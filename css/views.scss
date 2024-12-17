@@ -1,0 +1,216 @@
+/* --------------------------------------------------------------------------- planets index */
+
+#mercury { z-index: 10; }
+#venus   { z-index: 9; }
+#earth   { z-index: 8; }
+#moon    { z-index: 7; }
+#mars    { z-index: 6; }
+#jupiter { z-index: 5; }
+#saturn  { z-index: 4; }
+#uranus  { z-index: 3; }
+#neptune { z-index: 2; }
+#sun     { z-index: 1; }
+
+/* --------------------------------------------------------------------------- animations */
+
+@keyframes orbit {
+  0%    { transform: rotateZ(0deg); }
+  100%  { transform: rotateZ(-360deg); }
+}
+
+@keyframes suborbit {
+  0%    { transform: rotateX(90deg) rotateZ(0deg); }
+  100%  { transform: rotateX(90deg) rotateZ(-360deg); }
+}
+
+@keyframes invert {
+  0%   { transform: rotateX(-90deg) rotateY(360deg) rotateZ(0deg); }
+  100% { transform: rotateX(-90deg) rotateY(0deg) rotateZ(0deg); }
+}
+
+/* --------------------------------------------------------------------------- opening */
+
+.view-3D .opening #sun, 
+.view-3D .opening .orbit, 
+.view-3D .opening .pos, 
+.view-3D .opening .planet, 
+.view-3D .opening .satelite, 
+.view-3D .opening .ring { 
+  transition-duration: 4s;
+}
+
+#universe.opening #sun { 
+  box-shadow: 0 0 0 rgba(255, 160, 60, 0);
+}
+
+/* --------------------------------------------------------------------------- 2D view */
+
+.view-2D.zoom-large #sun    { transform-style: flat; }
+.view-2D.zoom-large .orbit  { transform-style: flat; }
+
+.view-2D #sun, 
+.view-2D .ring              { transform: rotateX(0deg); }
+
+.view-2D .planet, 
+.view-2D .moon              { transform: rotateX(90deg); }
+
+/* --------------------------------------------------------------------------- 3D view */
+
+.view-3D.zoom-large #sun    { transform-style: preserve-3d; }
+.view-3D.zoom-large .orbit  { transform-style: preserve-3d; }
+
+.view-3D #solar-system      { transform: rotateX(75deg) ; }
+.view-3D #sun               { transform: rotateX(-90deg); }
+.view-3D .ring              { transform: rotateX(90deg); }
+
+.view-3D .planet, 
+.view-3D .moon              { transform: rotateX(0deg); }
+
+/* --------------------------------------------------------------------------- large zoom */
+
+.zoom-large #solar-system { width: 100%; }
+
+.zoom-large.view-2D .scale-stretched #solar-system { font-size: 26%; }
+.zoom-large.view-3D .scale-stretched #solar-system { font-size: 62%; }
+
+.zoom-large.view-2D .scale-d #solar-system { font-size: 22%; }
+.zoom-large.view-3D .scale-d #solar-system { font-size: 48%; }
+
+.zoom-large.view-2D .scale-s #solar-system { font-size: 7%; }
+.zoom-large.view-3D .scale-s #solar-system { font-size: 14%; }
+
+/* --------------------------------------------------------------------------- close zoom */
+
+.zoom-close #solar-system { 
+  width: 200%; 
+  font-size: 100%;
+}
+
+.zoom-close .scale-stretched #solar-system { margin-left: -100%; }
+
+.zoom-close .scale-d #solar-system { margin-left: -106%; }
+.zoom-close.view-2D .scale-d #solar-system { font-size: 84%; }
+.zoom-close.view-3D .scale-d #solar-system { font-size: 84%; }
+
+.zoom-close .scale-s #solar-system { margin-left: -145%; }
+.zoom-close.view-2D .scale-s #solar-system { font-size: 40%; }
+.zoom-close.view-3D .scale-s #solar-system { font-size: 40%; }
+
+.zoom-close .orbit, 
+.zoom-close .pos,
+.zoom-close .planet, 
+.zoom-close .satelite,
+.zoom-close .ring{ 
+  animation-play-state: paused!important;
+  animation-duration: 0s!important;
+  animation: none!important;
+}
+
+.zoom-close.view-2D .planet,
+.zoom-close.view-2D .moon      { transform: rotateX(0deg); }
+
+.zoom-close.view-3D .planet    { transform: rotateX(-90deg); }
+
+.zoom-close.view-3D .moon      { transform: rotateX(90deg); }
+
+.zoom-close .pos{ 
+  left: 100%!important;
+  top: 50%!important;
+}
+
+/* --------------------------------------------------------------------------- planets index */
+
+#pluto   { z-index: 0; } /* Ensure Pluto has the lowest stacking order */
+
+/* --------------------------------------------------------------------------- animations */
+
+#pluto .pos, 
+#pluto .planet, 
+#pluto.orbit {
+  animation-duration: 2480s; /* Pluto's orbital duration */
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* --------------------------------------------------------------------------- 2D view */
+
+.view-2D.zoom-large #pluto .planet {
+  transform: rotateX(90deg);
+}
+
+.view-2D #pluto .orbit {
+  transform-style: flat;
+}
+
+/* --------------------------------------------------------------------------- 3D view */
+
+.view-3D.zoom-large #pluto .orbit {
+  transform-style: preserve-3d;
+}
+
+.view-3D #pluto .planet {
+  transform: rotateX(0deg);
+}
+
+/* --------------------------------------------------------------------------- large zoom */
+
+.zoom-large .scale-stretched #pluto.orbit {
+  font-size: 10%; /* Adjust scaling if needed */
+}
+
+.zoom-large .scale-d #pluto.orbit {
+  font-size: 8%;
+}
+
+.zoom-large .scale-s #pluto.orbit {
+  font-size: 4%;
+}
+
+/* --------------------------------------------------------------------------- close zoom */
+
+.zoom-close #pluto .orbit {
+  animation-play-state: paused !important;
+  animation-duration: 0s !important;
+  animation: none !important;
+}
+
+.zoom-close.view-2D #pluto .planet {
+  transform: rotateX(0deg);
+}
+
+.zoom-close.view-3D #pluto .planet {
+  transform: rotateX(-90deg);
+}
+
+.zoom-close #pluto .pos {
+  left: 100% !important;
+  top: 50% !important;
+}
+
+/* --------------------------------------------------------------------------- Pluto styling */
+
+#pluto .planet {
+  background-color: purple; /* Solid purple planet */
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* Shading for depth */
+}
+
+.scale-stretched #pluto.orbit {
+  width: 250em;
+  height: 250em;
+  margin-top: -125em;
+  margin-left: -125em;
+}
+
+.scale-d #pluto.orbit {
+  width: 300em;
+  height: 300em;
+  margin-top: -150em;
+  margin-left: -150em;
+}
+
+.scale-s #pluto.orbit {
+  width: 900em;
+  height: 900em;
+  margin-top: -450em;
+  margin-left: -450em;
+}
