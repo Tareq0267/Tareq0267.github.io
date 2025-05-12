@@ -13,7 +13,7 @@ function translateRumiToJawi(text) {
     return words.map(word => {
       if (rjmap.has(word)) {
         let choices = rjmap.get(word);
-        return choices.length > 1 ? `[${choices.join("|")}]` : choices[0];
+        return choices[0];
       } else if (/^[a-z\-]+$/.test(word)) {
         // Fallback only for Rumi alphabet words
         return manualTransliterate(word);
@@ -101,4 +101,3 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("translate-btn").addEventListener("click", translate);
   });
   
-
