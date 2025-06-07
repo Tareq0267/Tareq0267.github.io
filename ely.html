@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Activities I Want To Do With You 💛</title>
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet">
+
   <style>
+    /* Base styles */
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to bottom, #fffaf5, #f9f3f0);
@@ -21,6 +24,7 @@
       font-size: 2.4em;
       margin-bottom: 2rem;
       font-family: 'Dancing Script', cursive;
+      animation: fadeInUp 0.8s ease both;
     }
 
     h2 {
@@ -28,6 +32,7 @@
       color: #b5838d;
       font-size: 1.6em;
       margin-bottom: 1.2rem;
+      animation: fadeInUp 0.8s ease both;
     }
 
     .progress-tracker {
@@ -54,6 +59,7 @@
       margin-bottom: 3rem;
       position: relative;
       overflow: hidden;
+      animation: fadeInUp 0.8s ease both;
     }
 
     .checkbox-group label {
@@ -66,6 +72,10 @@
     input[type="checkbox"] {
       margin-right: 0.5rem;
       transform: scale(1.2);
+    }
+
+    input[type="checkbox"]:checked {
+      animation: bounceTick 0.3s ease;
     }
 
     .tiktok {
@@ -111,10 +121,10 @@
 
     .gallery-strip {
       display: flex;
-      gap: 1rem;
+      gap: 1.2rem;
       margin-top: 1.5rem;
       overflow-x: auto;
-      padding-bottom: 0.5rem;
+      padding-bottom: 1rem;
       scroll-behavior: smooth;
     }
 
@@ -146,40 +156,66 @@
   scroll-behavior: smooth;
 }
 
-.polaroid {
-  background: white;
-  padding: 0.5rem 0.5rem 1.2rem;
-  border-radius: 6px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-  width: 140px;
-  flex: 0 0 auto;
-  text-align: center;
-  transition: transform 0.2s ease;
-}
+    .polaroid {
+      background: white;
+      padding: 0.5rem 0.5rem 1.2rem;
+      border-radius: 6px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      width: 140px;
+      flex: 0 0 auto;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
 
-.polaroid:hover {
-  transform: rotate(-2deg) scale(1.03);
-}
+    .polaroid:hover {
+      transform: rotate(-2deg) scale(1.05);
+      box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+    }
 
-.polaroid img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 4px;
-}
+    .polaroid img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 4px;
+    }
 
-.caption {
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: #9c6785;
-  font-style: italic;
-  word-wrap: break-word;
-}
+    .caption {
+        margin-top: 0.5rem;
+        font-size: 1rem;
+        font-family: 'Dancing Script', cursive;
+        color: #5a4a56;
+        font-style: normal;
+        word-wrap: break-word;
+        line-height: 1.3;
+        }
 
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes bounceTick {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(156,103,133, 0.2); }
+      70% { box-shadow: 0 0 0 10px rgba(156,103,133, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(156,103,133, 0); }
+    }
   </style>
 </head>
 <body>
-
   <h1>Activities I Want To Do With You 💛</h1>
 
   <div class="progress-tracker" id="progressTracker">
@@ -190,9 +226,10 @@
     <div class="photo-frame">
       <p style="margin: 0; font-weight: bold;">🌸 Our Memories 🌸</p>
       <div class="gallery-strip" id="galleryStrip">
+        <!-- Add your polaroid divs here -->
         <div class="polaroid">
-            <img src="ely_img/pic1.jpg" alt="Memory 1">
-            <div class="caption">comelnya katak</div>
+          <img src="ely_img/pic1.jpg" alt="Memory 1">
+          <div class="caption">comelnya katak</div>
         </div>
         <div class="polaroid">
             <img src="ely_img/pic2.jpg" alt="Memory 2">
@@ -200,7 +237,7 @@
         </div>
         <div class="polaroid">
             <img src="ely_img/pic3.jpg" alt="Memory 3">
-            <div class="caption">Pasar Seni</div>
+            <div class="caption">hiihihihihih</div>
         </div>
         <div class="polaroid">
             <img src="ely_img/pic4.jpg" alt="Memory 4">
@@ -216,7 +253,7 @@
         </div>
         <div class="polaroid">
             <img src="ely_img/pic7.jpg" alt="Memory 7">
-            <div class="caption">gambar awak panggil saya comel</div>
+            <div class="caption">gambar saya yang awak panggil saya comel</div>
         </div>
         <div class="polaroid">
             <img src="ely_img/pic8.jpg" alt="Memory 8">
@@ -284,7 +321,7 @@
     </div>
 
     <div class="checkbox-group">
-      <label><input type="checkbox" /> makan gula cakery punya tiramisu</label>
+      <label><input type="checkbox" /> makan gula cakery punya tiramisu(SIKIIT LAGI HARITUUU)</label>
       <label><input type="checkbox" /> makan dooki</label>
     </div>
 
@@ -297,7 +334,7 @@
       <label><input type="checkbox" /> mani padi date ✨</label>
       <label><input type="checkbox" /> makan di sukiya</label>
       <label><input type="checkbox" /> makan nasi gepuk gembus</label>
-      <label><input type="checkbox" checked/> Mee tarik</label>
+      <label><input type="checkbox" checked/>bawak awak makan Mee tarik ori(jalan sultan)</label>
       <label><input type="checkbox" /> bawak awak makan Kuey teow</label>
       <label><input type="checkbox" /> bawak awak makan H&H</label>
       <label><input type="checkbox" /> Masakkan awak maggi</label>
@@ -315,13 +352,13 @@
       <label><input type="checkbox" /> Pindahkan awak dan family awak gi rumah baru</label>
       <label><input type="checkbox" /> beli and sell US company stocks sebelum trump turun</label>
       <label><input type="checkbox" /> glow up sama sama</label>
+      <div class="tiktok">
+        <iframe src="https://www.tiktok.com/embed/v2/7511561547282517266"></iframe>
+      </div>
+    </div>
       <label><input type="checkbox" /> kita buat lagu sama sama</label>
     </div>
 
-    <div class="tiktok">
-      <iframe src="https://www.tiktok.com/embed/v2/7511561547282517266"></iframe>
-    </div>
-  </div>
 
   <div class="section-card">
     <h2>🌍 Long Term</h2>
@@ -340,8 +377,10 @@
     function updateProgress() {
       const all = document.querySelectorAll('input[type="checkbox"]:not([disabled])');
       const done = document.querySelectorAll('input[type="checkbox"]:not([disabled]):checked');
-      document.getElementById('progressTracker').textContent =
-        `🎯 You’ve completed ${done.length} of ${all.length} memories together!`;
+      const tracker = document.getElementById('progressTracker');
+      tracker.textContent = `🎯 we have completed ${done.length} of ${all.length} Plans together!`;
+      tracker.style.animation = 'pulse 0.6s';
+      setTimeout(() => tracker.style.animation = '', 700);
     }
 
     document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
