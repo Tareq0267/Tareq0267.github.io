@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activities I Want To Do With You 💛</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #fffaf5, #f9f3f0);
+      color: #333;
+      margin: 0;
+      padding: 2rem;
+      line-height: 1.8;
+    }
+
+    h1 {
+      text-align: center;
+      color: #d387ab;
+      font-size: 2.4em;
+      margin-bottom: 2rem;
+      font-family: 'Dancing Script', cursive;
+    }
+
+    h2 {
+      text-align: center;
+      color: #b5838d;
+      font-size: 1.6em;
+      margin-bottom: 1.2rem;
+    }
+
+    .progress-tracker {
+      background: #fef6f8;
+      color: #9c6785;
+      font-weight: 600;
+      text-align: center;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+      margin: 2rem auto;
+      max-width: 600px;
+      width: 90%;
+      font-size: 1rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+
+    .section-card {
+      background: #fdf6f0;
+      border-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+      padding: 2rem;
+      margin-bottom: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .checkbox-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      color: #444;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 0.5rem;
+      transform: scale(1.2);
+    }
+
+    .tiktok {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+
+    iframe {
+      width: 100%;
+      max-width: 325px;
+      height: 600px;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Gallery Styles */
+    .gallery-slot {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0 2.5rem;
+    }
+
+    .photo-frame {
+      text-align: center;
+      border: 2px dashed #f4c2c2;
+      border-radius: 16px;
+      padding: 1rem;
+      background: #fff0f5;
+      max-width: 90vw;
+      width: 100%;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+    }
+
+    input[type="file"] {
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #b5838d;
+    }
+
+    .gallery-strip {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      scroll-behavior: smooth;
+    }
+
+    .gallery-strip::-webkit-scrollbar {
+      display: none;
+    }
+    .gallery-strip {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .gallery-strip img {
+      height: 180px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .gallery-strip img:hover {
+      transform: scale(1.05);
+    }
+    .gallery-strip {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 1.5rem;
+  overflow-x: auto;
+  padding-bottom: 1rem;
+  scroll-behavior: smooth;
+}
+
+.polaroid {
+  background: white;
+  padding: 0.5rem 0.5rem 1.2rem;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  width: 140px;
+  flex: 0 0 auto;
+  text-align: center;
+  transition: transform 0.2s ease;
+}
+
+.polaroid:hover {
+  transform: rotate(-2deg) scale(1.03);
+}
+
+.polaroid img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+}
+
+.caption {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #9c6785;
+  font-style: italic;
+  word-wrap: break-word;
+}
+
+  </style>
+</head>
+<body>
+
+  <h1>Activities I Want To Do With You 💛</h1>
+
+  <div class="progress-tracker" id="progressTracker">
+    🎯 You’ve completed 0 of 0 memories together!
+  </div>
+
+  <div class="gallery-slot">
+    <div class="photo-frame">
+      <p style="margin: 0; font-weight: bold;">🌸 Our Photo Memories 🌸</p>
+      <input type="file" id="photoUpload" accept="image/*" multiple />
+      <div class="gallery-strip" id="galleryStrip"></div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>🌼 Short Term</h2>
+    <div class="checkbox-group">
+      <label><input type="checkbox" checked /> pasar seni date</label>
+      <label><input type="checkbox" checked /> go to masjid damansara perdana</label>
+      <label><input type="checkbox" checked /> go to photobooth</label>
+      <label><input type="checkbox" checked /> shopping baju saya</label>
+      <label><input type="checkbox" /> Pusing pusing UM</label>
+      <label><input type="checkbox" /> belanja awak makan di ikea</label>
+      <label><input type="checkbox" /> clay date</label>
+    </div>
+
+    <div class="tiktok">
+      <iframe src="https://www.tiktok.com/embed/v2/7374792643785526534"></iframe>
+      <iframe src="https://www.tiktok.com/embed/v2/7497718419949653303"></iframe>
+    </div>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" /> aesthetic cafe date</label>
+    </div>
+
+    <div class="tiktok">
+      <iframe src="https://www.tiktok.com/embed/v2/7481204907135995143"></iframe>
+    </div>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" /> hiking togetherrrrr</label>
+      <label><input type="checkbox" /> karok unplugged</label>
+      <label><input type="checkbox" /> karok plugged</label>
+      <label><input type="checkbox" /> jumpa ibu awak</label>
+      <label><input type="checkbox" /> bawak awak jumpa mama</label>
+      <label><input type="checkbox" /> makan kplus</label>
+    </div>
+
+    <div class="tiktok">
+      <iframe src="https://www.tiktok.com/embed/v2/7509416276381486354"></iframe>
+      <iframe src="https://www.tiktok.com/embed/v2/7392415525772496135"></iframe>
+    </div>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" /> Korean bbq sweettree</label>
+    </div>
+
+    <div class="tiktok">
+      <iframe src="https://www.tiktok.com/embed/v2/7445310923167911176"></iframe>
+    </div>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" /> mala hotpot jalan sultan</label>
+    </div>
+
+    <div class="tiktok">
+      <iframe src="https://www.tiktok.com/embed/v2/7496453085762555154"></iframe>
+    </div>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" /> makan gula cakery punya tiramisu</label>
+      <label><input type="checkbox" /> makan dooki</label>
+    </div>
+
+    <div class="tiktok">
+      <iframe src="https://www.tiktok.com/embed/v2/7485724285236038930"></iframe>
+    </div>
+
+    <div class="checkbox-group">
+      <label><input type="checkbox" /> makan dodo korea</label>
+      <label><input type="checkbox" /> mani padi date ✨</label>
+      <label><input type="checkbox" /> makan di sukiya</label>
+      <label><input type="checkbox" /> makan nasi gepuk gembus</label>
+      <label><input type="checkbox" checked disabled /> Mee tarik</label>
+      <label><input type="checkbox" /> bawak awak makan Kuey teow</label>
+      <label><input type="checkbox" /> bawak awak makan H&H</label>
+      <label><input type="checkbox" /> Masakkan awak maggi</label>
+      <label><input type="checkbox" /> Main kejar kejar dalam mall</label>
+      <label><input type="checkbox" /> Pickle ball</label>
+      <label><input type="checkbox" /> Pizza mansion</label>
+      <label><input type="checkbox" /> gi graduation saya</label>
+      <label><input type="checkbox" /> gi graduation awak</label>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>🌿 Medium Term</h2>
+    <div class="checkbox-group">
+      <label><input type="checkbox" /> Pindahkan awak dan family awak gi rumah baru</label>
+      <label><input type="checkbox" /> beli and sell US company stocks sebelum trump turun</label>
+      <label><input type="checkbox" /> glow up sama sama</label>
+      <label><input type="checkbox" /> kita buat lagu sama sama</label>
+    </div>
+
+    <div class="tiktok">
+      <iframe src="https://www.tiktok.com/embed/v2/7511561547282517266"></iframe>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h2>🌍 Long Term</h2>
+    <div class="checkbox-group">
+      <label><input type="checkbox" /> beli rumah kita</label>
+      <label><input type="checkbox" /> Travel the whole world</label>
+      <label><input type="checkbox" /> tunang ngan awak 🤍</label>
+      <label><input type="checkbox" /> nikah ngan awak 🤍</label>
+      <label><input type="checkbox" /> kahwin ngan awak 🤍</label>
+      <label><input type="checkbox" /> spend seumur hidup dengan awak 💕</label>
+    </div>
+  </div>
+
+  <script>
+    // Update progress counter
+    function updateProgress() {
+      const all = document.querySelectorAll('input[type="checkbox"]:not([disabled])');
+      const done = document.querySelectorAll('input[type="checkbox"]:not([disabled]):checked');
+      document.getElementById('progressTracker').textContent =
+        `🎯 You’ve completed ${done.length} of ${all.length} memories together!`;
+    }
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.addEventListener('change', updateProgress);
+    });
+
+    updateProgress();
+
+    // Handle gallery uploads
+    const uploadInput = document.getElementById('photoUpload');
+    const galleryStrip = document.getElementById('galleryStrip');
+
+    uploadInput.addEventListener('change', (event) => {
+      const files = event.target.files;
+      if (!files.length) return;
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const wrapper = document.createElement('div');
+wrapper.classList.add('polaroid');
+
+const img = document.createElement('img');
+img.src = e.target.result;
+
+const caption = document.createElement('div');
+caption.className = 'caption';
+caption.innerText = '';
+
+wrapper.appendChild(img);
+wrapper.appendChild(caption);
+galleryStrip.appendChild(wrapper);
+
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  </script>
+
+</body>
+</html>
