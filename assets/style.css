@@ -1,0 +1,29 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background-color: #f7f7f7;
+}
+h1 {
+  text-align: center;
+}
+nav, a {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+.gallery img {
+  width: 300px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+}
+.flipbook-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
