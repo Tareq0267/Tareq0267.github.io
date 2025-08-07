@@ -3,78 +3,751 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Projects</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Muhammad Tareq Adam | AI Developer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background-color: #121212;
-      color: #e0e0e0;
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
 
-    .card {
-      background-color: #1e1e1e;
-      color: #e0e0e0;
-      border-color: #333;
-      transition: all 0.3s ease;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
     }
 
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    /* Navigation */
+    .nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 1000;
+      padding: 15px 0;
     }
 
-    .card-title,
-    .card-text {
-      color: #e0e0e0;
+    .nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #4fc3f7;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: #4fc3f7;
+    }
+
+    /* Hero Section */
+    .hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      animation: float 20s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(1deg); }
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #4fc3f7, #29b6f6, #03a9f4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero .subtitle {
+      font-size: 1.5rem;
+      color: #b0bec5;
+      margin-bottom: 2rem;
+    }
+
+    .hero .description {
+      font-size: 1.1rem;
+      color: #90a4ae;
+      max-width: 600px;
+      margin-bottom: 3rem;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .btn-primary {
-      background-color: #0d6efd;
-      border-color: #0d6efd;
+      background: linear-gradient(135deg, #4fc3f7, #29b6f6);
       color: #ffffff;
     }
 
     .btn-primary:hover {
-      background-color: #0b5ed7;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(79, 195, 247, 0.3);
     }
 
-    .text-muted {
-      color: #bbbbbb !important;
+    .btn-secondary {
+      background: transparent;
+      color: #4fc3f7;
+      border: 2px solid #4fc3f7;
+    }
+
+    .btn-secondary:hover {
+      background: #4fc3f7;
+      color: #0a0a0a;
+    }
+
+    /* About Section */
+    .about {
+      padding: 100px 0;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: #4fc3f7;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    .about-text h3 {
+      font-size: 1.5rem;
+      color: #4fc3f7;
+      margin-bottom: 1rem;
+    }
+
+    .about-text p {
+      color: #b0bec5;
+      margin-bottom: 1.5rem;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 2rem;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 20px;
+      background: rgba(79, 195, 247, 0.1);
+      border-radius: 10px;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #4fc3f7;
+    }
+
+    .stat-label {
+      color: #90a4ae;
+      font-size: 0.9rem;
+    }
+
+    /* Skills Section */
+    .skills {
+      padding: 100px 0;
+    }
+
+    /* Experience Section */
+    .experience {
+      padding: 100px 0;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .experience-timeline {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .experience-timeline::before {
+      content: '';
+      position: absolute;
+      left: 30px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, #4fc3f7, #29b6f6);
+    }
+
+    .experience-item {
+      position: relative;
+      margin-bottom: 50px;
+      padding-left: 80px;
+    }
+
+    .experience-item::before {
+      content: '';
+      position: absolute;
+      left: 24px;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #4fc3f7;
+      border: 3px solid #0a0a0a;
+    }
+
+    .experience-date {
+      color: #4fc3f7;
+      font-weight: 600;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+
+    .experience-content h4 {
+      color: #4fc3f7;
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .experience-content .company {
+      color: #b0bec5;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .experience-content .location {
+      color: #90a4ae;
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+
+    .experience-content .description {
+      color: #b0bec5;
+      margin-bottom: 15px;
+      line-height: 1.6;
+    }
+
+    .skills-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skills-tags span {
+      background: rgba(79, 195, 247, 0.1);
+      color: #4fc3f7;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      border: 1px solid rgba(79, 195, 247, 0.2);
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 3rem;
+    }
+
+    .skill-card {
+      background: rgba(79, 195, 247, 0.05);
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .skill-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(79, 195, 247, 0.2);
+    }
+
+    .skill-icon {
+      font-size: 3rem;
+      color: #4fc3f7;
+      margin-bottom: 1rem;
+    }
+
+    .skill-card h4 {
+      color: #4fc3f7;
+      margin-bottom: 1rem;
+    }
+
+    .skill-card p {
+      color: #90a4ae;
+      font-size: 0.9rem;
+    }
+
+    /* Projects Section */
+    .projects {
+      padding: 100px 0;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 30px;
+      margin-top: 3rem;
+    }
+
+    .project-card {
+      background: rgba(79, 195, 247, 0.05);
+      border: 1px solid rgba(79, 195, 247, 0.2);
+      border-radius: 15px;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .project-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(79, 195, 247, 0.2);
+    }
+
+    .project-content {
+      padding: 25px;
+    }
+
+    .project-card h4 {
+      color: #4fc3f7;
+      margin-bottom: 1rem;
+    }
+
+    .project-card p {
+      color: #90a4ae;
+      margin-bottom: 1.5rem;
+    }
+
+    .project-links {
+      display: flex;
+      gap: 15px;
+    }
+
+    .project-links a {
+      color: #4fc3f7;
+      text-decoration: none;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .project-links a:hover {
+      color: #29b6f6;
+    }
+
+    /* Contact Section */
+    .contact {
+      padding: 100px 0;
+      text-align: center;
+    }
+
+    .contact-info {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #b0bec5;
+    }
+
+    .contact-item i {
+      color: #4fc3f7;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .hero .subtitle {
+        font-size: 1.2rem;
+      }
+
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .experience-timeline::before {
+        left: 15px;
+      }
+
+      .experience-item {
+        padding-left: 50px;
+      }
+
+      .experience-item::before {
+        left: 9px;
+      }
     }
   </style>
 </head>
 <body>
-
-  <div class="container py-5">
-    <h1 class="text-center mb-4">🌐 My Project Showcase</h1>
-    <p class="text-center mb-5">Welcome to my personal GitHub portfolio. Explore my web-based tools and utilities!</p>
-
-
-    <div class="row g-4">
-
-      <!-- Project AWA -->
-      <div class="col-md-6">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">🧠 Project AWA</h5>
-            <p class="card-text">An interactive solar system traverser(stands for Astronomy Watchtower and Analysis )</p>
-            <a href="awa.html" class="btn btn-primary" target="_blank">View Project</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Rumi to Jawi Translator -->
-      <div class="col-md-6">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">🔤 Rumi to Jawi Translator</h5>
-            <p class="card-text">A smart Malay script converter that supports dictionary-based Jawi lookup, phonetic fallback, digits, digraphs, and acronym transliteration. Built in pure JS + Bootstrap.</p>
-            <a href="rumitojawi.html" class="btn btn-primary" target="_blank">Try It Now</a>
-          </div>
-        </div>
-      </div>
-
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="container">
+      <div class="logo">TAREQ</div>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#experience">Experience</a></li>
+        <li><a href="#skills">Skills</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <!-- <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="pdfs.html">PDFs</a></li> -->
+      </ul>
     </div>
-  </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Muhammad Tareq Adam</h1>
+        <p class="subtitle">AI Developer & Computer Science Student</p>
+        <p class="description">
+          Passionate about Artificial Intelligence, Machine Learning, and Computer Vision. 
+          Currently pursuing Bachelor's in Computer Science (AI) at University of Malaya with a CGPA of 3.71. 
+          Experienced in full-stack development, robotics, and innovative AI solutions.
+        </p>
+        <div class="cta-buttons">
+          <a href="#projects" class="btn btn-primary">
+            <i class="fas fa-code"></i> View Projects
+          </a>
+          <!-- <a href="gallery.html" class="btn btn-secondary">
+            <i class="fas fa-images"></i> Gallery
+          </a> -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="about" id="about">
+    <div class="container">
+      <h2 class="section-title">About Me</h2>
+      <div class="about-grid">
+        <div class="about-text">
+          <h3>AI Enthusiast & Full-Stack Developer</h3>
+          <p>
+            I'm a final-year Computer Science student specializing in Artificial Intelligence at University of Malaya. 
+            My passion lies in developing innovative AI solutions, from computer vision applications to NLP systems.
+          </p>
+          <p>
+            With experience as a Full-Stack Developer Intern at Intekma Sdn Bhd, I've worked on Django-based applications 
+            and REST APIs. I'm also actively involved in ROTU UM as a Young Officer and serve as Lead Guitarist for PEND8KAR POPBAND.
+          </p>
+        </div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-number">3.71</div>
+            <div class="stat-label">CGPA</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">15+</div>
+            <div class="stat-label">Projects</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Dean's List</div>
+          </div>
+          <div class="stat">
+            <div class="stat-number">2025</div>
+            <div class="stat-label">Graduating</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience Section -->
+  <section class="experience" id="experience">
+    <div class="container">
+      <h2 class="section-title">Work Experience</h2>
+      <div class="experience-timeline">
+        <div class="experience-item">
+          <div class="experience-date">May 2025 - Present</div>
+          <div class="experience-content">
+            <h4><i class="fas fa-briefcase"></i> Full-stack Web Developer</h4>
+            <p class="company">Intekma Sdn. Bhd. · Full-time</p>
+            <p class="location">Kota Damansara, Selangor, Malaysia · On-site</p>
+            <p class="description">
+              Develop the in-house web based app project and has experience working both in Front end and Back end
+            </p>
+            <div class="skills-tags">
+              <span>Web Development</span>
+              <span>Django</span>
+              <span>Django REST Framework</span>
+              <span>GitHub</span>
+              <span>Project Management</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="experience-item">
+          <div class="experience-date">Jan 2025 - May 2025</div>
+          <div class="experience-content">
+            <h4><i class="fas fa-tools"></i> Helper at Makerspace UM</h4>
+            <p class="company">University of Malaya · Part-time</p>
+            <p class="location">WP. Kuala Lumpur, Federal Territory of Kuala Lumpur, Malaysia · On-site</p>
+            <p class="description">
+              Work as a part-time helper at Makerspace UM and help to assist and teach the makerspace members to use the tools and the basic concepts in 3d-printing, laser engraving, electronic circuitry and basic Coding concepts
+            </p>
+            <div class="skills-tags">
+              <span>3D Printing</span>
+              <span>Laser Engraving</span>
+              <span>AutoCAD</span>
+              <span>3D Scanning</span>
+              <span>Arduino</span>
+              <span>Raspberry Pi</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="experience-item">
+          <div class="experience-date">Jun 2023 - Dec 2023</div>
+          <div class="experience-content">
+            <h4><i class="fas fa-laptop-code"></i> Intern</h4>
+            <p class="company">Intekma Sdn. Bhd. · Internship</p>
+            <p class="location">Kota Damansara, Selangor, Malaysia · On-site</p>
+            <p class="description">
+              Gained hands-on experience in web development and data analysis during a 7-month internship program
+            </p>
+            <div class="skills-tags">
+              <span>Web Development</span>
+              <span>Web Design</span>
+              <span>Data Analysis</span>
+              <span>Program Management</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section class="skills" id="skills">
+    <div class="container">
+      <h2 class="section-title">Technical Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-card">
+          <i class="fas fa-brain skill-icon"></i>
+          <h4>Artificial Intelligence</h4>
+          <p>Machine Learning, Deep Learning, Computer Vision, NLP, TensorFlow</p>
+        </div>
+        <div class="skill-card">
+          <i class="fas fa-code skill-icon"></i>
+          <h4>Programming</h4>
+          <p>Python, Java, C, JavaScript, Django, REST APIs</p>
+        </div>
+        <div class="skill-card">
+          <i class="fas fa-globe skill-icon"></i>
+          <h4>Website Development</h4>
+          <p>Adept at Django, HTML, CSS, REST APIs, Full-Stack Development</p>
+        </div>
+        <div class="skill-card">
+          <i class="fas fa-eye skill-icon"></i>
+          <h4>Computer Vision</h4>
+          <p>OpenCV, Object Detection, YOLO, Image Processing, AR/VR</p>
+        </div>
+        <div class="skill-card">
+          <i class="fas fa-robot skill-icon"></i>
+          <h4>Robotics</h4>
+          <p>Autonomous Systems, Pick & Place, Inverse Kinematics</p>
+        </div>
+        <div class="skill-card">
+          <i class="fas fa-shield-alt skill-icon"></i>
+          <h4>Cybersecurity</h4>
+          <p>Penetration Testing, Kali Linux, CTF Competitions</p>
+        </div>
+        <div class="skill-card">
+          <i class="fas fa-chart-line skill-icon"></i>
+          <h4>Data Science</h4>
+          <p>R Programming, Statistical Modeling, Data Visualization</p>
+        </div>
+        <div class="skill-card">
+          <i class="fas fa-cube skill-icon"></i>
+          <h4>3D Printing & Fabrication</h4>
+          <p>3D Modeling, CAD Design, Additive Manufacturing, Laser Engraving</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section class="projects" id="projects">
+    <div class="container">
+      <h2 class="section-title">Featured Projects</h2>
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-content">
+            <h4><i class="fas fa-hand-paper"></i> AR Mouse (Hand Detection)</h4>
+            <p>Computer vision-based virtual mouse control using hand tracking and gesture recognition for intuitive HCI.</p>
+            <div class="project-links">
+              <a href="#"><i class="fas fa-external-link-alt"></i> Demo</a>
+            </div>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-content">
+            <h4><i class="fas fa-globe"></i> Project AWA</h4>
+            <p>Interactive solar system explorer for astronomy education and analysis.</p>
+            <div class="project-links">
+              <a href="awa.html"><i class="fas fa-external-link-alt"></i> Explore</a>
+            </div>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-content">
+            <h4><i class="fas fa-language"></i> Rumi to Jawi Translator</h4>
+            <p>Smart Malay script converter with dictionary-based lookup and phonetic fallback capabilities.</p>
+            <div class="project-links">
+              <a href="rumitojawi.html"><i class="fas fa-external-link-alt"></i> Try Now</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact" id="contact">
+    <div class="container">
+      <h2 class="section-title">Get In Touch</h2>
+      <p style="color: #90a4ae; margin-bottom: 2rem;">
+        I'm always open to discussing new opportunities, collaborations, or just having a chat about AI and technology.
+      </p>
+      <div class="contact-info">
+        <div class="contact-item">
+          <i class="fas fa-envelope"></i>
+          <span>tareqadam2002@gmail.com</span>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-phone"></i>
+          <span>+60129218586</span>
+        </div>
+        <div class="contact-item">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Petaling Jaya, Selangor</span>
+        </div>
+        <div class="contact-item">
+          <i class="fab fa-linkedin"></i>
+          <a href="https://www.linkedin.com/in/muhammad-tareq-adam-ellias-780274260/" target="_blank" style="color: #4fc3f7; text-decoration: none;">LinkedIn Profile</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+          behavior: 'smooth'
+        });
+      });
+    });
+
+    // Add scroll effect to navigation
+    window.addEventListener('scroll', function() {
+      const nav = document.querySelector('.nav');
+      if (window.scrollY > 50) {
+        nav.style.background = 'rgba(10, 10, 10, 0.98)';
+      } else {
+        nav.style.background = 'rgba(10, 10, 10, 0.95)';
+      }
+    });
+  </script>
 </body>
 </html>
