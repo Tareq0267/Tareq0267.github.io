@@ -3,10 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Muhammad Tareq Adam | AI Developer</title>
+  <title>Muhammad Tareq Adam | AI Developer & RoboCup Champion</title>
+  <meta name="description" content="AI Developer, Computer Science Student, and RoboCup Malaysia 2025 Champion. Specializing in Machine Learning, Robotics, and Full-Stack Development.">
+  <meta name="keywords" content="AI Developer, Machine Learning, Robotics, RoboCup Champion, Computer Science, Full-Stack Developer">
+  
+  <!-- Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <!-- Optimized font loading -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
+  
+  <!-- Critical CSS inlined -->
   <style>
+    /* Skip link for accessibility */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 6px;
+      background: #4fc3f7;
+      color: #fff;
+      padding: 8px;
+      text-decoration: none;
+      z-index: 1001;
+      border-radius: 4px;
+    }
+    .skip-link:focus {
+      top: 6px;
+    }
+    
+    /* Performance optimizations */
     * {
       margin: 0;
       padding: 0;
@@ -152,7 +180,7 @@
     .hero-content {
       position: relative;
       z-index: 2;
-      animation: fadeInUp 1s ease-out;
+      /* Remove animation delay for LCP */
     }
 
     .hero h1 {
@@ -163,14 +191,18 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: fadeInUp 1.2s ease-out 0.3s both;
+      /* Ensure immediate visibility for LCP */
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .hero .subtitle {
       font-size: 1.5rem;
       color: #b0bec5;
       margin-bottom: 2rem;
-      animation: fadeInUp 1.2s ease-out 0.5s both;
+      /* Ensure immediate visibility */
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .hero .description {
@@ -178,14 +210,18 @@
       color: #90a4ae;
       max-width: 600px;
       margin-bottom: 3rem;
-      animation: fadeInUp 1.2s ease-out 0.7s both;
+      /* Ensure immediate visibility */
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .cta-buttons {
       display: flex;
       gap: 20px;
       flex-wrap: wrap;
-      animation: fadeInUp 1.2s ease-out 0.9s both;
+      /* Ensure immediate visibility */
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .btn {
@@ -331,7 +367,7 @@
       margin-bottom: 8px;
     }
 
-    .experience-content h4 {
+    .experience-content h3 {
       color: #4fc3f7;
       font-size: 1.3rem;
       margin-bottom: 8px;
@@ -445,7 +481,7 @@
       margin-bottom: 1rem;
     }
 
-    .skill-card h4 {
+    .skill-card h3 {
       color: #4fc3f7;
       margin-bottom: 1rem;
     }
@@ -485,7 +521,7 @@
       padding: 25px;
     }
 
-    .project-card h4 {
+    .project-card h3 {
       color: #4fc3f7;
       margin-bottom: 1rem;
     }
@@ -581,15 +617,18 @@
   </style>
 </head>
 <body>
+  <!-- Skip to main content link -->
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
   <!-- Navigation -->
-  <nav class="nav">
+  <nav class="nav" role="navigation" aria-label="Main navigation">
     <div class="container">
       <!-- <div class="logo">TAREQ</div> -->
       <ul class="nav-links">
-        <li><a href="#about">About</a></li>
-        <li><a href="#experience">Experience</a></li>
-        <li><a href="#skills">Skills</a></li>
-        <li><a href="#projects">Projects</a></li>
+        <li><a href="#about" aria-label="About section">About</a></li>
+        <li><a href="#experience" aria-label="Experience section">Experience</a></li>
+        <li><a href="#skills" aria-label="Skills section">Skills</a></li>
+        <li><a href="#projects" aria-label="Projects section">Projects</a></li>
         <!-- <li><a href="gallery.html">Gallery</a></li>
         <li><a href="pdfs.html">PDFs</a></li> -->
       </ul>
@@ -597,7 +636,7 @@
   </nav>
 
   <!-- Hero Section -->
-  <section class="hero">
+  <section class="hero" id="main">
     <div class="container">
       <div class="hero-content">
         <h1>Muhammad Tareq Adam</h1>
@@ -667,7 +706,7 @@
         <div class="experience-item scroll-animate-left">
           <div class="experience-date">August 2025</div>
           <div class="experience-content">
-            <h4><i class="fas fa-trophy"></i> RoboCup Malaysia 2025 - 1st Place Winner</h4>
+            <h3><i class="fas fa-trophy"></i> RoboCup Malaysia 2025 - 1st Place Winner</h3>
             <p class="company">RobotEdge UM Team · Competition</p>
             <p class="location">Malaysia · @Home Category</p>
             <p class="description">
@@ -689,7 +728,7 @@
         <div class="experience-item scroll-animate-right">
           <div class="experience-date">May 2025 - Present</div>
           <div class="experience-content">
-            <h4><i class="fas fa-briefcase"></i> Full-stack Web Developer</h4>
+            <h3><i class="fas fa-briefcase"></i> Full-stack Web Developer</h3>
             <p class="company">Intekma Sdn. Bhd. · Full-time</p>
             <p class="location">Kota Damansara, Selangor, Malaysia · On-site</p>
             <p class="description">
@@ -708,7 +747,7 @@
         <div class="experience-item scroll-animate-left">
           <div class="experience-date">Jan 2025 - May 2025</div>
           <div class="experience-content">
-            <h4><i class="fas fa-tools"></i> Helper at Makerspace UM</h4>
+            <h3><i class="fas fa-tools"></i> Helper at Makerspace UM</h3>
             <p class="company">University of Malaya · Part-time</p>
             <p class="location">WP. Kuala Lumpur, Federal Territory of Kuala Lumpur, Malaysia · On-site</p>
             <p class="description">
@@ -728,7 +767,7 @@
         <div class="experience-item scroll-animate-left">
           <div class="experience-date">Jun 2023 - Dec 2023</div>
           <div class="experience-content">
-            <h4><i class="fas fa-laptop-code"></i> Intern</h4>
+            <h3><i class="fas fa-laptop-code"></i> Intern</h3>
             <p class="company">Intekma Sdn. Bhd. · Internship</p>
             <p class="location">Kota Damansara, Selangor, Malaysia · On-site</p>
             <p class="description">
@@ -753,42 +792,42 @@
       <div class="skills-grid">
         <div class="skill-card scroll-animate-scale">
           <i class="fas fa-brain skill-icon"></i>
-          <h4>Artificial Intelligence</h4>
+          <h3>Artificial Intelligence</h3>
           <p>Machine Learning, Deep Learning, Computer Vision, NLP, TensorFlow</p>
         </div>
         <div class="skill-card scroll-animate-scale">
           <i class="fas fa-code skill-icon"></i>
-          <h4>Programming</h4>
+          <h3>Programming</h3>
           <p>Python, Java, C, JavaScript, Django, REST APIs</p>
         </div>
         <div class="skill-card scroll-animate-scale">
           <i class="fas fa-globe skill-icon"></i>
-          <h4>Website Development</h4>
+          <h3>Website Development</h3>
           <p>Adept at Django, HTML, CSS, REST APIs, Full-Stack Development</p>
         </div>
         <div class="skill-card scroll-animate-scale">
           <i class="fas fa-eye skill-icon"></i>
-          <h4>Computer Vision</h4>
+          <h3>Computer Vision</h3>
           <p>OpenCV, Object Detection, YOLO, Image Processing, AR/VR</p>
         </div>
         <div class="skill-card scroll-animate-scale">
           <i class="fas fa-robot skill-icon"></i>
-          <h4>Robotics</h4>
+          <h3>Robotics</h3>
           <p>Autonomous Systems, Pick & Place, Inverse Kinematics</p>
         </div>
         <div class="skill-card scroll-animate-scale">
           <i class="fas fa-shield-alt skill-icon"></i>
-          <h4>Cybersecurity</h4>
+          <h3>Cybersecurity</h3>
           <p>Penetration Testing, Kali Linux, CTF Competitions</p>
         </div>
         <div class="skill-card scroll-animate-scale">
           <i class="fas fa-chart-line skill-icon"></i>
-          <h4>Data Science</h4>
+          <h3>Data Science</h3>
           <p>R Programming, Statistical Modeling, Data Visualization</p>
         </div>
         <div class="skill-card scroll-animate-scale">
           <i class="fas fa-cube skill-icon"></i>
-          <h4>3D Printing & Fabrication</h4>
+          <h3>3D Printing & Fabrication</h3>
           <p>3D Modeling, CAD Design, Additive Manufacturing, Laser Engraving</p>
         </div>
       </div>
@@ -802,7 +841,7 @@
       <div class="projects-grid">
         <div class="project-card scroll-animate-left">
           <div class="project-content">
-            <h4><i class="fas fa-trophy"></i> RoboCup @Home - Champion Robot</h4>
+            <h3><i class="fas fa-trophy"></i> RoboCup @Home - Champion Robot</h3>
             <p>First place winning autonomous service robot for RoboCup Malaysia 2025. Features advanced navigation, object recognition, and human-robot interaction capabilities.</p>
             <div class="project-links">
               <a href="https://www.instagram.com/robocupmalaysia/p/DNOFP1iPjKx/"><i class="fas fa-robot"></i> RobotEdge UM</a>
@@ -812,7 +851,7 @@
         </div>
         <div class="project-card scroll-animate">
           <div class="project-content">
-            <h4><i class="fas fa-hand-paper"></i> AR Mouse (Hand Detection)</h4>
+            <h3><i class="fas fa-hand-paper"></i> AR Mouse (Hand Detection)</h3>
             <p>Computer vision-based virtual mouse control using hand tracking and gesture recognition for intuitive HCI.</p>
             <div class="project-links">
               <a href="#"><i class="fas fa-external-link-alt"></i> Demo</a>
@@ -821,7 +860,7 @@
         </div>
         <div class="project-card scroll-animate-right">
           <div class="project-content">
-            <h4><i class="fas fa-globe"></i> Project AWA</h4>
+            <h3><i class="fas fa-globe"></i> Project AWA</h3>
             <p>Interactive solar system explorer for astronomy education and analysis.</p>
             <div class="project-links">
               <a href="awa.html"><i class="fas fa-external-link-alt"></i> Explore</a>
@@ -830,7 +869,7 @@
         </div>
         <div class="project-card scroll-animate-left">
           <div class="project-content">
-            <h4><i class="fas fa-language"></i> Rumi to Jawi Translator</h4>
+            <h3><i class="fas fa-language"></i> Rumi to Jawi Translator</h3>
             <p>Smart Malay script converter with dictionary-based lookup and phonetic fallback capabilities.</p>
             <div class="project-links">
               <a href="rumitojawi.html"><i class="fas fa-external-link-alt"></i> Try Now</a>
@@ -888,6 +927,25 @@
       } else {
         nav.style.background = 'rgba(10, 10, 10, 0.95)';
       }
+    });
+
+    // Delayed hero animations for better LCP
+    window.addEventListener('load', function() {
+      // Add hero animations after page load
+      const heroContent = document.querySelector('.hero-content');
+      const heroH1 = document.querySelector('.hero h1');
+      const heroSubtitle = document.querySelector('.hero .subtitle');
+      const heroDescription = document.querySelector('.hero .description');
+      const ctaButtons = document.querySelector('.cta-buttons');
+      
+      // Apply animations after LCP measurement
+      setTimeout(() => {
+        if (heroContent) heroContent.style.animation = 'fadeInUp 1s ease-out';
+        if (heroH1) heroH1.style.animation = 'fadeInUp 1.2s ease-out 0.3s both';
+        if (heroSubtitle) heroSubtitle.style.animation = 'fadeInUp 1.2s ease-out 0.5s both';
+        if (heroDescription) heroDescription.style.animation = 'fadeInUp 1.2s ease-out 0.7s both';
+        if (ctaButtons) ctaButtons.style.animation = 'fadeInUp 1.2s ease-out 0.9s both';
+      }, 100);
     });
 
     // Scroll animations
