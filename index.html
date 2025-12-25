@@ -550,44 +550,30 @@
        MOBILE PERFORMANCE + LAYOUT FIXES (ADDED)
     ========================================================= */
 
-    /* Better viewport behavior on iOS Safari */
-    .hero{
-      min-height: 100svh;
-    }
-
-    @media (max-width: 860px){
-      body{ cursor: auto; }
-      .custom-cursor{ display:none; }
-
-      /* nav becomes full width */
-      .nav{
-        left: 12px;
-        right: 12px;
-        transform: none;
-        width: auto;
-        top: 12px;
-        padding: 10px 12px;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+    @media (max-width: 600px) {
+      /* Better viewport behavior on iOS Safari */
+      .hero h1 {
+        font-size: 2.2rem;
+        letter-spacing: 0.01em;
+        margin-bottom: 0.7rem;
+        /* Do not change color or gradient */
+        text-align: left;
       }
-      .nav .container{ justify-content: center; }
-
-      .nav-links{ display:none; }
-
-      .hero{
+      .hero {
         padding: 120px 0 56px;
       }
-      .hero-content{
-        padding: 26px 16px;
-        border-radius: 16px;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+      .hero-content {
+        padding: 18px 6px;
+        background: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
       }
       .hero .description{
         font-size: .98rem;
         line-height: 1.55;
       }
-
       .cta-buttons{ gap: 10px; }
       .btn{
         width: 100%;
@@ -597,6 +583,8 @@
 
       .section{ padding: 64px 0; }
       .section-title{ margin-bottom: 1.6rem; }
+      .nav .container{ justify-content: center; }
+      .nav-links{ display:none; }
 
       .about-grid{ grid-template-columns: 1fr; gap: 16px; }
       .about-text{ padding: 18px; }
