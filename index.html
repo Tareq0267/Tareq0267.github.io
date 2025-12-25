@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Muhammad Tareq Adam | AI Developer & RoboCup Champion</title>
+  <title>Tareq Adam | AI Developer & RoboCup Champion</title>
   <meta name="description" content="AI Developer, Computer Science Student, and RoboCup Malaysia 2025 Champion. Specializing in Machine Learning, Robotics, and Full-Stack Development.">
 
   <!-- Fonts: the “vibe” set (Syne + Inter) -->
@@ -51,7 +51,7 @@
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       line-height: 1.6;
       overflow-x: hidden;
-      cursor: none;          /* custom cursor */
+      cursor: none;          /* custom cursor (disabled on touch via media query below) */
       background: #0a0e27;   /* fallback behind WebGL */
     }
 
@@ -132,15 +132,13 @@
        4) HERO (Typography + Glass container)
     ========================================================= */
     .hero{
-      min-height: 100vh;
+      min-height: 100vh;  /* overridden to 100svh on mobile */
       display:flex;
       align-items:center;
       justify-content:center;
-      /* padding: 120px 20px 80px; */
       position: relative;
     }
     .hero-content{
-      /* width: min(980px, 100%); */
       text-align:center;
 
       background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
@@ -150,10 +148,9 @@
       -webkit-backdrop-filter: blur(18px);
       box-shadow: var(--shadow);
 
-       padding: 48px 24px; 
+      padding: 48px 24px;
     }
 
-    /* Scramble heading */
     .hero h1{
       font-family: Syne, sans-serif;
       font-weight: 800;
@@ -217,7 +214,7 @@
     }
 
     /* =========================================================
-       5) SECTIONS + GLASS CARDS (Your “carding styling”)
+       5) SECTIONS + GLASS CARDS
     ========================================================= */
     section{ position: relative; }
     .section{
@@ -250,6 +247,29 @@
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       box-shadow: 0 10px 34px rgba(0,0,0,.22);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (max-width: 600px) {
+      .glass-card {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto 1.5rem auto;
+        border-radius: 16px;
+        left: unset;
+        right: unset;
+      }
+      .container {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+      }
+      body, html {
+        padding: 0;
+        margin: 0;
+        width: 100vw;
+        overflow-x: hidden;
+      }
     }
 
     .about-grid{
@@ -497,47 +517,7 @@
     .contact-item a{ color: rgba(255,255,255,.88); text-decoration:none; }
 
     /* =========================================================
-       6) COLOR CONTROLS (like your example)
-    ========================================================= */
-    .color-controls{
-      position: fixed;
-      top: 76px;
-      right: 18px;
-      z-index: 1000;
-      display:flex;
-      gap: 10px;
-      pointer-events: auto;
-    }
-    .color-btn{
-      min-width: 44px;
-      height: 44px;
-      padding: 0 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.10);
-      border: 1px solid rgba(255,255,255,.28);
-      color: rgba(255,255,255,.90);
-      font-family: Syne, sans-serif;
-      font-size: .72rem;
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      cursor:pointer;
-      transition: transform .2s ease, background .2s ease, border-color .2s ease;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-    .color-btn:hover{
-      transform: translateY(-2px);
-      background: rgba(255,255,255,.16);
-      border-color: rgba(255,255,255,.40);
-    }
-    .color-btn.active{
-      background: rgba(255,255,255,.22);
-      border-color: rgba(255,255,255,.55);
-    }
-
-    /* =========================================================
-       7) CUSTOM CURSOR (your example)
+       7) CUSTOM CURSOR
     ========================================================= */
     .custom-cursor{
       position: fixed;
@@ -567,13 +547,87 @@
     .dud{ color: rgba(255,255,255,.45); }
 
     /* =========================================================
-       8) RESPONSIVE
+       MOBILE PERFORMANCE + LAYOUT FIXES (ADDED)
     ========================================================= */
+
+    /* Better viewport behavior on iOS Safari */
+    .hero{
+      min-height: 100svh;
+    }
+
     @media (max-width: 860px){
-      .about-grid{ grid-template-columns: 1fr; }
+      body{ cursor: auto; }
+      .custom-cursor{ display:none; }
+
+      /* nav becomes full width */
+      .nav{
+        left: 12px;
+        right: 12px;
+        transform: none;
+        width: auto;
+        top: 12px;
+        padding: 10px 12px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+      .nav .container{ justify-content: center; }
+
       .nav-links{ display:none; }
-      .color-controls{ top: 18px; right: 18px; }
-      .hero{ padding-top: 140px; }
+
+      .hero{
+        padding: 120px 0 56px;
+      }
+      .hero-content{
+        padding: 26px 16px;
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      .hero .description{
+        font-size: .98rem;
+        line-height: 1.55;
+      }
+
+      .cta-buttons{ gap: 10px; }
+      .btn{
+        width: 100%;
+        justify-content: center;
+        padding: 12px 16px;
+      }
+
+      .section{ padding: 64px 0; }
+      .section-title{ margin-bottom: 1.6rem; }
+
+      .about-grid{ grid-template-columns: 1fr; gap: 16px; }
+      .about-text{ padding: 18px; }
+      .stats{ padding: 18px; gap: 10px; }
+      .stat{ padding: 14px; }
+
+      .experience-timeline::before{ left: 14px; }
+      .experience-item{ padding-left: 44px; }
+      .experience-item::before{ left: 6px; top: 20px; }
+      .experience-card{ padding: 16px; }
+
+      .glass-card{
+        border-radius: 16px;
+        box-shadow: 0 10px 26px rgba(0,0,0,.20);
+      }
+
+      .projects-grid{ grid-template-columns: 1fr; }
+      .project-image{ height: 160px; }
+
+      .skills-grid{ grid-template-columns: 1fr; }
+
+      .contact-info{ gap: 10px; }
+      .contact-item{
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 420px){
+      .hero h1{ font-size: 2.25rem; }
+      .section{ padding: 56px 0; }
     }
   </style>
 </head>
@@ -581,13 +635,10 @@
 <body>
   <a href="#main" class="skip-link">Skip to main content</a>
 
-  <!-- WebGL background is injected by JS as #webGLApp -->
-
   <div class="ui-layer">
     <!-- Nav -->
     <nav class="nav" role="navigation" aria-label="Main navigation">
       <div class="container">
-        <!-- <div class="logo">TAREQ</div> -->
         <ul class="nav-links">
           <li><a href="#about" aria-label="About section">About</a></li>
           <li><a href="#experience" aria-label="Experience section">Experience</a></li>
@@ -598,21 +649,11 @@
       </div>
     </nav>
 
-    <!-- Color scheme buttons (like your example) -->
-    <!-- <div class="color-controls" aria-label="Background color schemes">
-      <button class="color-btn active" data-scheme="1">S1</button>
-      <button class="color-btn" data-scheme="2">S2</button>
-      <button class="color-btn" data-scheme="3">S3</button>
-      <button class="color-btn" data-scheme="4">S4</button>
-      <button class="color-btn" data-scheme="5">S5</button>
-    </div> -->
-
     <!-- Hero -->
     <section class="hero" id="main">
       <div class="container">
         <div class="hero-content">
-          <!-- Scramble text target: keep class="text" -->
-          <h1 class="text">Muhammad Tareq Adam</h1>
+          <h1 class="text">Tareq Adam</h1>
           <p class="subtitle">AI Developer & Computer Science Student</p>
           <p class="description">
             Passionate about Artificial Intelligence, Machine Learning, and Computer Vision.
@@ -879,6 +920,12 @@
 
   <script>
     /* =========================================================
+       Mobile/touch detection (ADDED)
+    ========================================================= */
+    const isMobile = matchMedia("(max-width: 860px)").matches;
+    const isTouch = matchMedia("(hover: none)").matches;
+
+    /* =========================================================
        COMPONENT #1: LIQUID GRADIENT BACKGROUND (Three.js + shader)
     ========================================================= */
     class TouchTexture {
@@ -960,7 +1007,10 @@
           stencil: false,
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // (ADDED) lower pixel ratio on mobile for smoothness
+        this.renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
+
         document.body.appendChild(this.renderer.domElement);
         this.renderer.domElement.id = "webGLApp";
 
@@ -978,17 +1028,17 @@
           uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
           uTouchTexture: { value: this.touch.texture },
 
-          // S4 – mono navy palette
-          uColorA: { value: new THREE.Vector3(0.10, 0.14, 0.36) },
-          uColorB: { value: new THREE.Vector3(0.039, 0.055, 0.153) },
-          uColorC: { value: new THREE.Vector3(0.08, 0.12, 0.30) },
-          uColorD: { value: new THREE.Vector3(0.14, 0.26, 0.36) }, // cyan mist
-          uColorE: { value: new THREE.Vector3(0.18, 0.12, 0.30) }, // violet energy
+          // More colors (ADDED / expanded)
+          uColorA: { value: new THREE.Vector3(0.10, 0.14, 0.36) },  // deep blue
+          uColorB: { value: new THREE.Vector3(0.039, 0.055, 0.153) },// navy base
+          uColorC: { value: new THREE.Vector3(0.08, 0.12, 0.30) },   // mid blue
+          uColorD: { value: new THREE.Vector3(0.10, 0.22, 0.36) },   // cyan mist
+          uColorE: { value: new THREE.Vector3(0.34, 0.16, 0.48) },   // violet energy
 
-          uGrain: { value: 0.025 },
+          // (ADDED) reduce grain on mobile
+          uGrain: { value: isMobile ? 0.015 : 0.025 },
           uSpeed: { value: 1.0 },
         };
-
 
         this.mesh = this.createFullscreenPlane();
         this.scene.add(this.mesh);
@@ -1020,12 +1070,12 @@
             uniform float uTime;
             uniform vec2 uResolution;
             uniform sampler2D uTouchTexture;
+
             uniform vec3 uColorA;
             uniform vec3 uColorB;
             uniform vec3 uColorC;
             uniform vec3 uColorD;
             uniform vec3 uColorE;
-            
 
             uniform float uGrain;
             uniform float uSpeed;
@@ -1051,26 +1101,26 @@
               float ripple = sin(d * 22.0 - uTime * 3.0) * 0.03 * intensity;
               uv += ripple;
 
-              // 5 animated centers (fast, looks “liquid”)
+              // 5 animated centers (now uses more colors)
               vec2 c1 = vec2(
-                0.5 + sin(uTime * 0.45) * 0.38,
-                0.5 + cos(uTime * 0.52) * 0.38
+                0.5 + sin(uTime * uSpeed * 0.45) * 0.38,
+                0.5 + cos(uTime * uSpeed * 0.52) * 0.38
               );
               vec2 c2 = vec2(
-                0.5 + cos(uTime * 0.60) * 0.44,
-                0.5 + sin(uTime * 0.48) * 0.44
+                0.5 + cos(uTime * uSpeed * 0.60) * 0.44,
+                0.5 + sin(uTime * uSpeed * 0.48) * 0.44
               );
               vec2 c3 = vec2(
-                0.5 + sin(uTime * 0.32) * 0.40,
-                0.5 + cos(uTime * 0.61) * 0.40
+                0.5 + sin(uTime * uSpeed * 0.32) * 0.40,
+                0.5 + cos(uTime * uSpeed * 0.61) * 0.40
               );
               vec2 c4 = vec2(
-                0.5 + sin(uTime * 0.22 + 1.7) * 0.46,
-                0.5 + cos(uTime * 0.36 + 2.4) * 0.46
+                0.5 + sin(uTime * uSpeed * 0.22 + 1.7) * 0.46,
+                0.5 + cos(uTime * uSpeed * 0.36 + 2.4) * 0.46
               );
               vec2 c5 = vec2(
-                0.5 + cos(uTime * 0.18 + 4.1) * 0.50,
-                0.5 + sin(uTime * 0.26 + 1.3) * 0.50
+                0.5 + cos(uTime * uSpeed * 0.18 + 4.1) * 0.50,
+                0.5 + sin(uTime * uSpeed * 0.26 + 1.3) * 0.50
               );
 
               float i1 = 1.0 - smoothstep(0.0, 0.60, length(uv - c1));
@@ -1079,15 +1129,13 @@
               float i4 = 1.0 - smoothstep(0.0, 0.65, length(uv - c4));
               float i5 = 1.0 - smoothstep(0.0, 0.70, length(uv - c5));
 
-
               vec3 col = vec3(0.0);
 
-              col += uColorA * i1 * 0.9;
-              col += uColorB * i2 * 1.1;
-              col += uColorC * i3 * 0.8;
-              col += uColorD * i4 * 0.6;
-              col += uColorE * i5 * 0.5;
-
+              col += uColorA * i1 * 0.90;
+              col += uColorB * i2 * 1.10;
+              col += uColorC * i3 * 0.85;
+              col += uColorD * i4 * 0.65;
+              col += uColorE * i5 * 0.55;
 
               // subtle saturation boost
               float luma = dot(col, vec3(0.299, 0.587, 0.114));
@@ -1102,41 +1150,11 @@
               col += g;
 
               gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
-
             }
           `,
         });
 
         return new THREE.Mesh(geo, mat);
-      }
-
-      setScheme(scheme) {
-        const U = this.uniforms;
-
-        const schemes = {
-          1: { // Orange + Navy
-            c1:[0.945,0.353,0.133], c2:[0.039,0.055,0.153], c3:[0.945,0.353,0.133], c4:[0.039,0.055,0.153], c5:[0.945,0.353,0.133]
-          },
-          2: { // Coral + Turquoise + Navy
-            c1:[1.0,0.424,0.314], c2:[0.039,0.055,0.153], c3:[0.251,0.878,0.816], c4:[0.039,0.055,0.153], c5:[0.251,0.878,0.816]
-          },
-          3: { // Teal + Beige + Navy
-            c1:[0.176,0.42,0.427], c2:[0.039,0.055,0.153], c3:[0.82,0.686,0.612], c4:[0.039,0.055,0.153], c5:[0.176,0.42,0.427]
-          },
-          4: { // Mono navy boosts (calm)
-            c1:[0.10,0.14,0.36], c2:[0.039,0.055,0.153], c3:[0.08,0.12,0.30], c4:[0.039,0.055,0.153], c5:[0.06,0.10,0.24]
-          },
-          5: { // Orange + Dark teal + near-black
-            c1:[0.945,0.353,0.133], c2:[0.0,0.259,0.22], c3:[0.945,0.353,0.133], c4:[0.0,0.0,0.0], c5:[0.945,0.353,0.133]
-          },
-        };
-
-        const s = schemes[scheme] || schemes[1];
-        U.uColor1.value.set(...s.c1);
-        U.uColor2.value.set(...s.c2);
-        U.uColor3.value.set(...s.c3);
-        U.uColor4.value.set(...s.c4);
-        U.uColor5.value.set(...s.c5);
       }
 
       bindEvents() {
@@ -1162,6 +1180,9 @@
           this.renderer.setSize(window.innerWidth, window.innerHeight);
           this.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
 
+          // keep mobile pixel ratio on resize (ADDED)
+          this.renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
+
           const view = this.getViewSize();
           this.mesh.geometry.dispose();
           this.mesh.geometry = new THREE.PlaneGeometry(view.width, view.height, 1, 1);
@@ -1180,109 +1201,34 @@
     const liquid = new LiquidBgApp();
 
     /* =========================================================
-       COMPONENT #2: CUSTOM CURSOR (from your example)
+       COMPONENT #2: CUSTOM CURSOR (disabled on touch)
     ========================================================= */
     const cursor = document.getElementById("customCursor");
-    let mouseX = 0, mouseY = 0;
-    document.addEventListener("mousemove", (e) => {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      cursor.style.left = mouseX + "px";
-      cursor.style.top = mouseY + "px";
-    });
 
-    // enlarge on interactive elements
-    const hoverTargets = [
-      ...document.querySelectorAll("a, button, .glass-card")
-    ];
-    hoverTargets.forEach(el => {
-      el.addEventListener("mouseenter", () => {
-        cursor.style.width = "52px";
-        cursor.style.height = "52px";
-        cursor.style.borderWidth = "3px";
-        cursor.style.borderColor = "rgba(255,255,255,.55)";
+    if (!isTouch) {
+      document.addEventListener("mousemove", (e) => {
+        cursor.style.left = e.clientX + "px";
+        cursor.style.top = e.clientY + "px";
       });
-      el.addEventListener("mouseleave", () => {
-        cursor.style.width = "40px";
-        cursor.style.height = "40px";
-        cursor.style.borderWidth = "2px";
-        cursor.style.borderColor = "rgba(255,255,255,0)";
+
+      const hoverTargets = [
+        ...document.querySelectorAll("a, button, .glass-card")
+      ];
+      hoverTargets.forEach(el => {
+        el.addEventListener("mouseenter", () => {
+          cursor.style.width = "52px";
+          cursor.style.height = "52px";
+          cursor.style.borderWidth = "3px";
+          cursor.style.borderColor = "rgba(255,255,255,.55)";
+        });
+        el.addEventListener("mouseleave", () => {
+          cursor.style.width = "40px";
+          cursor.style.height = "40px";
+          cursor.style.borderWidth = "2px";
+          cursor.style.borderColor = "rgba(255,255,255,0)";
+        });
       });
-    });
-
-    // /* =========================================================
-    //    COMPONENT #3: TEXT SCRAMBLE HERO (from your example)
-    // ========================================================= */
-    // class TextScramble {
-    //   constructor(el) {
-    //     this.el = el;
-    //     this.chars = '!<>-_\\/[]{}—=+*^?#________';
-    //     this.update = this.update.bind(this);
-    //   }
-    //   setText(newText) {
-    //     const oldText = this.el.innerText;
-    //     const length = Math.max(oldText.length, newText.length);
-    //     const promise = new Promise((resolve) => (this.resolve = resolve));
-    //     this.queue = [];
-    //     for (let i = 0; i < length; i++) {
-    //       const from = oldText[i] || '';
-    //       const to = newText[i] || '';
-    //       const start = Math.floor(Math.random() * 40);
-    //       const end = start + Math.floor(Math.random() * 40);
-    //       this.queue.push({ from, to, start, end });
-    //     }
-    //     cancelAnimationFrame(this.frameRequest);
-    //     this.frame = 0;
-    //     this.update();
-    //     return promise;
-    //   }
-    //   update() {
-    //     let output = '';
-    //     let complete = 0;
-    //     for (let i = 0, n = this.queue.length; i < n; i++) {
-    //       let { from, to, start, end, char } = this.queue[i];
-    //       if (this.frame >= end) {
-    //         complete++;
-    //         output += to;
-    //       } else if (this.frame >= start) {
-    //         if (!char || Math.random() < 0.28) {
-    //           char = this.randomChar();
-    //           this.queue[i].char = char;
-    //         }
-    //         output += `<span class="dud">${char}</span>`;
-    //       } else {
-    //         output += from;
-    //       }
-    //     }
-    //     this.el.innerHTML = output;
-    //     if (complete === this.queue.length) {
-    //       this.resolve();
-    //     } else {
-    //       this.frameRequest = requestAnimationFrame(this.update);
-    //       this.frame++;
-    //     }
-    //   }
-    //   randomChar() {
-    //     return this.chars[Math.floor(Math.random() * this.chars.length)];
-    //   }
-    // }
-
-    // const phrases = [
-    //   "Muhammad Tareq Adam",
-    //   "AI Developer",
-    //   "RoboCup Malaysia 2025 Champion",
-    //   "Computer Vision • Robotics • ML",
-    //   "Full-Stack Builder"
-    // ];
-    // const textEl = document.querySelector(".text");
-    // const fx = new TextScramble(textEl);
-    // let counter = 0;
-
-    // const next = () => {
-    //   fx.setText(phrases[counter]).then(() => setTimeout(next, 900));
-    //   counter = (counter + 1) % phrases.length;
-    // };
-    // next();
+    }
 
     /* =========================================================
        KEEP YOUR NICE INTERACTIONS (lightweight versions)
@@ -1313,7 +1259,7 @@
       }
     });
 
-    // 3D tilt for cards (skills + projects)
+    // 3D tilt for cards (skills + projects) - DISABLED on mobile/touch (ADDED)
     function addTilt(selector, strength = 12, hoverLift = -8) {
       document.querySelectorAll(selector).forEach(card => {
         card.addEventListener('mousemove', (e) => {
@@ -1331,8 +1277,11 @@
         });
       });
     }
-    addTilt(".skill-card", 14, -8);
-    addTilt(".project-card", 18, -10);
+
+    if (!isMobile && !isTouch) {
+      addTilt(".skill-card", 14, -8);
+      addTilt(".project-card", 18, -10);
+    }
   </script>
 </body>
 </html>
