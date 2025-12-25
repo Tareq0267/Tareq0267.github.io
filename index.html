@@ -907,6 +907,54 @@
   <div class="custom-cursor" id="customCursor"></div>
 
   <script>
+        // Make nav clickable on mobile to scroll to the next section
+        window.addEventListener('DOMContentLoaded', function() {
+          var nav = document.querySelector('.nav');
+          var sectionIds = ['about', 'experience', 'skills', 'projects', 'contact'];
+          function isMobile() {
+            return window.matchMedia('(max-width: 600px)').matches;
+          }
+          function getCurrentSectionIndex() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var buffer = window.innerHeight * 0.2;
+            for (var i = sectionIds.length - 1; i >= 0; i--) {
+              var el = document.getElementById(sectionIds[i]);
+              if (el) {
+                var rect = el.getBoundingClientRect();
+                var top = rect.top + scrollY;
+                if (scrollY + buffer >= top) {
+                  return i;
+                }
+              }
+            }
+            return -1;
+          }
+          function scrollToNextSection() {
+            var idx = getCurrentSectionIndex();
+            var nextIdx = Math.min(idx + 1, sectionIds.length - 1);
+            if (nextIdx > idx) {
+              var nextEl = document.getElementById(sectionIds[nextIdx]);
+              if (nextEl) nextEl.scrollIntoView({behavior: 'smooth'});
+            }
+          }
+          function attachNavHandler() {
+            if (!nav) return;
+            nav.style.cursor = isMobile() ? 'pointer' : '';
+            nav._nextSectionHandler = function(e) {
+              if (e.target.closest('a, ul, li')) return;
+              scrollToNextSection();
+            };
+            nav.removeEventListener('click', nav._nextSectionHandlerReal);
+            if (isMobile()) {
+              nav._nextSectionHandlerReal = nav._nextSectionHandler;
+              nav.addEventListener('click', nav._nextSectionHandlerReal);
+            } else {
+              nav._nextSectionHandlerReal = null;
+            }
+          }
+          attachNavHandler();
+          window.addEventListener('resize', attachNavHandler);
+        });
     /* =========================================================
        Mobile/touch detection (ADDED)
     ========================================================= */
