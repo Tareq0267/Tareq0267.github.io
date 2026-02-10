@@ -255,10 +255,8 @@ body {
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 140px;
+  justify-content: center;
   pointer-events: none;
 }
 
@@ -271,27 +269,6 @@ body {
   font-size: 20px;
   box-shadow: 0 8px 20px rgba(107,44,62,0.15);
   transition: opacity 0.4s ease;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.crank-arrow {
-  width: 48px;
-  height: 48px;
-  animation: spinHint 2s ease-in-out infinite;
-}
-
-.crank-arrow svg {
-  width: 100%;
-  height: 100%;
-}
-
-@keyframes spinHint {
-  0% { opacity: 0.5; transform: rotate(0deg); }
-  50% { opacity: 1; transform: rotate(20deg); }
-  100% { opacity: 0.5; transform: rotate(0deg); }
 }
 
 .scene.hidden {
@@ -632,6 +609,11 @@ body {
   touch-action: none;
   box-shadow: 0 4px 15px rgba(107, 44, 62, 0.3);
   border: 3px solid rgba(107, 44, 62, 0.15);
+  cursor: grab;
+}
+
+.crank:active {
+  cursor: grabbing;
 }
 
 .handle {
@@ -674,18 +656,9 @@ body {
     max-height: 180px;
   }
 
-  .scene {
-    padding-bottom: 110px;
-  }
-
   .message {
     font-size: 16px;
     padding: 14px 18px;
-  }
-
-  .crank-arrow {
-    width: 40px;
-    height: 40px;
   }
 
   .valentine-question {
@@ -874,10 +847,6 @@ body {
 
 /* Short screens (landscape or short phones) */
 @media (max-height: 600px) {
-  .scene {
-    padding-bottom: 100px;
-  }
-
   #typewriter {
     top: 40px;
     max-height: 140px;
@@ -983,15 +952,7 @@ body {
 </div>
 
 <div class="scene">
-  <div class="message">
-    turn the crank 💗
-    <div class="crank-arrow">
-      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M36 24c0-6.627-5.373-12-12-12S12 17.373 12 24s5.373 12 12 12" stroke="#6b2c3e" stroke-width="3" stroke-linecap="round" fill="none"/>
-        <path d="M28 32l-4 4 4 4" stroke="#6b2c3e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      </svg>
-    </div>
-  </div>
+  <div class="message">turn the crank or scroll 💗</div>
 </div>
 
 <div class="crank-container">
@@ -1470,6 +1431,92 @@ crank.addEventListener("touchend", () => {
     }
   }
 })
+
+/* ---- Mouse support for laptop/desktop ---- */
+crank.addEventListener("mousedown", e => {
+  e.preventDefault()
+  isDragging = true
+  scene.classList.add("hidden")
+  updateCenter()
+
+  if (inertiaFrame) {
+    cancelAnimationFrame(inertiaFrame)
+    inertiaFrame = null
+  }
+
+  lastAngle = angleFromPoint(e.clientX, e.clientY)
+  lastTime = performance.now()
+  velocity = 0
+
+  music.volume = 1
+  vinyl.volume = 0.3
+  startAudio()
+})
+
+document.addEventListener("mousemove", e => {
+  if (!isDragging) return
+
+  const angle = angleFromPoint(e.clientX, e.clientY)
+  let delta = angle - lastAngle
+
+  if (delta > Math.PI) delta -= Math.PI * 2
+  if (delta < -Math.PI) delta += Math.PI * 2
+
+  const scrollDelta = delta * 120
+  applyScroll(scrollDelta)
+
+  const now = performance.now()
+  const dt = now - lastTime
+  if (dt > 0) {
+    velocity = velocity * 0.7 + (scrollDelta / dt * 16) * 0.3
+  }
+
+  startAudio()
+
+  lastAngle = angle
+  lastTime = now
+})
+
+document.addEventListener("mouseup", () => {
+  if (!isDragging) return
+  isDragging = false
+
+  if (Math.abs(velocity) > MIN_VELOCITY) {
+    inertiaFrame = requestAnimationFrame(inertiaLoop)
+  } else {
+    fadeOutAudio()
+
+    if (scrollX >= MAX_SCROLL - 50) {
+      showValentineScreen()
+    }
+  }
+})
+
+/* ---- Scroll-wheel support ---- */
+document.addEventListener("wheel", e => {
+  if (valentineShown) return
+  e.preventDefault()
+
+  scene.classList.add("hidden")
+
+  const scrollDelta = e.deltaY * 0.5
+  applyScroll(scrollDelta)
+
+  music.volume = 1
+  vinyl.volume = 0.3
+  startAudio()
+
+  // Debounced stop: fade audio after wheel stops
+  clearTimeout(wheelTimeout)
+  wheelTimeout = setTimeout(() => {
+    fadeOutAudio()
+    if (scrollX >= MAX_SCROLL - 50) {
+      showValentineScreen()
+    }
+  }, 200)
+}, { passive: false })
+
+let wheelTimeout = null
 
 function updateWorld() {
   world.style.transform = `translate(${-scrollX}px, -50%)`
