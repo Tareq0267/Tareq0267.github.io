@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>For You 💖</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Nunito:wght@400;600&family=Caveat:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  background: linear-gradient(
+    -45deg,
+    #ffb6c1,
+    #ffc8dd,
+    #ffafcc,
+    #f8bbd9,
+    #ffd6e8,
+    #e8b4d0
+  );
+  background-size: 300% 300%;
+  animation: gradientFlow 12s ease infinite;
+  overflow: hidden;
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  25% {
+    background-position: 50% 100%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  75% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ===== LOADING OVERLAY ===== */
+#loading {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    -45deg,
+    #ffb6c1,
+    #ffc8dd,
+    #ffafcc,
+    #f8bbd9,
+    #ffd6e8,
+    #e8b4d0
+  );
+  background-size: 300% 300%;
+  animation: gradientFlow 12s ease infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 999;
+  transition: opacity 0.6s ease;
+}
+
+#loading.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-card {
+  background: rgba(255,255,255,0.92);
+  padding: 28px 36px;
+  border-radius: 18px;
+  box-shadow: 0 8px 20px rgba(107,44,62,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  max-width: 280px;
+}
+
+.loading-spinner {
+  font-size: 28px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #6b2c3e;
+  font-size: 16px;
+  font-weight: 600;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.loading-earphones {
+  color: #8b4a5e;
+  font-family: 'Caveat', cursive;
+  font-size: 15px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.loading-earphones.show {
+  opacity: 1;
+}
+
+.loading-tap {
+  color: #6b2c3e;
+  font-size: 16px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  animation: none;
+}
+
+.loading-tap.show {
+  opacity: 1;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+/* ===== VIEWPORT ===== */
+#viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+#viewport.ready {
+  opacity: 1;
+  animation: breathe 6s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0% { filter: saturate(1); }
+  50% { filter: saturate(1.04); }
+  100% { filter: saturate(1); }
+}
+
+/* ===== WORLD ===== */
+#world {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  will-change: transform;
+}
+
+/* ===== MEMORY PLACEHOLDER ===== */
+.memory {
+  position: absolute;
+  width: 116px;
+  height: 136px;
+  background-size: cover;
+  background-position: center;
+  border: 6px solid #ffffff;
+  border-bottom: 28px solid #ffffff;
+  border-radius: 4px;
+  box-shadow:
+    0 10px 25px rgba(107,44,62,0.18),
+    0 2px 4px rgba(107,44,62,0.1);
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.memory.visible {
+  opacity: 1;
+}
+
+.memory.future {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  color: #6b2c3e;
+  background-image: linear-gradient(#fff0f3, #fff0f3);
+}
+
+/* ===== TYPEWRITER ===== */
+#typewriter {
+  font-family: 'Caveat', cursive;
+  position: absolute;
+  top: 70px;
+  left: 24px;
+  right: 24px;
+  padding: 0 26px;
+  color: #5a2030;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 32px;
+  z-index: 10;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 31px,
+      rgba(107,44,62,0.08) 31px,
+      rgba(107,44,62,0.08) 32px
+    ),
+    white;
+  border-radius: 9px;
+  box-shadow:
+    0 8px 24px rgba(107,44,62,0.15),
+    0 2px 4px rgba(107,44,62,0.08);
+  max-height: 250px;
+  overflow: hidden;
+}
+
+#typewriter::after {
+  content: "|";
+  animation: blink 0.8s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* ===== MESSAGE ===== */
+.scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 140px;
+  pointer-events: none;
+}
+
+.message {
+  font-family: 'DM Serif Display', serif;
+  background: rgba(255,255,255,0.92);
+  padding: 18px 22px;
+  border-radius: 18px;
+  color: #6b2c3e;
+  font-size: 20px;
+  box-shadow: 0 8px 20px rgba(107,44,62,0.15);
+  transition: opacity 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.crank-arrow {
+  width: 48px;
+  height: 48px;
+  animation: spinHint 2s ease-in-out infinite;
+}
+
+.crank-arrow svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes spinHint {
+  0% { opacity: 0.5; transform: rotate(0deg); }
+  50% { opacity: 1; transform: rotate(20deg); }
+  100% { opacity: 0.5; transform: rotate(0deg); }
+}
+
+.scene.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== VALENTINE QUESTION ===== */
+#valentine-screen {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    -45deg,
+    #ffb6c1,
+    #ffc8dd,
+    #ffafcc,
+    #f8bbd9,
+    #ffd6e8,
+    #e8b4d0
+  );
+  background-size: 300% 300%;
+  animation: gradientFlow 12s ease infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+#valentine-screen.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.valentine-question {
+  font-family: 'DM Serif Display', serif;
+  font-size: 32px;
+  color: #6b2c3e;
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 0 20px;
+  animation: floatIn 1s ease-out;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.valentine-btn {
+  padding: 16px 40px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.valentine-btn.yes {
+  background: linear-gradient(135deg, #ff6b8a, #ff8fa3);
+  color: white;
+  box-shadow: 0 6px 20px rgba(255,107,138,0.4);
+  margin-bottom: 20px;
+}
+
+.valentine-btn.yes:hover,
+.valentine-btn.yes:active {
+  transform: scale(1.1);
+  box-shadow: 0 8px 25px rgba(255,107,138,0.5);
+}
+
+.valentine-btn.no {
+  background: #f0f0f0;
+  color: #666;
+  position: fixed;
+  transition: left 0.3s ease, top 0.3s ease;
+  left: 50%;
+  top: 60%;
+  transform: translateX(-50%);
+}
+
+.valentine-btn.no:hover,
+.valentine-btn.no:active {
+  background: #e0e0e0;
+}
+
+/* ===== YES CELEBRATION ===== */
+#celebration {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    -45deg,
+    #ffb6c1,
+    #ffc8dd,
+    #ffafcc,
+    #f8bbd9,
+    #ffd6e8,
+    #e8b4d0
+  );
+  background-size: 300% 300%;
+  animation: gradientFlow 12s ease infinite;
+  z-index: 1001;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+  overflow: hidden;
+}
+
+#celebration.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ===== FLOATING HEARTS ===== */
+.floating-hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.floating-heart {
+  position: absolute;
+  bottom: -50px;
+  font-size: 20px;
+  opacity: 0;
+}
+
+/* ===== SPARKLES ===== */
+.sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 6px 2px rgba(255,255,255,0.8);
+}
+
+/* ===== LETTER GLOW (handled by GSAP) ===== */
+
+/* Photo frame around the letter */
+.photo-frame {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.frame-photo {
+  position: absolute;
+  width: 50px;
+  height: 65px;
+  background-size: cover;
+  background-position: center;
+  border: 4px solid #ffffff;
+  border-bottom: 18px solid #ffffff;
+  border-radius: 3px;
+  box-shadow:
+    0 4px 12px rgba(107,44,62,0.2),
+    0 1px 3px rgba(107,44,62,0.1);
+  opacity: 0;
+}
+
+/* Love letter in center */
+.love-letter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  width: min(260px, 70vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: white;
+  padding: 24px 20px;
+  border-radius: 12px;
+  box-shadow:
+    0 15px 40px rgba(107,44,62,0.2),
+    0 4px 10px rgba(107,44,62,0.1);
+  z-index: 10;
+  opacity: 0;
+}
+
+.love-letter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 27px,
+      rgba(107,44,62,0.06) 27px,
+      rgba(107,44,62,0.06) 28px
+    );
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.love-letter h2 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 18px;
+  color: #6b2c3e;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.love-letter p {
+  font-family: 'Caveat', cursive;
+  font-size: 16px;
+  line-height: 24px;
+  color: #5a2030;
+  margin: 0 0 10px 0;
+}
+
+.love-letter .signature {
+  font-family: 'Caveat', cursive;
+  font-size: 20px;
+  color: #6b2c3e;
+  text-align: right;
+  margin-top: 20px;
+}
+
+/* ===== SPACING CONTROLS ===== */
+#controls-toggle {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255,255,255,0.85);
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(107,44,62,0.2);
+  z-index: 101;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #6b2c3e;
+  transition: transform 0.2s ease;
+}
+
+#controls-toggle:active {
+  transform: scale(0.95);
+}
+
+#celebration.show #controls-toggle {
+  display: flex;
+}
+
+#controls {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.95);
+  background: rgba(255,255,255,0.95);
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(107,44,62,0.2);
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 260px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+#controls.visible {
+  display: flex;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) scale(1);
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.control-row label {
+  font-size: 12px;
+  color: #6b2c3e;
+  min-width: 70px;
+}
+
+.control-row input[type="range"] {
+  flex: 1;
+  accent-color: #ff6b8a;
+}
+
+.control-row span {
+  font-size: 11px;
+  color: #888;
+  min-width: 30px;
+  text-align: right;
+}
+
+/* ===== CRANK ===== */
+.crank-container {
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+.crank {
+  width: 90px;
+  height: 90px;
+  background: #ffffff;
+  border-radius: 50%;
+  margin: 0 auto;
+  position: relative;
+  touch-action: none;
+  box-shadow: 0 4px 15px rgba(107, 44, 62, 0.3);
+  border: 3px solid rgba(107, 44, 62, 0.15);
+}
+
+.handle {
+  width: 12px;
+  height: 40px;
+  background: #6b2c3e;
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 6px;
+}
+
+/* ===== RESPONSIVE STYLES ===== */
+
+/* Extra small phones (320px - 374px) */
+@media (max-width: 374px) {
+  .loading-text {
+    font-size: 16px;
+  }
+
+  .memory {
+    width: 90px;
+    height: 110px;
+    border-width: 4px;
+    border-bottom-width: 22px;
+  }
+
+  .memory.future {
+    font-size: 13px;
+  }
+
+  #typewriter {
+    top: 50px;
+    left: 12px;
+    right: 12px;
+    padding: 0 16px;
+    font-size: 16px;
+    line-height: 26px;
+    max-height: 180px;
+  }
+
+  .scene {
+    padding-bottom: 110px;
+  }
+
+  .message {
+    font-size: 16px;
+    padding: 14px 18px;
+  }
+
+  .crank-arrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .valentine-question {
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+
+  .valentine-btn {
+    padding: 14px 32px;
+    font-size: 16px;
+  }
+
+  .crank {
+    width: 70px;
+    height: 70px;
+  }
+
+  .handle {
+    width: 10px;
+    height: 32px;
+    top: -28px;
+  }
+
+  .love-letter {
+    width: min(240px, 80vw);
+    padding: 18px 14px;
+  }
+
+  .love-letter h2 {
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .love-letter p {
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 8px;
+  }
+
+  .love-letter .signature {
+    font-size: 16px;
+    margin-top: 14px;
+  }
+
+  .love-letter .signature span {
+    font-size: 9px !important;
+  }
+
+  .frame-photo {
+    border-width: 3px;
+    border-bottom-width: 14px;
+  }
+
+  #controls {
+    min-width: 220px;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .control-row label {
+    font-size: 11px;
+    min-width: 60px;
+  }
+}
+
+/* Small phones (375px - 413px) */
+@media (min-width: 375px) and (max-width: 413px) {
+  .memory {
+    width: 100px;
+    height: 120px;
+  }
+
+  #typewriter {
+    top: 60px;
+    font-size: 18px;
+    max-height: 200px;
+  }
+
+  .valentine-question {
+    font-size: 28px;
+  }
+
+  .crank {
+    width: 80px;
+    height: 80px;
+  }
+
+  .handle {
+    height: 36px;
+    top: -32px;
+  }
+
+  .love-letter {
+    width: min(250px, 75vw);
+    padding: 20px 16px;
+  }
+
+  .love-letter h2 {
+    font-size: 16px;
+  }
+
+  .love-letter p {
+    font-size: 15px;
+    line-height: 22px;
+  }
+}
+
+/* Medium phones (414px - 479px) - iPhone Plus, etc */
+@media (min-width: 414px) and (max-width: 479px) {
+  .memory {
+    width: 110px;
+    height: 130px;
+  }
+
+  #typewriter {
+    font-size: 19px;
+    max-height: 220px;
+  }
+
+  .love-letter {
+    width: min(280px, 70vw);
+  }
+}
+
+/* Large phones / Small tablets (480px+) */
+@media (min-width: 480px) {
+  .memory {
+    width: 120px;
+    height: 140px;
+    border-width: 6px;
+    border-bottom-width: 30px;
+  }
+
+  #typewriter {
+    top: 80px;
+    left: 30px;
+    right: 30px;
+    font-size: 22px;
+    line-height: 34px;
+    max-height: 280px;
+  }
+
+  .message {
+    font-size: 22px;
+    padding: 20px 26px;
+  }
+
+  .valentine-question {
+    font-size: 36px;
+  }
+
+  .valentine-btn {
+    padding: 18px 44px;
+    font-size: 20px;
+  }
+
+  .crank {
+    width: 100px;
+    height: 100px;
+  }
+
+  .handle {
+    width: 14px;
+    height: 44px;
+    top: -40px;
+  }
+
+  .love-letter {
+    width: min(320px, 60vw);
+    padding: 28px 24px;
+  }
+
+  .love-letter h2 {
+    font-size: 20px;
+  }
+
+  .love-letter p {
+    font-size: 17px;
+    line-height: 26px;
+  }
+
+  .love-letter .signature {
+    font-size: 22px;
+  }
+}
+
+/* Short screens (landscape or short phones) */
+@media (max-height: 600px) {
+  .scene {
+    padding-bottom: 100px;
+  }
+
+  #typewriter {
+    top: 40px;
+    max-height: 140px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .crank-container {
+    bottom: 10px;
+  }
+
+  .crank {
+    width: 65px;
+    height: 65px;
+  }
+
+  .handle {
+    height: 28px;
+    top: -24px;
+  }
+
+  .love-letter {
+    padding: 16px 14px;
+  }
+
+  .love-letter h2 {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .love-letter p {
+    font-size: 13px;
+    line-height: 18px;
+    margin-bottom: 6px;
+  }
+
+  .love-letter .signature {
+    font-size: 16px;
+    margin-top: 12px;
+  }
+
+  .valentine-question {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .valentine-btn {
+    padding: 12px 28px;
+    font-size: 15px;
+  }
+}
+
+/* Very short screens */
+@media (max-height: 500px) {
+  #typewriter {
+    top: 30px;
+    max-height: 100px;
+  }
+
+  .love-letter p:nth-child(3) {
+    display: none;
+  }
+}
+
+/* Tall phones (iPhone X, etc) - safe area handling */
+@supports (padding-top: env(safe-area-inset-top)) {
+  #typewriter {
+    top: calc(70px + env(safe-area-inset-top));
+  }
+
+  .crank-container {
+    bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+
+  #controls-toggle {
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    right: calc(12px + env(safe-area-inset-right));
+  }
+
+  #controls {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="loading-card">
+    <div class="loading-spinner">💗</div>
+    <div class="loading-text">winding up…</div>
+    <div class="loading-earphones">psst… put your earphones on, it's worth it 🎧</div>
+  </div>
+  <div class="loading-tap">tap to start 💗</div>
+</div>
+
+<div id="typewriter"></div>
+
+<div id="viewport">
+  <div id="world"></div>
+</div>
+
+<div class="scene">
+  <div class="message">
+    turn the crank 💗
+    <div class="crank-arrow">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M36 24c0-6.627-5.373-12-12-12S12 17.373 12 24s5.373 12 12 12" stroke="#6b2c3e" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M28 32l-4 4 4 4" stroke="#6b2c3e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="crank-container">
+  <div class="crank" id="crank">
+    <div class="handle"></div>
+  </div>
+</div>
+
+<!-- VALENTINE QUESTION SCREEN -->
+<div id="valentine-screen">
+  <div class="valentine-question">Will you be my Valentine?</div>
+  <button class="valentine-btn yes" id="yes-btn">Yes!</button>
+  <button class="valentine-btn no" id="no-btn">No</button>
+</div>
+
+<!-- CELEBRATION SCREEN -->
+<div id="celebration">
+  <div class="floating-hearts" id="floating-hearts"></div>
+  <div class="sparkles" id="sparkles"></div>
+  <div class="photo-frame" id="photo-frame"></div>
+
+  <button id="controls-toggle">⚙️</button>
+  <div id="controls">
+    <div class="control-row">
+      <label>Gap from letter</label>
+      <input type="range" id="gap-slider" min="0" max="50" value="0">
+      <span id="gap-value">0</span>
+    </div>
+    <div class="control-row">
+      <label>Photo spacing</label>
+      <input type="range" id="spacing-slider" min="-20" max="30" value="3">
+      <span id="spacing-value">3</span>
+    </div>
+    <div class="control-row">
+      <label>Photo size</label>
+      <input type="range" id="size-slider" min="25" max="80" value="61">
+      <span id="size-value">61</span>
+    </div>
+    <div class="control-row">
+      <label>Messiness</label>
+      <input type="range" id="overlap-slider" min="0" max="60" value="36">
+      <span id="overlap-value">36</span>
+    </div>
+    <div class="control-row">
+      <label>Photo count</label>
+      <input type="range" id="count-slider" min="5" max="60" value="60">
+      <span id="count-value">All</span>
+    </div>
+  </div>
+
+  <div class="love-letter">
+    <h2>My Dearest Qaisara,</h2>
+    <p>Every moment with you feels like a dream I never want to wake up from. From the first time we met, I knew something was different.</p>
+    <p>You make the ordinary feel magical, and every memory we share becomes my favorite one.</p>
+    <p>I love you more than words could ever express. Will you continue making memories with me forever?</p>
+    <div class="signature">Forever yours,<br>Tareq<br><span style="font-size: 10px;">(your love/ your bam bam boy / your future husband🤍)</span></div>
+  </div>
+</div>
+
+<script>
+/* =====================
+   AUDIO
+===================== */
+const music = new Audio(
+  "song.mp3"
+)
+music.loop = true
+music.preload = "auto"
+
+const vinyl = new Audio("vinyl.mp3")
+vinyl.loop = true
+vinyl.volume = 0.3
+
+function startAudio() {
+  if (vinyl.paused) vinyl.play().catch(() => {})
+  if (music.paused) music.play().catch(() => {})
+}
+
+function stopAudio() {
+  music.pause()
+  vinyl.pause()
+}
+
+/* =====================
+   TYPEWRITER
+===================== */
+const typewriterEl = document.getElementById("typewriter")
+const fullMessage = "Every moment with you feels like a dream I never want to wake up from. From the first time we met, I knew something was different. You make the ordinary feel magical, and every memory we share becomes my favorite one. This is my love letter to you, written in photos and heartbeats. Happy Valentine's Day, my Qaisara🤍"
+
+function updateTypewriter() {
+  const progress = scrollX / MAX_SCROLL
+  const chars = Math.floor(progress * fullMessage.length)
+  typewriterEl.textContent = fullMessage.slice(0, chars)
+  typewriterEl.scrollTop = typewriterEl.scrollHeight
+}
+
+/* =====================
+   LOADING LOGIC
+===================== */
+const loading = document.getElementById("loading")
+const loadingText = loading.querySelector(".loading-text")
+const loadingSpinner = loading.querySelector(".loading-spinner")
+const loadingEarphones = loading.querySelector(".loading-earphones")
+const loadingTap = loading.querySelector(".loading-tap")
+const viewport = document.getElementById("viewport")
+let audioReady = false
+
+function onAudioReady() {
+  if (audioReady) return
+  audioReady = true
+  loadingText.textContent = "ready!"
+  loadingText.style.animation = "none"
+  loadingText.style.opacity = "1"
+  loadingSpinner.style.animation = "none"
+  loadingEarphones.classList.add("show")
+  setTimeout(() => loadingTap.classList.add("show"), 600)
+}
+
+function hideLoading() {
+  if (loading.classList.contains("hidden")) return
+  // Unlock audio by playing & pausing — eliminates cold-start delay on crank
+  music.play().then(() => {
+    music.pause()
+    music.currentTime = 0
+  }).catch(() => {})
+  vinyl.play().then(() => {
+    vinyl.pause()
+    vinyl.currentTime = 0
+  }).catch(() => {})
+
+  loading.classList.add("hidden")
+  viewport.classList.add("ready")
+}
+
+// Preload music on page load
+music.load()
+
+// Wait for music to be fully loaded, then show "tap to start"
+music.addEventListener("canplaythrough", onAudioReady, { once: true })
+
+// Check if already loaded
+if (music.readyState >= 3) {
+  onAudioReady()
+}
+
+// Require a tap to start — this user gesture unlocks mobile audio
+loading.addEventListener("click", () => {
+  if (audioReady) hideLoading()
+})
+loading.addEventListener("touchend", (e) => {
+  if (audioReady) {
+    e.preventDefault()
+    hideLoading()
+  }
+})
+
+/* =====================
+   RESPONSIVE HELPERS
+===================== */
+function getResponsiveValues() {
+  const vw = window.innerWidth
+  const vh = window.innerHeight
+
+  // Card sizes based on screen width
+  let cardW, cardH, imageStep
+
+  if (vw < 375) {
+    cardW = 90
+    cardH = 110
+    imageStep = 120
+  } else if (vw < 414) {
+    cardW = 100
+    cardH = 120
+    imageStep = 140
+  } else if (vw < 480) {
+    cardW = 110
+    cardH = 130
+    imageStep = 150
+  } else {
+    cardW = 120
+    cardH = 140
+    imageStep = 160
+  }
+
+  // Letter dimensions based on CSS media queries
+  let letterW, letterH
+
+  if (vw < 375) {
+    letterW = Math.min(240, vw * 0.8)
+    letterH = vh < 600 ? 280 : 340
+  } else if (vw < 414) {
+    letterW = Math.min(250, vw * 0.75)
+    letterH = vh < 600 ? 300 : 360
+  } else if (vw < 480) {
+    letterW = Math.min(280, vw * 0.7)
+    letterH = vh < 600 ? 320 : 380
+  } else {
+    letterW = Math.min(320, vw * 0.6)
+    letterH = vh < 600 ? 340 : 400
+  }
+
+  // Short screen adjustments
+  if (vh < 500) {
+    letterH = Math.min(letterH, vh * 0.6)
+  } else if (vh < 600) {
+    letterH = Math.min(letterH, vh * 0.65)
+  }
+
+  // Photo size based on screen
+  let defaultPhotoSize
+  if (vw < 375) {
+    defaultPhotoSize = 40
+  } else if (vw < 480) {
+    defaultPhotoSize = 48
+  } else {
+    defaultPhotoSize = 56
+  }
+
+  return { cardW, cardH, imageStep, letterW, letterH, defaultPhotoSize, vw, vh }
+}
+
+/* =====================
+   INFINITE PLACEHOLDERS
+===================== */
+const world = document.getElementById("world")
+let IMAGE_STEP = getResponsiveValues().imageStep
+const BUFFER = 10
+
+const images = [
+  "images/1.jpeg",
+  "images/2.jpeg",
+  "images/3.jpeg",
+  "images/4.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.24.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.25 (1).jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.25.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.26 (1).jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.26.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.27 (1).jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.27.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.28 (1).jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.28.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.29 (1).jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.29 (2).jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.29.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.30 (1).jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.30.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.01.31.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.02.24.jpeg",
+  "images/WhatsApp Image 2026-02-02 at 20.02.25.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.06.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.07 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.07 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.07.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.08 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.08 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.08.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.09 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.09 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.09 (3).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.09.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.10 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.10 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.10.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.11 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.11 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.11.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.12 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.12 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.12 (3).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.12.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.13 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.13 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.13.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.14 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.14 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.14.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.15 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.15 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.15 (3).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.15.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.16 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.16 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.16.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.17 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.17 (2).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.17.jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.18 (1).jpeg",
+  "images/WhatsApp Image 2026-02-03 at 23.01.18.jpeg"
+]
+
+const FUTURE_CARDS = 5
+const TOTAL_CARDS = images.length + FUTURE_CARDS
+
+let cards = []
+let scrollX = 0
+const MAX_SCROLL = (TOTAL_CARDS - 1) * IMAGE_STEP
+
+function createCard(index) {
+  const el = document.createElement("div")
+  el.className = "memory"
+  el.style.left = `${index * IMAGE_STEP}px`
+
+  if (index < images.length) {
+    const img = images[index]
+    el.style.backgroundImage = `url('${img}')`
+  } else {
+    el.classList.add("future")
+    el.textContent = "yet to be made with you 🤍"
+  }
+
+  el.dataset.offsetY = (Math.random() * 40 - 20).toFixed(1)
+  el.dataset.rot = (Math.random() * 12 - 6).toFixed(1)
+  world.appendChild(el)
+  cards.push({ el, index })
+}
+
+function ensureCards() {
+  const centerIndex = Math.floor(scrollX / IMAGE_STEP)
+  const lo = Math.max(0, centerIndex - BUFFER)
+  const hi = Math.min(TOTAL_CARDS - 1, centerIndex + BUFFER)
+  for (let i = lo; i <= hi; i++) {
+    if (!cards.find(c => c.index === i)) {
+      createCard(i)
+    }
+  }
+}
+
+/* =====================
+   CRANK LOGIC WITH INERTIA
+===================== */
+const crank = document.getElementById("crank")
+const scene = document.querySelector(".scene")
+let isDragging = false
+let lastAngle = 0
+let center = { x:0, y:0 }
+
+// Inertia physics
+let velocity = 0
+let lastTime = 0
+let inertiaFrame = null
+const FRICTION = 0.95  // How quickly it slows down (0.95 = gentle, 0.85 = quick)
+const MIN_VELOCITY = 0.5  // Stop when velocity drops below this
+
+function updateCenter() {
+  const r = crank.getBoundingClientRect()
+  center.x = r.left + r.width / 2
+  center.y = r.top + r.height / 2
+}
+
+function angleFromPoint(x,y) {
+  return Math.atan2(y - center.y, x - center.x)
+}
+
+function applyScroll(amount) {
+  const oldScroll = scrollX
+  scrollX = Math.max(0, Math.min(MAX_SCROLL, scrollX + amount))
+  crank.style.transform = `rotate(${scrollX * 0.2}deg)`
+
+  if (scrollX !== oldScroll) {
+    ensureCards()
+    updateWorld()
+    updateTypewriter()
+    return true
+  }
+  return false
+}
+
+function inertiaLoop() {
+  if (isDragging) return
+
+  // Apply friction
+  velocity *= FRICTION
+
+  // Apply velocity to scroll
+  if (Math.abs(velocity) > MIN_VELOCITY) {
+    applyScroll(velocity)
+
+    // Fade audio volume based on velocity
+    const vol = Math.min(1, Math.abs(velocity) / 20)
+    music.volume = vol
+    vinyl.volume = vol * 0.3
+
+    inertiaFrame = requestAnimationFrame(inertiaLoop)
+  } else {
+    // Stopped - fade out audio smoothly
+    velocity = 0
+    fadeOutAudio()
+
+    // Check if reached the end
+    if (scrollX >= MAX_SCROLL - 50) {
+      showValentineScreen()
+    }
+  }
+}
+
+function fadeOutAudio() {
+  const fadeStep = () => {
+    if (isDragging) return // Stop fading if user grabbed crank again
+
+    music.volume = Math.max(0, music.volume - 0.05)
+    vinyl.volume = Math.max(0, vinyl.volume - 0.015)
+
+    if (music.volume > 0) {
+      requestAnimationFrame(fadeStep)
+    } else {
+      stopAudio()
+      music.volume = 1
+      vinyl.volume = 0.3
+    }
+  }
+  fadeStep()
+}
+
+crank.addEventListener("touchstart", e => {
+  isDragging = true
+  scene.classList.add("hidden")
+  updateCenter()
+
+  // Cancel any running inertia
+  if (inertiaFrame) {
+    cancelAnimationFrame(inertiaFrame)
+    inertiaFrame = null
+  }
+
+  const t = e.touches[0]
+  lastAngle = angleFromPoint(t.clientX, t.clientY)
+  lastTime = performance.now()
+  velocity = 0
+
+  // Restore volume and start audio immediately
+  music.volume = 1
+  vinyl.volume = 0.3
+  startAudio()
+})
+
+crank.addEventListener("touchmove", e => {
+  if (!isDragging) return
+
+  const t = e.touches[0]
+  const angle = angleFromPoint(t.clientX, t.clientY)
+  let delta = angle - lastAngle
+
+  if (delta > Math.PI) delta -= Math.PI * 2
+  if (delta < -Math.PI) delta += Math.PI * 2
+
+  const scrollDelta = delta * 120
+  applyScroll(scrollDelta)
+
+  // Track velocity for inertia
+  const now = performance.now()
+  const dt = now - lastTime
+  if (dt > 0) {
+    // Smooth velocity calculation
+    velocity = velocity * 0.7 + (scrollDelta / dt * 16) * 0.3
+  }
+
+  startAudio()
+
+  lastAngle = angle
+  lastTime = now
+})
+
+crank.addEventListener("touchend", () => {
+  isDragging = false
+
+  // Start inertia animation
+  if (Math.abs(velocity) > MIN_VELOCITY) {
+    inertiaFrame = requestAnimationFrame(inertiaLoop)
+  } else {
+    fadeOutAudio()
+
+    // Check if reached the end
+    if (scrollX >= MAX_SCROLL - 50) {
+      showValentineScreen()
+    }
+  }
+})
+
+function updateWorld() {
+  world.style.transform = `translate(${-scrollX}px, -50%)`
+  const centerView = scrollX + window.innerWidth / 2
+
+  cards.forEach(({ el, index }) => {
+    const cardCenter = index * IMAGE_STEP + IMAGE_STEP / 2
+    const dist = Math.abs(cardCenter - centerView)
+    const visible = dist < 240
+
+    el.classList.toggle("visible", visible)
+
+    el.style.transform = `
+      translateY(${el.dataset.offsetY}px)
+      rotate(${el.dataset.rot}deg)
+      scale(${visible ? 1 : 0.9})
+    `
+  })
+}
+
+// initial
+ensureCards()
+updateWorld()
+
+/* =====================
+   VALENTINE SCREEN
+===================== */
+const valentineScreen = document.getElementById("valentine-screen")
+const celebration = document.getElementById("celebration")
+const yesBtn = document.getElementById("yes-btn")
+const noBtn = document.getElementById("no-btn")
+
+let valentineShown = false
+
+function showValentineScreen() {
+  if (valentineShown) return
+  valentineShown = true
+
+  // Start playing music continuously
+  music.play()
+
+  // Fade out the main content and show valentine screen
+  setTimeout(() => {
+    valentineScreen.classList.add("show")
+  }, 500)
+}
+
+// Make No button run away
+function moveNoButton() {
+  const padding = 20
+  const btnWidth = noBtn.offsetWidth
+  const btnHeight = noBtn.offsetHeight
+  const maxX = window.innerWidth - btnWidth - padding
+  const maxY = window.innerHeight - btnHeight - padding
+
+  const newX = Math.random() * maxX
+  const newY = Math.random() * maxY
+
+  noBtn.style.left = newX + "px"
+  noBtn.style.top = newY + "px"
+}
+
+noBtn.addEventListener("touchstart", (e) => {
+  e.preventDefault()
+  moveNoButton()
+})
+
+noBtn.addEventListener("mouseenter", moveNoButton)
+noBtn.addEventListener("click", (e) => {
+  e.preventDefault()
+  moveNoButton()
+})
+
+// Yes button celebration
+function showCelebration() {
+  valentineScreen.classList.remove("show")
+  setTimeout(() => {
+    celebration.classList.add("show")
+    createPhotoFrame()
+    animateLetter()
+    createFloatingHearts()
+    createSparkles()
+  }, 400)
+}
+
+// Animate the love letter with GSAP
+function animateLetter() {
+  const letter = document.querySelector(".love-letter")
+
+  // Letter entrance
+  gsap.to(letter, {
+    opacity: 1,
+    scale: 1,
+    duration: 1,
+    delay: 0.5,
+    ease: "back.out(1.7)"
+  })
+
+  // Pulsing glow effect
+  gsap.to(letter, {
+    boxShadow: "0 15px 40px rgba(107,44,62,0.25), 0 4px 10px rgba(107,44,62,0.15), 0 0 50px rgba(255,182,193,0.5)",
+    duration: 1.5,
+    delay: 1.5,
+    repeat: -1,
+    yoyo: true,
+    ease: "sine.inOut"
+  })
+}
+
+// Create floating hearts with GSAP
+function createFloatingHearts() {
+  const container = document.getElementById("floating-hearts")
+  const hearts = ["💕", "💗", "💖", "💝", "🤍", "💓"]
+
+  // Create initial hearts with staggered delay
+  for (let i = 0; i < 15; i++) {
+    setTimeout(() => createHeart(container, hearts), i * 400)
+  }
+
+  // Keep creating hearts
+  setInterval(() => {
+    createHeart(container, hearts)
+  }, 800)
+}
+
+function createHeart(container, hearts) {
+  const heart = document.createElement("div")
+  heart.className = "floating-heart"
+  heart.textContent = hearts[Math.floor(Math.random() * hearts.length)]
+  heart.style.left = Math.random() * 100 + "%"
+  heart.style.fontSize = (16 + Math.random() * 16) + "px"
+  container.appendChild(heart)
+
+  const duration = 5 + Math.random() * 3
+
+  // GSAP animation
+  gsap.fromTo(heart,
+    {
+      y: 0,
+      rotation: 0,
+      scale: 0.5,
+      opacity: 0
+    },
+    {
+      y: -window.innerHeight - 100,
+      rotation: 360,
+      scale: 1,
+      opacity: 0.8,
+      duration: duration,
+      ease: "none",
+      onComplete: () => heart.remove()
+    }
+  )
+
+  // Fade out near the end
+  gsap.to(heart, {
+    opacity: 0,
+    duration: 1,
+    delay: duration - 1,
+    ease: "power2.in"
+  })
+}
+
+// Create sparkles with GSAP
+function createSparkles() {
+  const container = document.getElementById("sparkles")
+
+  // Create initial sparkles
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => createSparkle(container), i * 100)
+  }
+
+  // Keep creating sparkles
+  setInterval(() => {
+    if (container.children.length < 30) {
+      createSparkle(container)
+    }
+  }, 300)
+}
+
+function createSparkle(container) {
+  const sparkle = document.createElement("div")
+  sparkle.className = "sparkle"
+  sparkle.style.left = Math.random() * 100 + "%"
+  sparkle.style.top = Math.random() * 100 + "%"
+
+  // Vary sizes
+  const size = 4 + Math.random() * 6
+  sparkle.style.width = size + "px"
+  sparkle.style.height = size + "px"
+
+  container.appendChild(sparkle)
+
+  const duration = 1.5 + Math.random() * 1.5
+
+  // GSAP twinkle animation
+  gsap.fromTo(sparkle,
+    { scale: 0.5, opacity: 0 },
+    {
+      scale: 1,
+      opacity: 1,
+      duration: duration / 2,
+      ease: "sine.inOut",
+      yoyo: true,
+      repeat: 1,
+      onComplete: () => sparkle.remove()
+    }
+  )
+}
+
+yesBtn.addEventListener("click", showCelebration)
+yesBtn.addEventListener("touchend", (e) => {
+  e.preventDefault()
+  showCelebration()
+})
+
+// Photo frame around love letter
+const photoFrame = document.getElementById("photo-frame")
+
+// Slider controls
+const gapSlider = document.getElementById("gap-slider")
+const spacingSlider = document.getElementById("spacing-slider")
+const sizeSlider = document.getElementById("size-slider")
+const overlapSlider = document.getElementById("overlap-slider")
+const countSlider = document.getElementById("count-slider")
+const gapValue = document.getElementById("gap-value")
+const spacingValue = document.getElementById("spacing-value")
+const sizeValue = document.getElementById("size-value")
+const overlapValue = document.getElementById("overlap-value")
+const countValue = document.getElementById("count-value")
+
+function createPhotoFrame() {
+  // Clear existing photos
+  photoFrame.innerHTML = ""
+
+  // Get responsive values
+  const responsive = getResponsiveValues()
+  const vw = responsive.vw
+  const vh = responsive.vh
+
+  // Get values from sliders (use responsive default if slider hasn't been touched)
+  const baseSize = parseInt(sizeSlider.value) || responsive.defaultPhotoSize
+
+  // Border sizes also scale with screen
+  const borderSize = vw < 375 ? 3 : 4
+  const borderBottom = vw < 375 ? 14 : 18
+
+  const photoW = baseSize + (borderSize * 2)
+  const photoH = baseSize + borderSize + borderBottom
+  const gap = parseInt(gapSlider.value)
+  const spacing = parseInt(spacingSlider.value)
+  const messiness = parseInt(overlapSlider.value)
+  const photoCount = parseInt(countSlider.value)
+
+  // Get actual letter dimensions from DOM
+  const letterEl = document.querySelector(".love-letter")
+  let letterW, letterH, letterLeft, letterRight, letterTop, letterBottom
+
+  if (letterEl && letterEl.offsetWidth > 0) {
+    // getBoundingClientRect works even with opacity: 0
+    const letterRect = letterEl.getBoundingClientRect()
+    letterW = letterRect.width
+    letterH = letterRect.height
+    letterLeft = letterRect.left
+    letterRight = letterRect.right
+    letterTop = letterRect.top
+    letterBottom = letterRect.bottom
+  } else {
+    // Fallback to calculated values
+    letterW = responsive.letterW
+    letterH = responsive.letterH
+    letterLeft = (vw - letterW) / 2
+    letterRight = letterLeft + letterW
+    letterTop = (vh - letterH) / 2
+    letterBottom = letterTop + letterH
+  }
+
+  const positions = []
+
+  // Calculate step sizes - allow dense packing with overlap
+  const stepX = Math.max(photoW + spacing, photoW * 0.4)  // Min 40% overlap
+  const stepY = Math.max(photoH + spacing, photoH * 0.4)  // Min 40% overlap
+
+  // Left side - fill entire left area
+  for (let x = 0; x + photoW <= letterLeft - gap; x += stepX) {
+    for (let y = 0; y < vh - photoH; y += stepY) {
+      positions.push({ x: x, y: y, zone: 'left' })
+    }
+  }
+
+  // Right side - fill entire right area
+  for (let x = letterRight + gap; x + photoW <= vw; x += stepX) {
+    for (let y = 0; y < vh - photoH; y += stepY) {
+      positions.push({ x: x, y: y, zone: 'right' })
+    }
+  }
+
+  // Top area - above the letter (between left and right zones)
+  for (let y = 0; y + photoH <= letterTop - gap; y += stepY) {
+    for (let x = letterLeft; x + photoW <= letterRight; x += stepX) {
+      positions.push({ x: x, y: y, zone: 'top' })
+    }
+  }
+
+  // Bottom area - below the letter (between left and right zones)
+  for (let y = letterBottom + gap; y + photoH <= vh; y += stepY) {
+    for (let x = letterLeft; x + photoW <= letterRight; x += stepX) {
+      positions.push({ x: x, y: y, zone: 'bottom' })
+    }
+  }
+
+  // Corner areas (if not enough positions yet)
+  // Top-left corner
+  for (let x = 0; x + photoW <= letterLeft - gap; x += stepX) {
+    for (let y = 0; y + photoH <= letterTop - gap; y += stepY) {
+      if (!positions.some(p => p.x === x && p.y === y)) {
+        positions.push({ x: x, y: y, zone: 'corner-tl' })
+      }
+    }
+  }
+
+  // Top-right corner
+  for (let x = letterRight + gap; x + photoW <= vw; x += stepX) {
+    for (let y = 0; y + photoH <= letterTop - gap; y += stepY) {
+      if (!positions.some(p => p.x === x && p.y === y)) {
+        positions.push({ x: x, y: y, zone: 'corner-tr' })
+      }
+    }
+  }
+
+  // Bottom-left corner
+  for (let x = 0; x + photoW <= letterLeft - gap; x += stepX) {
+    for (let y = letterBottom + gap; y + photoH <= vh; y += stepY) {
+      if (!positions.some(p => p.x === x && p.y === y)) {
+        positions.push({ x: x, y: y, zone: 'corner-bl' })
+      }
+    }
+  }
+
+  // Bottom-right corner
+  for (let x = letterRight + gap; x + photoW <= vw; x += stepX) {
+    for (let y = letterBottom + gap; y + photoH <= vh; y += stepY) {
+      if (!positions.some(p => p.x === x && p.y === y)) {
+        positions.push({ x: x, y: y, zone: 'corner-br' })
+      }
+    }
+  }
+
+  // If still not enough positions, add more with tighter packing
+  if (positions.length < photoCount) {
+    const tightStepX = photoW * 0.3
+    const tightStepY = photoH * 0.3
+
+    // Add more positions around the edges with tighter spacing
+    for (let x = 0; x + photoW <= letterLeft - gap; x += tightStepX) {
+      for (let y = 0; y < vh - photoH; y += tightStepY) {
+        if (!positions.some(p => Math.abs(p.x - x) < tightStepX && Math.abs(p.y - y) < tightStepY)) {
+          positions.push({ x: x, y: y, zone: 'left' })
+        }
+        if (positions.length >= photoCount * 1.5) break
+      }
+      if (positions.length >= photoCount * 1.5) break
+    }
+
+    for (let x = letterRight + gap; x + photoW <= vw; x += tightStepX) {
+      for (let y = 0; y < vh - photoH; y += tightStepY) {
+        if (!positions.some(p => Math.abs(p.x - x) < tightStepX && Math.abs(p.y - y) < tightStepY)) {
+          positions.push({ x: x, y: y, zone: 'right' })
+        }
+        if (positions.length >= photoCount * 1.5) break
+      }
+      if (positions.length >= photoCount * 1.5) break
+    }
+  }
+
+  // Shuffle positions
+  positions.sort(() => Math.random() - 0.5)
+
+  // Place images (limited by count slider)
+  const imagesToShow = images.slice(0, photoCount)
+  imagesToShow.forEach((imgSrc, i) => {
+    if (i >= positions.length) return
+
+    const pos = positions[i]
+    const photo = document.createElement("div")
+    photo.className = "frame-photo"
+    photo.style.width = baseSize + "px"
+    photo.style.height = (baseSize * 1.3) + "px"
+    photo.style.backgroundImage = `url('${imgSrc}')`
+
+    // Add random offset based on messiness slider
+    let offsetX = (Math.random() * messiness * 2 - messiness)
+    let offsetY = (Math.random() * messiness * 2 - messiness)
+
+    // Clamp offsets so photos don't go under the letter
+    let finalX = pos.x + offsetX
+    let finalY = pos.y + offsetY
+
+    // Prevent photos from overlapping with the letter area
+    if (pos.zone === 'left' || pos.zone === 'corner-tl' || pos.zone === 'corner-bl') {
+      finalX = Math.min(finalX, letterLeft - photoW - 2)  // Stay left of letter
+    }
+    if (pos.zone === 'right' || pos.zone === 'corner-tr' || pos.zone === 'corner-br') {
+      finalX = Math.max(finalX, letterRight + 2)  // Stay right of letter
+    }
+    if (pos.zone === 'top' || pos.zone === 'corner-tl' || pos.zone === 'corner-tr') {
+      finalY = Math.min(finalY, letterTop - photoH - 2)  // Stay above letter
+    }
+    if (pos.zone === 'bottom' || pos.zone === 'corner-bl' || pos.zone === 'corner-br') {
+      finalY = Math.max(finalY, letterBottom + 2)  // Stay below letter
+    }
+
+    // Also clamp to screen edges
+    const edgeMargin = 5
+    finalX = Math.max(edgeMargin, Math.min(vw - photoW - edgeMargin, finalX))
+    finalY = Math.max(edgeMargin, Math.min(vh - photoH - edgeMargin, finalY))
+
+    photo.style.left = finalX + "px"
+    photo.style.top = finalY + "px"
+    photo.style.zIndex = i
+
+    // More rotation with more messiness
+    const rotationRange = 5 + (messiness / 2)
+    const rotation = (Math.random() * rotationRange * 2 - rotationRange).toFixed(1)
+
+    photoFrame.appendChild(photo)
+
+    // GSAP animation for each photo
+    gsap.fromTo(photo,
+      {
+        scale: 0.5,
+        rotation: 0,
+        opacity: 0
+      },
+      {
+        scale: 1,
+        rotation: rotation,
+        opacity: 1,
+        duration: 0.5,
+        delay: i * 0.05,  // Staggered entrance
+        ease: "back.out(1.4)"
+      }
+    )
+  })
+}
+
+// Slider event listeners
+gapSlider.addEventListener("input", () => {
+  gapValue.textContent = gapSlider.value
+  createPhotoFrame()
+})
+
+spacingSlider.addEventListener("input", () => {
+  spacingValue.textContent = spacingSlider.value
+  createPhotoFrame()
+})
+
+sizeSlider.addEventListener("input", () => {
+  sizeValue.textContent = sizeSlider.value
+  createPhotoFrame()
+})
+
+overlapSlider.addEventListener("input", () => {
+  overlapValue.textContent = overlapSlider.value
+  createPhotoFrame()
+})
+
+countSlider.addEventListener("input", () => {
+  countValue.textContent = countSlider.value >= 60 ? "All" : countSlider.value
+  createPhotoFrame()
+})
+
+// Toggle controls panel
+const controlsToggle = document.getElementById("controls-toggle")
+const controls = document.getElementById("controls")
+
+controlsToggle.addEventListener("click", () => {
+  controls.classList.toggle("visible")
+})
+
+// Default values are set in HTML (gap:0, spacing:3, size:61, messiness:36, count:60)
+
+// Handle resize / orientation change
+let resizeTimeout
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimeout)
+  resizeTimeout = setTimeout(() => {
+    // Update IMAGE_STEP for carousel
+    IMAGE_STEP = getResponsiveValues().imageStep
+
+    // Recreate cards with new sizes
+    cards.forEach(c => c.el.remove())
+    cards = []
+    ensureCards()
+    updateWorld()
+
+    // Recreate photo frame if celebration is showing
+    if (celebration.classList.contains("show")) {
+      createPhotoFrame()
+    }
+  }, 250)
+})
+</script>
+
+</body>
+</html>
