@@ -314,6 +314,8 @@
       font-size: 1.8rem;
       font-weight: 800;
       letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+      display: block;
     }
     .stat-label{ color: rgba(255,255,255,.65); font-size: .9rem; }
 
@@ -616,6 +618,21 @@
     @media (max-width: 420px){
       .hero h1{ font-size: 2.25rem; }
       .section{ padding: 56px 0; }
+    }
+
+    /* =========================================================
+       8) SCROLL REVEAL
+    ========================================================= */
+    [data-reveal]{
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity .75s cubic-bezier(.22,.61,.36,1),
+                  transform .75s cubic-bezier(.22,.61,.36,1);
+      transition-delay: var(--reveal-delay, 0ms);
+    }
+    [data-reveal].revealed{
+      opacity: 1;
+      transform: translateY(0);
     }
   </style>
 </head>
@@ -932,9 +949,7 @@
         <p>I'm always open to discussing new opportunities, collaborations, or just having a chat about AI and technology.</p>
 
         <div class="contact-info">
-          <div class="contact-item"><i class="fas fa-envelope"></i><span>tareqadam2002@gmail.com</span></div>
-          <div class="contact-item"><i class="fas fa-phone"></i><span>+60129218586</span></div>
-          <div class="contact-item"><i class="fas fa-map-marker-alt"></i><span>Petaling Jaya, Selangor</span></div>
+          <div class="contact-item"><i class="fas fa-envelope"></i><a href="mailto:tareqadam2002@gmail.com">My Email</a></div>
           <div class="contact-item">
             <i class="fab fa-linkedin"></i>
             <a href="https://www.linkedin.com/in/muhammad-tareq-adam-ellias-780274260/" target="_blank" rel="noreferrer">LinkedIn Profile</a>
@@ -1362,6 +1377,180 @@
     if (!isMobile && !isTouch) {
       addTilt(".skill-card", 14, -8);
       addTilt(".project-card", 18, -10);
+    }
+
+    /* =========================================================
+       FEATURE 1: SCROLL REVEAL (IntersectionObserver)
+    ========================================================= */
+    (function() {
+      // Section titles
+      document.querySelectorAll('.section-title').forEach(el => {
+        el.dataset.reveal = '1';
+      });
+      // About cards with stagger
+      document.querySelectorAll('.about-grid > .glass-card').forEach((el, i) => {
+        el.dataset.reveal = '1';
+        el.style.setProperty('--reveal-delay', (i * 130) + 'ms');
+      });
+      // Experience items with stagger
+      document.querySelectorAll('.experience-item').forEach((el, i) => {
+        el.dataset.reveal = '1';
+        el.style.setProperty('--reveal-delay', (i * 90) + 'ms');
+      });
+      // Skills + Projects grids as a whole
+      document.querySelectorAll('.skills-grid, .projects-grid').forEach(el => {
+        el.dataset.reveal = '1';
+      });
+      // Contact info
+      const contactInfo = document.querySelector('.contact-info');
+      if (contactInfo) contactInfo.dataset.reveal = '1';
+      // Contact text
+      const contactP = document.querySelector('.contact p');
+      if (contactP) contactP.dataset.reveal = '1';
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+    })();
+
+    /* =========================================================
+       FEATURE 2: ANIMATED STAT COUNTERS
+    ========================================================= */
+    (function() {
+      const statEls = document.querySelectorAll('.stat-number');
+      let triggered = false;
+
+      const stats = Array.from(statEls).map(el => {
+        const raw = el.textContent.trim();
+        const suffix = raw.replace(/[\d.]/g, '');
+        const value = parseFloat(raw);
+        const decimals = (raw.indexOf('.') >= 0)
+          ? raw.split('.')[1].replace(/\D/g,'').length
+          : 0;
+        // Pad initial to same digit count so layout never shifts
+        const intDigits = Math.floor(value).toString().length;
+        const initInt = '0'.repeat(intDigits);
+        el.textContent = decimals > 0
+          ? initInt + '.' + '0'.repeat(decimals)
+          : initInt + suffix;
+        return { el, value, suffix, decimals };
+      });
+
+      function runCounters() {
+        if (triggered) return;
+        triggered = true;
+        const duration = 600;
+        const start = performance.now();
+        function tick(now) {
+          const elapsed = now - start;
+          const t = Math.min(elapsed / duration, 1);
+          const ease = 1 - Math.pow(1 - t, 3); // easeOutCubic
+          stats.forEach(({ el, value, suffix, decimals }) => {
+            const cur = value * ease;
+            el.textContent = decimals > 0
+              ? cur.toFixed(decimals)
+              : Math.round(cur) + suffix;
+          });
+          if (t < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      }
+
+      const statsContainer = document.querySelector('.stats');
+      if (statsContainer) {
+        const obs = new IntersectionObserver(entries => {
+          if (entries[0].isIntersecting) { runCounters(); obs.disconnect(); }
+        }, { threshold: 0.4 });
+        obs.observe(statsContainer);
+      }
+    })();
+
+    /* =========================================================
+       FEATURE 3: TEXT SCRAMBLE — HERO NAME
+    ========================================================= */
+    (function() {
+      const CHARS = '!<>-_\\/[]{}=+*^?#@$%&';
+
+      function scramble(el, finalText, totalDuration) {
+        const frames = Math.ceil(totalDuration / 40);
+        let frame = 0;
+        const queue = finalText.split('').map(ch => ({
+          ch,
+          start: Math.floor(Math.random() * frames * 0.35),
+          end:   Math.floor(frames * 0.35) + Math.floor(Math.random() * frames * 0.65),
+          cur: '',
+        }));
+
+        function tick() {
+          let out = '';
+          let done = 0;
+          queue.forEach(item => {
+            if (frame >= item.end) {
+              out += item.ch === ' ' ? ' ' : item.ch;
+              done++;
+            } else if (frame >= item.start) {
+              if (!item.cur || Math.random() < 0.28) {
+                item.cur = item.ch === ' ' ? ' '
+                  : CHARS[Math.floor(Math.random() * CHARS.length)];
+              }
+              out += `<span class="dud">${item.cur}</span>`;
+            } else {
+              out += item.ch === ' ' ? ' '
+                : `<span class="dud">${CHARS[Math.floor(Math.random() * CHARS.length)]}</span>`;
+            }
+          });
+          el.innerHTML = out;
+          frame++;
+          if (done < queue.length) requestAnimationFrame(tick);
+          else el.textContent = finalText; // clean finish
+        }
+        tick();
+      }
+
+      window.addEventListener('load', () => {
+        const h1 = document.querySelector('.hero h1');
+        if (h1) {
+          const original = h1.textContent.trim();
+          setTimeout(() => scramble(h1, original, 1600), 350);
+        }
+      });
+    })();
+
+    /* =========================================================
+       FEATURE 4: MAGNETIC BUTTONS
+    ========================================================= */
+    if (!isTouch) {
+      document.querySelectorAll('.btn').forEach(btn => {
+        let raf;
+
+        btn.addEventListener('mouseenter', () => {
+          btn.style.transition = 'transform 0.08s ease, border-color .2s ease, background .2s ease';
+        });
+
+        btn.addEventListener('mousemove', e => {
+          cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(() => {
+            const r = btn.getBoundingClientRect();
+            const dx = e.clientX - (r.left + r.width  / 2);
+            const dy = e.clientY - (r.top  + r.height / 2);
+            btn.style.transform = `translate(${dx * 0.32}px, ${dy * 0.32}px) translateY(-2px)`;
+          });
+        });
+
+        btn.addEventListener('mouseleave', () => {
+          cancelAnimationFrame(raf);
+          btn.style.transition = 'transform 0.5s cubic-bezier(.175,.885,.32,1.275), border-color .2s ease, background .2s ease';
+          btn.style.transform = 'translate(0,0)';
+          setTimeout(() => { btn.style.transition = ''; }, 500);
+        });
+      });
     }
   </script>
 </body>
