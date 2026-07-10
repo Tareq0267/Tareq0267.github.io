@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diyah's Interview Helper</title>
+  <style>
+    :root {
+      --bg: #fffaf4;
+      --card: rgba(255, 255, 255, 0.92);
+      --ink: #2f3a36;
+      --muted: #748079;
+      --primary: #6aa78c;
+      --primary-dark: #4d826d;
+      --peach: #ffbd9b;
+      --yellow: #f6d878;
+      --lilac: #c9b7e8;
+      --danger: #e57d7d;
+      --line: #e8e5df;
+      --shadow: 0 18px 50px rgba(76, 91, 82, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-rounded, "SF Pro Rounded", "Segoe UI", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255, 189, 155, .22), transparent 28%),
+        radial-gradient(circle at 88% 12%, rgba(201, 183, 232, .24), transparent 28%),
+        radial-gradient(circle at 72% 88%, rgba(106, 167, 140, .18), transparent 26%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    .blob {
+      position: fixed;
+      border-radius: 999px;
+      filter: blur(2px);
+      opacity: .6;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .blob.one { width: 170px; height: 170px; background: #ffd7c3; top: -60px; left: -50px; }
+    .blob.two { width: 130px; height: 130px; background: #ddd0f3; right: -35px; top: 110px; }
+    .blob.three { width: 110px; height: 110px; background: #cfe8da; left: 7%; bottom: -30px; }
+
+    .app-shell {
+      position: relative;
+      z-index: 1;
+      width: min(980px, calc(100% - 28px));
+      margin: 0 auto;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 34px 0;
+    }
+
+    .panel {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,.9);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+
+    .setup {
+      display: grid;
+      grid-template-columns: .85fr 1.15fr;
+      min-height: 660px;
+    }
+
+    .hero {
+      padding: 44px;
+      background: linear-gradient(160deg, #f5fff9 0%, #fff8ed 100%);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 28px;
+    }
+
+    .mascot {
+      width: 94px;
+      height: 94px;
+      border-radius: 30px;
+      display: grid;
+      place-items: center;
+      font-size: 46px;
+      background: #fff;
+      box-shadow: 0 14px 30px rgba(78, 117, 98, .14);
+      transform: rotate(-4deg);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: .98;
+      letter-spacing: -2.2px;
+      margin: 24px 0 18px;
+    }
+
+    .hero h1 span { color: var(--primary-dark); }
+    .hero p { color: var(--muted); line-height: 1.65; font-size: 16px; }
+
+    .mini-note {
+      border: 1px dashed #b8d5c6;
+      background: rgba(255,255,255,.74);
+      border-radius: 18px;
+      padding: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .form-area { padding: 40px; }
+    .form-area h2 { margin-bottom: 8px; font-size: 28px; }
+    .form-area > p { color: var(--muted); margin-bottom: 28px; }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: #627068;
+      margin-bottom: 10px;
+    }
+
+    .difficulty-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .difficulty-card {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 17px;
+      padding: 15px 12px;
+      text-align: left;
+      transition: .2s ease;
+      position: relative;
+    }
+    .difficulty-card:hover { transform: translateY(-2px); }
+    .difficulty-card.active { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(106, 167, 140, .12); }
+    .difficulty-card strong { display: block; margin-bottom: 5px; }
+    .difficulty-card small { color: var(--muted); }
+    .difficulty-card .dot {
+      width: 10px; height: 10px; border-radius: 50%; position: absolute; right: 12px; top: 12px;
+    }
+    .easy .dot { background: var(--primary); }
+    .medium .dot { background: var(--yellow); }
+    .hard .dot { background: var(--danger); }
+
+    .category-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 24px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 10px 13px;
+      color: #5c6761;
+      transition: .18s ease;
+    }
+    .chip.active {
+      background: #edf8f2;
+      border-color: #9fc8b5;
+      color: var(--primary-dark);
+      font-weight: 700;
+    }
+
+    .controls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .select-like {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 14px;
+      background: #fff;
+    }
+    .select-like label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    .select-like select { width: 100%; border: 0; outline: 0; color: var(--ink); background: transparent; font-weight: 700; }
+
+    .start-btn, .next-btn, .secondary-btn {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-weight: 800;
+      transition: .2s ease;
+    }
+    .start-btn, .next-btn {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 10px 24px rgba(106, 167, 140, .24);
+    }
+    .start-btn { width: 100%; font-size: 16px; }
+    .start-btn:hover, .next-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .secondary-btn { background: #f4f3ef; color: #5e6862; }
+
+    .interview { display: none; padding: 28px; min-height: 650px; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+    }
+    .brand-icon {
+      width: 44px; height: 44px; border-radius: 15px; display: grid; place-items: center; background: #eef8f3; font-size: 23px;
+    }
+
+    .progress-wrap { min-width: 240px; text-align: right; }
+    .progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 7px; }
+    .progress-bar { height: 8px; border-radius: 99px; background: #eceeea; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--primary), #96c7b0); transition: width .35s ease; }
+
+    .question-stage {
+      min-height: 505px;
+      border: 1px solid var(--line);
+      border-radius: 25px;
+      background: linear-gradient(180deg, #ffffff 0%, #fffcf8 100%);
+      padding: clamp(24px, 5vw, 50px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .question-stage::after {
+      content: "";
+      width: 210px; height: 210px; border-radius: 50%; background: rgba(201, 183, 232, .12); position: absolute; right: -80px; bottom: -100px;
+    }
+
+    .stage-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; position: relative; z-index: 1; }
+    .category-badge {
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #fff0e8;
+      color: #a05e3d;
+    }
+
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-variant-numeric: tabular-nums;
+      font-weight: 900;
+      color: var(--primary-dark);
+      background: #eef8f3;
+      border-radius: 999px;
+      padding: 8px 12px;
+    }
+    .timer.warning { color: #9f6d12; background: #fff6d7; }
+    .timer.danger { color: #a64e4e; background: #ffecec; animation: pulse .9s infinite; }
+
+    @keyframes pulse { 50% { transform: scale(1.04); } }
+
+    .question-content { display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 1; }
+    .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: 12px; font-weight: 900; color: var(--primary); margin-bottom: 14px; }
+    .question-en { font-size: clamp(28px, 4vw, 45px); line-height: 1.15; letter-spacing: -1.2px; margin-bottom: 18px; max-width: 790px; }
+    .question-ms { color: var(--muted); font-size: clamp(17px, 2vw, 21px); line-height: 1.55; max-width: 760px; margin-bottom: 0; }
+
+    .listening-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--line);
+      padding-top: 20px;
+    }
+
+    .fake-listener { display: flex; align-items: center; gap: 12px; color: #5f6c65; font-weight: 700; }
+    .mic-dot { width: 42px; height: 42px; border-radius: 50%; background: #f0f8f4; display: grid; place-items: center; }
+    .bars { display: flex; align-items: center; gap: 3px; height: 22px; }
+    .bars span { width: 3px; border-radius: 9px; background: var(--primary); animation: sound 1s ease-in-out infinite; }
+    .bars span:nth-child(1) { height: 7px; animation-delay: -.1s; }
+    .bars span:nth-child(2) { height: 15px; animation-delay: -.35s; }
+    .bars span:nth-child(3) { height: 21px; animation-delay: -.2s; }
+    .bars span:nth-child(4) { height: 11px; animation-delay: -.55s; }
+    .bars span:nth-child(5) { height: 18px; animation-delay: -.4s; }
+    @keyframes sound { 0%,100% { transform: scaleY(.45); opacity: .55; } 50% { transform: scaleY(1); opacity: 1; } }
+
+    .listener-copy small { display: block; color: #98a09b; font-weight: 500; margin-top: 3px; }
+
+    .button-row { display: flex; gap: 10px; }
+    .next-btn { min-width: 150px; }
+
+    .complete { display: none; text-align: center; padding: 60px 30px; min-height: 640px; place-items: center; }
+    .complete-inner { max-width: 520px; margin: 0 auto; }
+    .complete-emoji { font-size: 72px; margin-bottom: 14px; }
+    .complete h2 { font-size: 38px; margin-bottom: 12px; }
+    .complete p { color: var(--muted); line-height: 1.65; }
+    .summary-card { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 28px 0; }
+    .summary-item { background: #faf9f6; border: 1px solid var(--line); border-radius: 16px; padding: 16px 10px; }
+    .summary-item strong { display: block; font-size: 22px; margin-bottom: 4px; }
+    .summary-item span { color: var(--muted); font-size: 12px; }
+
+    .footer-note { text-align: center; color: #989f9b; font-size: 11px; margin-top: 14px; }
+
+    @media (max-width: 780px) {
+      .setup { grid-template-columns: 1fr; }
+      .hero { border-right: 0; border-bottom: 1px solid var(--line); padding: 30px; }
+      .hero h1 { font-size: 42px; }
+      .mascot { width: 74px; height: 74px; font-size: 38px; }
+      .form-area { padding: 28px; }
+      .topbar { align-items: flex-start; }
+      .progress-wrap { min-width: 160px; }
+      .question-stage { padding: 25px; min-height: 530px; }
+      .listening-row { align-items: flex-end; }
+      .listener-copy { display: none; }
+    }
+
+    @media (max-width: 520px) {
+      .app-shell { width: min(100% - 16px, 980px); padding: 8px 0; }
+      .panel { border-radius: 22px; }
+      .difficulty-grid { grid-template-columns: 1fr; }
+      .controls-row { grid-template-columns: 1fr; }
+      .interview { padding: 13px; }
+      .topbar { display: block; }
+      .progress-wrap { margin-top: 14px; width: 100%; }
+      .stage-meta { align-items: flex-start; }
+      .question-en { font-size: 29px; }
+      .listening-row { flex-direction: column; align-items: stretch; }
+      .button-row { width: 100%; }
+      .button-row button { flex: 1; }
+      .summary-card { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob one"></div>
+  <div class="blob two"></div>
+  <div class="blob three"></div>
+
+  <main class="app-shell">
+    <section class="panel" id="appPanel">
+      <div class="setup" id="setupScreen">
+        <aside class="hero">
+          <div>
+            <div class="mascot">🧸</div>
+            <h1>Ready, <span>Teacher Diyah?</span></h1>
+            <p>A calm little practice room for your preschool teacher interview. Answer aloud, take your time, then move to the next question.</p>
+          </div>
+        </aside>
+
+        <div class="form-area">
+          <h2>Set up your mock interview</h2>
+          <p>Choose the difficulty and the sections you want to practise.</p>
+
+          <span class="field-label">Difficulty</span>
+          <div class="difficulty-grid" id="difficultyGrid">
+            <button class="difficulty-card easy active" data-level="easy" type="button">
+              <span class="dot"></span>
+              <strong>Easy</strong>
+              <small>90 sec · gentle</small>
+            </button>
+            <button class="difficulty-card medium" data-level="medium" type="button">
+              <span class="dot"></span>
+              <strong>Medium</strong>
+              <small>60 sec · balanced</small>
+            </button>
+            <button class="difficulty-card hard" data-level="hard" type="button">
+              <span class="dot"></span>
+              <strong>Hard</strong>
+              <small>45 sec · fast-paced</small>
+            </button>
+          </div>
+
+          <span class="field-label">Interview sections</span>
+          <div class="category-grid" id="categoryGrid"></div>
+
+          <div class="controls-row">
+            <div class="select-like">
+              <label for="questionCount">Question count</label>
+              <select id="questionCount">
+                <option value="8">8 questions</option>
+                <option value="10" selected>10 questions</option>
+                <option value="12">12 questions</option>
+                <option value="15">15 questions</option>
+              </select>
+            </div>
+            <div class="select-like">
+              <label for="languageMode">Question display</label>
+              <select id="languageMode">
+                <option value="both" selected>English + Malay</option>
+                <option value="en">English only</option>
+                <option value="ms">Malay only</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="start-btn" id="startBtn" type="button">Start mock interview ✨</button>
+          <div class="footer-note">Demo mode only. No microphone access or audio recording is used.</div>
+        </div>
+      </div>
+
+      <div class="interview" id="interviewScreen">
+        <div class="topbar">
+          <div class="brand">
+            <div class="brand-icon">🌼</div>
+            <div>
+              <div id="brandName">Diyah's Interview Helper</div>
+              <small style="color: var(--muted); font-weight: 600;">Preschool Interview Practice</small>
+            </div>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-meta">
+              <span id="progressText">Question 1 of 10</span>
+              <span id="difficultyText">Easy mode</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+          </div>
+        </div>
+
+        <div class="question-stage">
+          <div class="stage-meta">
+            <div class="category-badge" id="categoryBadge">About You</div>
+            <div class="timer" id="timer">⏱ 01:30</div>
+          </div>
+
+          <div class="question-content">
+            <div class="eyebrow" id="questionEyebrow">Interview question</div>
+            <h2 class="question-en" id="questionEn"></h2>
+            <p class="question-ms" id="questionMs"></p>
+          </div>
+
+          <div class="listening-row">
+            <div class="fake-listener">
+              <div class="mic-dot">🎙️</div>
+              <div class="bars" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+              <div class="listener-copy">Listening to your answer…<small>Practice simulation only</small></div>
+            </div>
+            <div class="button-row">
+              <button class="secondary-btn" id="restartBtn" type="button">Restart</button>
+              <button class="next-btn" id="nextBtn" type="button">Next question →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="complete" id="completeScreen">
+        <div class="complete-inner">
+          <div class="complete-emoji">🎉</div>
+          <h2>Well done, <span id="completeName">Teacher Diyah</span>!</h2>
+          <p>You completed the mock interview. Take a short break, then try again with a higher difficulty or a different mix of sections.</p>
+          <div class="summary-card">
+            <div class="summary-item"><strong id="summaryQuestions">10</strong><span>Questions</span></div>
+            <div class="summary-item"><strong id="summaryDifficulty">Easy</strong><span>Difficulty</span></div>
+            <div class="summary-item"><strong id="summaryMinutes">15m</strong><span>Practice time</span></div>
+          </div>
+          <button class="start-btn" id="againBtn" type="button">Practise again 🌷</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const categories = [
+      { id: "teaching", label: "Teaching & Activities" },
+      { id: "behaviour", label: "Child Behaviour" },
+      { id: "safety", label: "Safety & Emergencies" },
+      { id: "parents", label: "Parents & Teamwork" },
+      { id: "situational", label: "Situational Questions" },
+      { id: "career", label: "Career & Practical" }
+    ];
+
+    const questionBank = {
+      intro: [
+        { en: "Can you tell us a little about yourself?", ms: "Boleh ceritakan sedikit tentang diri anda?", category: "About You" },
+        { en: "Why do you want to become a preschool teacher?", ms: "Mengapa anda mahu menjadi guru prasekolah?", category: "About You" },
+        { en: "What experience do you have working with children?", ms: "Apakah pengalaman anda bekerja dengan kanak-kanak?", category: "Work Experience", key: "work-experience" }
+      ],
+      kemas: [
+        { en: "You completed an internship at TABIKA KEMAS. What were your main responsibilities there?", ms: "Anda pernah menjalani latihan industri di TABIKA KEMAS. Apakah tanggungjawab utama anda di sana?", category: "TABIKA KEMAS" },
+        { en: "What was the most valuable lesson you learned during your internship at TABIKA KEMAS?", ms: "Apakah pengalaman atau pengajaran paling berharga yang anda peroleh semasa latihan industri di TABIKA KEMAS?", category: "TABIKA KEMAS" },
+        { en: "Can you describe one activity you helped conduct at TABIKA KEMAS and how the children responded?", ms: "Boleh terangkan satu aktiviti yang anda bantu jalankan di TABIKA KEMAS dan bagaimana kanak-kanak memberi respons?", category: "TABIKA KEMAS" },
+        { en: "Did you face any challenges at TABIKA KEMAS, and how did you handle them?", ms: "Adakah anda menghadapi sebarang cabaran di TABIKA KEMAS, dan bagaimana anda mengatasinya?", category: "TABIKA KEMAS" }
+      ],
+      teaching: [
+        { en: "How do you plan learning activities for preschool children?", ms: "Bagaimanakah anda merancang aktiviti pembelajaran untuk kanak-kanak prasekolah?" },
+        { en: "How do you make learning fun and engaging?", ms: "Bagaimanakah anda menjadikan pembelajaran menyeronokkan dan menarik?" },
+        { en: "Give an example of an activity suitable for children aged four to six.", ms: "Berikan contoh aktiviti yang sesuai untuk kanak-kanak berumur empat hingga enam tahun." },
+        { en: "How would you teach children with different learning abilities?", ms: "Bagaimanakah anda mengajar kanak-kanak yang mempunyai tahap pembelajaran berbeza?" },
+        { en: "What is your opinion on learning through play?", ms: "Apakah pendapat anda tentang pembelajaran melalui bermain?" },
+        { en: "How would you encourage language and communication development?", ms: "Bagaimanakah anda menggalakkan perkembangan bahasa dan komunikasi kanak-kanak?" },
+        { en: "Are you comfortable singing, storytelling, and leading movement activities?", ms: "Adakah anda selesa menyanyi, bercerita dan menjalankan aktiviti pergerakan bersama kanak-kanak?" }
+      ],
+      behaviour: [
+        { en: "How would you handle a child who is crying or having a tantrum?", ms: "Bagaimanakah anda mengendalikan kanak-kanak yang menangis atau mengamuk?" },
+        { en: "What would you do if a child refused to follow instructions?", ms: "Apakah yang anda akan lakukan jika seorang kanak-kanak enggan mengikuti arahan?" },
+        { en: "How would you manage a child who hits other children?", ms: "Bagaimanakah anda menguruskan kanak-kanak yang suka memukul kanak-kanak lain?" },
+        { en: "How would you resolve a disagreement between two children?", ms: "Bagaimanakah anda menyelesaikan perselisihan antara dua orang kanak-kanak?" },
+        { en: "What discipline approach would you use in a preschool classroom?", ms: "Apakah pendekatan disiplin yang anda gunakan dalam kelas prasekolah?" },
+        { en: "How would you support a shy child who finds it difficult to socialise?", ms: "Bagaimanakah anda membantu kanak-kanak yang pemalu dan sukar bergaul?" }
+      ],
+      safety: [
+        { en: "How do you make sure the classroom is safe at all times?", ms: "Bagaimanakah anda memastikan kelas sentiasa selamat?" },
+        { en: "What would you do if a child fell and was injured?", ms: "Apakah yang anda akan lakukan jika seorang kanak-kanak terjatuh dan cedera?" },
+        { en: "What would you do if a child developed a fever during class?", ms: "Apakah yang anda akan lakukan jika seorang kanak-kanak demam semasa kelas?" },
+        { en: "How do you make sure every child remains properly supervised?", ms: "Bagaimanakah anda memastikan setiap kanak-kanak sentiasa berada di bawah pengawasan?" },
+        { en: "What basic first-aid knowledge do you have?", ms: "Apakah pengetahuan asas pertolongan cemas yang anda miliki?" }
+      ],
+      parents: [
+        { en: "How would you communicate a child's progress to their parents?", ms: "Bagaimanakah anda berkomunikasi dengan ibu bapa mengenai perkembangan anak mereka?" },
+        { en: "How would you handle an upset parent or a complaint?", ms: "Bagaimanakah anda mengendalikan ibu bapa yang marah atau membuat aduan?" },
+        { en: "What would you do if a parent disagreed with the way you handled their child?", ms: "Apakah yang anda akan lakukan jika ibu bapa tidak bersetuju dengan cara anda mengendalikan anak mereka?" },
+        { en: "How do you work effectively with other teachers and assistants?", ms: "Bagaimanakah anda bekerja dengan berkesan bersama guru dan pembantu lain?" },
+        { en: "How do you respond to feedback from a supervisor?", ms: "Bagaimanakah anda menerima maklum balas daripada penyelia?" }
+      ],
+      situational: [
+        { en: "If the classroom became too noisy, what would you do?", ms: "Jika kelas menjadi terlalu bising, apakah yang anda akan lakukan?" },
+        { en: "A child keeps crying after their parent leaves. How would you comfort them?", ms: "Seorang kanak-kanak terus menangis selepas ibu bapanya pulang. Bagaimanakah anda menenangkannya?" },
+        { en: "Two children want the same toy. How would you handle the situation?", ms: "Dua orang kanak-kanak mahukan permainan yang sama. Bagaimanakah anda mengendalikan keadaan itu?" },
+        { en: "The children are not interested in your planned activity. What would you do next?", ms: "Kanak-kanak tidak berminat dengan aktiviti yang anda rancang. Apakah yang anda akan lakukan seterusnya?" },
+        { en: "How would you support a child with additional learning needs?", ms: "Bagaimanakah anda membantu kanak-kanak yang mempunyai keperluan pembelajaran tambahan?" },
+        { en: "A child refuses to eat or rest. How would you respond?", ms: "Seorang kanak-kanak enggan makan atau berehat. Bagaimanakah anda bertindak?" }
+      ],
+      career: [
+        { en: "Why are you interested in working at this preschool?", ms: "Mengapa anda berminat untuk bekerja di prasekolah ini?" },
+        { en: "What are your strengths and weaknesses as a teacher?", ms: "Apakah kekuatan dan kelemahan anda sebagai seorang guru?" },
+        { en: "Where do you see yourself in three to five years?", ms: "Di manakah anda melihat diri anda dalam tempoh tiga hingga lima tahun?" },
+        { en: "Are you comfortable helping with meals, cleaning, or changing children's clothes when needed?", ms: "Adakah anda selesa membantu menyediakan makanan, membersihkan kelas atau menukar pakaian kanak-kanak apabila diperlukan?" },
+        { en: "When would you be available to start work?", ms: "Bilakah anda boleh mula bekerja?" },
+        { en: "What are your salary expectations?", ms: "Berapakah jangkaan gaji anda?" },
+        { en: "Do you have any questions for us?", ms: "Adakah anda mempunyai sebarang soalan untuk kami?" }
+      ]
+    };
+
+    const categoryLabels = Object.fromEntries(categories.map(item => [item.id, item.label]));
+    const levelSettings = {
+      easy: { seconds: 90, kemasCount: 1 },
+      medium: { seconds: 60, kemasCount: 2 },
+      hard: { seconds: 45, kemasCount: 3 }
+    };
+
+    let selectedLevel = "easy";
+    let selectedCategories = new Set(categories.map(c => c.id));
+    let interviewQuestions = [];
+    let currentIndex = 0;
+    let timeLeft = 90;
+    let timerId = null;
+    let languageMode = "both";
+    let startedAt = null;
+
+    const setupScreen = document.getElementById("setupScreen");
+    const interviewScreen = document.getElementById("interviewScreen");
+    const completeScreen = document.getElementById("completeScreen");
+    const categoryGrid = document.getElementById("categoryGrid");
+
+    function renderCategoryChips() {
+      categoryGrid.innerHTML = "";
+      categories.forEach(category => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "chip active";
+        button.dataset.category = category.id;
+        button.textContent = category.label;
+        button.addEventListener("click", () => {
+          if (selectedCategories.has(category.id)) {
+            if (selectedCategories.size === 1) return;
+            selectedCategories.delete(category.id);
+            button.classList.remove("active");
+          } else {
+            selectedCategories.add(category.id);
+            button.classList.add("active");
+          }
+        });
+        categoryGrid.appendChild(button);
+      });
+    }
+
+    function shuffle(array) {
+      const copy = [...array];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function buildQuestionSequence(total) {
+      const sequence = questionBank.intro.map(q => ({ ...q }));
+
+      const kemasQuestions = shuffle(questionBank.kemas)
+        .slice(0, levelSettings[selectedLevel].kemasCount)
+        .map(q => ({ ...q }));
+
+      // KEMAS follow-ups are deliberately inserted immediately after work experience.
+      sequence.push(...kemasQuestions);
+
+      const available = [];
+      selectedCategories.forEach(categoryId => {
+        questionBank[categoryId].forEach(q => available.push({
+          ...q,
+          category: categoryLabels[categoryId]
+        }));
+      });
+
+      const remainingSlots = Math.max(0, total - sequence.length);
+      sequence.push(...shuffle(available).slice(0, remainingSlots));
+      return sequence.slice(0, total);
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60).toString().padStart(2, "0");
+      const secs = (seconds % 60).toString().padStart(2, "0");
+      return `${mins}:${secs}`;
+    }
+
+    function updateTimerDisplay() {
+      const timer = document.getElementById("timer");
+      timer.textContent = `⏱ ${formatTime(timeLeft)}`;
+      timer.classList.remove("warning", "danger");
+      if (timeLeft <= 10) timer.classList.add("danger");
+      else if (timeLeft <= 20) timer.classList.add("warning");
+    }
+
+    function startQuestionTimer() {
+      clearInterval(timerId);
+      timeLeft = levelSettings[selectedLevel].seconds;
+      updateTimerDisplay();
+      timerId = setInterval(() => {
+        if (timeLeft > 0) {
+          timeLeft -= 1;
+          updateTimerDisplay();
+        } else {
+          clearInterval(timerId);
+          document.getElementById("timer").textContent = "⏱ Time's up";
+        }
+      }, 1000);
+    }
+
+    function renderQuestion() {
+      const question = interviewQuestions[currentIndex];
+      const total = interviewQuestions.length;
+      const progress = ((currentIndex + 1) / total) * 100;
+
+      document.getElementById("progressText").textContent = `Question ${currentIndex + 1} of ${total}`;
+      document.getElementById("progressFill").style.width = `${progress}%`;
+      document.getElementById("categoryBadge").textContent = question.category;
+      document.getElementById("questionEyebrow").textContent = question.category === "TABIKA KEMAS" ? "A follow-up on your experience" : "Interview question";
+      document.getElementById("questionEn").textContent = question.en;
+      document.getElementById("questionMs").textContent = question.ms;
+      document.getElementById("nextBtn").textContent = currentIndex === total - 1 ? "Finish interview ✓" : "Next question →";
+
+      const en = document.getElementById("questionEn");
+      const ms = document.getElementById("questionMs");
+      en.style.display = languageMode === "ms" ? "none" : "block";
+      ms.style.display = languageMode === "en" ? "none" : "block";
+
+      startQuestionTimer();
+    }
+
+    function startInterview() {
+      const count = Number(document.getElementById("questionCount").value);
+      languageMode = document.getElementById("languageMode").value;
+      interviewQuestions = buildQuestionSequence(count);
+      currentIndex = 0;
+      startedAt = Date.now();
+
+      document.getElementById("difficultyText").textContent = `${selectedLevel[0].toUpperCase() + selectedLevel.slice(1)} mode`;
+      setupScreen.style.display = "none";
+      completeScreen.style.display = "none";
+      interviewScreen.style.display = "block";
+      renderQuestion();
+    }
+
+    function finishInterview() {
+      clearInterval(timerId);
+      const elapsedMinutes = Math.max(1, Math.round((Date.now() - startedAt) / 60000));
+      interviewScreen.style.display = "none";
+      completeScreen.style.display = "grid";
+      document.getElementById("summaryQuestions").textContent = interviewQuestions.length;
+      document.getElementById("summaryDifficulty").textContent = selectedLevel[0].toUpperCase() + selectedLevel.slice(1);
+      document.getElementById("summaryMinutes").textContent = `${elapsedMinutes}m`;
+    }
+
+    function resetToSetup() {
+      clearInterval(timerId);
+      interviewScreen.style.display = "none";
+      completeScreen.style.display = "none";
+      setupScreen.style.display = "grid";
+    }
+
+    document.querySelectorAll(".difficulty-card").forEach(card => {
+      card.addEventListener("click", () => {
+        selectedLevel = card.dataset.level;
+        document.querySelectorAll(".difficulty-card").forEach(c => c.classList.remove("active"));
+        card.classList.add("active");
+      });
+    });
+
+    document.getElementById("startBtn").addEventListener("click", startInterview);
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      if (currentIndex < interviewQuestions.length - 1) {
+        currentIndex += 1;
+        renderQuestion();
+      } else {
+        finishInterview();
+      }
+    });
+    document.getElementById("restartBtn").addEventListener("click", resetToSetup);
+    document.getElementById("againBtn").addEventListener("click", resetToSetup);
+
+    renderCategoryChips();
+  </script>
+</body>
+</html>
