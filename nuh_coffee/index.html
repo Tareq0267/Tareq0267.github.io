@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#000000">
+<title>NUH Coffee — Design showcase</title>
+<style>
+/* A deliberately near-invisible shell: the only chrome is two edge zones that stay hidden
+   until the pointer reaches them, so nothing competes with the design being shown. */
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#000;overflow:hidden;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#fff}
+
+#stage{position:fixed;inset:0;width:100%;height:100%;border:0;background:#000;opacity:0;transition:opacity .4s ease}
+#stage.is-ready{opacity:1}
+
+.edge{position:fixed;top:0;bottom:0;z-index:10;width:clamp(78px,11vw,172px);display:flex;align-items:center;justify-content:center;padding:0;border:0;cursor:pointer;color:#fff;opacity:0;transition:opacity .3s ease}
+.edge.prev{left:0;background:linear-gradient(90deg,rgba(0,0,0,.66),rgba(0,0,0,0))}
+.edge.next{right:0;background:linear-gradient(270deg,rgba(0,0,0,.66),rgba(0,0,0,0))}
+.edge:hover,.edge:focus-visible{opacity:1}
+.edge:focus-visible{outline:none}
+.edge:focus-visible .inner{box-shadow:0 0 0 1px rgba(255,255,255,.55);padding:14px 16px}
+.inner{display:flex;flex-direction:column;align-items:center;gap:11px;text-align:center;transform:translateY(8px);transition:transform .38s cubic-bezier(.16,1,.3,1)}
+.edge:hover .inner,.edge:focus-visible .inner{transform:none}
+.chev{font-size:24px;line-height:1;text-shadow:0 1px 12px rgba(0,0,0,.7)}
+.count{font-size:9px;letter-spacing:.24em;opacity:.55}
+.name{font-size:10px;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap;text-shadow:0 1px 12px rgba(0,0,0,.8)}
+
+/* Touch devices have no hover, so the arrows have to be permanently (if faintly) visible. */
+@media(hover:none){.edge{opacity:.8}.inner{transform:none}}
+@media(max-width:560px){.name{display:none}.edge{width:64px}}
+@media(prefers-reduced-motion:reduce){#stage,.inner{transition:none}}
+</style>
+</head>
+<body>
+<iframe id="stage" title="Design preview"></iframe>
+
+<button class="edge prev" type="button" aria-label="Previous design">
+ <span class="inner"><span class="chev" aria-hidden="true">&#8592;</span><span class="count"></span><span class="name"></span></span>
+</button>
+<button class="edge next" type="button" aria-label="Next design">
+ <span class="inner"><span class="chev" aria-hidden="true">&#8594;</span><span class="count"></span><span class="name"></span></span>
+</button>
+
+<script>
+// Each entry is [file, label]. Order is the order you page through.
+const designs = [
+ ['original.html',     'Original'],
+ ['index-noir.html',   'Noir'],
+ ['kopitiam.html',     'Kopitiam'],
+ ['night-market.html', 'Night Market'],
+ ['botanical.html',    'Botanical']
+];
+
+const stage = document.getElementById('stage');
+const prev = document.querySelector('.edge.prev');
+const next = document.querySelector('.edge.next');
+const slug = name => name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+const wrap = i => (i % designs.length + designs.length) % designs.length;
+
+let current = Math.max(0, designs.findIndex(([, name]) => slug(name) === location.hash.slice(1)));
+
+function label(button, index){
+ button.querySelector('.count').textContent = String(index + 1).padStart(2, '0') + ' / ' + String(designs.length).padStart(2, '0');
+ button.querySelector('.name').textContent = designs[index][1];
+ button.setAttribute('aria-label', 'Show ' + designs[index][1]);
+}
+
+function show(index, push){
+ current = wrap(index);
+ const [file, name] = designs[current];
+ // Fade out before swapping so a design's own load animation is never seen half-painted.
+ stage.classList.remove('is-ready');
+ stage.src = file;
+ clearTimeout(revealTimer);
+ revealTimer = setTimeout(reveal, 600);
+ document.title = name + ' — NUH Coffee designs';
+ if(push !== false) history.replaceState(null, '', '#' + slug(name));
+ label(prev, wrap(current - 1));
+ label(next, wrap(current + 1));
+}
+
+// Reveal on load OR after a short beat, whichever lands first. Designs that embed a map or a
+// remote photo can take seconds to fire load, and waiting for it leaves the viewer on black.
+let revealTimer;
+function reveal(){ clearTimeout(revealTimer); stage.classList.add('is-ready'); }
+stage.addEventListener('load', reveal);
+prev.addEventListener('click', () => show(current - 1));
+next.addEventListener('click', () => show(current + 1));
+
+// Arrow keys only reach here while focus is outside the iframe; clicking into a design hands
+// keyboard control to that page, so the edge buttons stay the reliable way through.
+addEventListener('keydown', event => {
+ if(event.key === 'ArrowLeft'){ event.preventDefault(); show(current - 1); }
+ if(event.key === 'ArrowRight'){ event.preventDefault(); show(current + 1); }
+});
+addEventListener('hashchange', () => {
+ const found = designs.findIndex(([, name]) => slug(name) === location.hash.slice(1));
+ if(found > -1 && found !== current) show(found, false);
+});
+
+show(current, false);
+</script>
+</body>
+</html>

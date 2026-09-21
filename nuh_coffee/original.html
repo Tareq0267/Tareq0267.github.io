@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#9C4A31">
+<title>NUH Coffee — A little pause. A good coffee.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{--rust:var(--p-accent, #9C4A31);--cream:var(--p-base, #F3ECDC);--ink:var(--p-ink, #413024);--muted:var(--p-muted, #776a5c);--surface:var(--p-surface, #E5D9C3);--accent-2:var(--p-accent-2, #C08A4E);--serif:'Playfair Display',Georgia,serif;--sans:'DM Sans',Arial,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button{font:inherit}a:focus-visible,button:focus-visible{outline:3px solid currentColor;outline-offset:7px}::selection{background:var(--rust);color:var(--cream)}
+.hero{position:relative;isolation:isolate;min-height:790px;height:min(920px,100svh);color:var(--cream);background:var(--rust);overflow:hidden}.hero-photo{position:absolute;z-index:-3;inset:0;width:100%;height:100%;object-fit:cover;object-position:72% 50%}.hero:before{content:'';position:absolute;z-index:-2;inset:0;background:linear-gradient(180deg,color-mix(in srgb, var(--ink) 75%, transparent) 0%,color-mix(in srgb, var(--ink) 15%, transparent) 29%,transparent 58%),linear-gradient(90deg,var(--rust) 0%,var(--rust) 30%,color-mix(in srgb, var(--rust) 97%, transparent) 40%,color-mix(in srgb, var(--rust) 70%, transparent) 52%,color-mix(in srgb, var(--rust) 13%, transparent) 74%,color-mix(in srgb, var(--ink) 10%, transparent) 100%)}.hero:after{content:'';position:absolute;z-index:-1;inset:0;opacity:.065;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23n)' opacity='.7' d='M0 0h160v160H0z'/%3E%3C/svg%3E")}
+nav{height:111px;margin:0 5%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid color-mix(in srgb, var(--cream) 27%, transparent);gap:24px}.brand{font-weight:700;font-size:28px;letter-spacing:-2px;line-height:.8}.brand span{display:block;font-size:10px;letter-spacing:3.8px;margin-top:9px;font-weight:500}.nav-links{display:flex;align-items:center;gap:37px;font-size:12px}.nav-links a{padding:8px 0}.nav-links a:hover{opacity:.7}.nav-cta{border:1px solid color-mix(in srgb, var(--cream) 50%, transparent);border-radius:30px;padding:13px 21px!important;display:flex;gap:23px;align-items:center}.hero-content{padding:76px 5% 125px;max-width:850px}.eyebrow{text-transform:uppercase;font-size:10px;font-weight:600;letter-spacing:2.5px;display:flex;align-items:center;gap:12px}.eyebrow:before{content:'';width:25px;height:1px;background:currentColor}.hero h1{font-family:var(--serif);font-size:clamp(100px,12.2vw,182px);font-weight:400;letter-spacing:-7px;line-height:.87;margin:32px 0 25px}.hero h1 span{display:block;font-style:italic;margin-left:65px}.hero-copy{font-size:14px;line-height:1.85;max-width:290px;color:color-mix(in srgb, var(--cream) 85%, transparent);margin:29px 0}.pill{display:inline-flex;align-items:center;justify-content:space-between;gap:34px;border-radius:32px;padding:17px 24px;background:var(--cream);color:var(--ink);font-size:12px;font-weight:600;transition:transform .2s,background .2s}.pill:hover{transform:translateY(-3px);background:var(--cream)}.arrow{font-size:18px;font-weight:400}.hero-bottom{position:absolute;bottom:29px;left:5%;right:5%;display:flex;align-items:center;justify-content:space-between;font-size:9px;letter-spacing:1.8px;text-transform:uppercase}.hero-bottom a{display:flex;gap:18px;align-items:center}.photo-note{position:absolute;right:5%;bottom:116px;font-family:var(--serif);font-style:italic;font-size:27px;text-align:right;transform:rotate(-7deg);max-width:180px;line-height:1.05;text-shadow:0 2px 15px color-mix(in srgb, var(--ink) 40%, transparent)}.photo-note span{display:block;font-size:42px;margin-right:50px}.ticker{display:flex;justify-content:space-around;align-items:center;gap:22px;padding:24px 5%;background:var(--rust);color:var(--cream);font-size:10px;letter-spacing:2px;text-transform:uppercase}.ticker .star{font-size:21px}
+.story{min-height:590px;position:relative;isolation:isolate;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}.story-photo{position:absolute;z-index:-2;left:0;top:0;width:60%;height:100%;object-fit:cover;object-position:center}.story:before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,transparent 10%,color-mix(in srgb, var(--cream) 12%, transparent) 27%,color-mix(in srgb, var(--cream) 85%, transparent) 46%,var(--cream) 59%)}.story-content{grid-column:2;padding:96px 12% 85px 4%}.story .eyebrow{color:var(--rust)}h2{font-family:var(--serif);font-weight:400;letter-spacing:-2px;font-size:clamp(46px,5vw,72px);line-height:1.05;margin:26px 0}h2 em{font-weight:400;color:var(--rust)}.story p{font-size:13px;line-height:1.95;color:var(--muted);max-width:355px}.text-link{display:inline-flex;gap:43px;align-items:center;font-size:11px;font-weight:600;border-bottom:1px solid color-mix(in srgb, var(--ink) 31%, transparent);padding:14px 0 10px;margin-top:13px}.stamp{position:absolute;bottom:35px;left:5%;width:95px;height:95px;border:1px solid color-mix(in srgb, var(--cream) 69%, transparent);border-radius:50%;color:var(--cream);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transform:rotate(-12deg);font-size:8px;letter-spacing:2px}.stamp strong{font-family:var(--serif);font-size:32px;font-weight:400;letter-spacing:-1px}
+.menu{padding:80px 5% 95px}.menu-top{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:38px}.menu h2{margin-bottom:0}.tabs{display:flex;gap:7px}.tab{cursor:pointer;border:1px solid color-mix(in srgb, var(--ink) 25%, transparent);background:transparent;color:var(--ink);border-radius:30px;font-size:11px;padding:11px 19px}.tab[aria-pressed=true]{background:var(--ink);color:var(--cream);border-color:var(--ink)}.menu-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}.drink-image{height:275px;overflow:hidden;background:var(--surface)}.drink-image img{height:100%;width:100%;object-fit:cover;transition:transform .5s}.drink:hover img{transform:scale(1.04)}.drink-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.drink h3{font-family:var(--serif);font-size:29px;font-weight:400;margin:19px 0 8px}.drink-heading span{font-size:9px;color:var(--rust);letter-spacing:1px;text-transform:uppercase}.drink p{font-size:12px;color:var(--muted);margin:0;line-height:1.7}.closing{background:var(--rust);color:var(--cream);padding:60px 5%;display:flex;align-items:center;justify-content:space-between;gap:30px}.closing h2{margin:0;font-size:56px}.closing p{font-size:12px;color:color-mix(in srgb, var(--cream) 74%, transparent)}.closing .pill{flex-shrink:0}footer{padding:28px 5%;display:flex;align-items:center;justify-content:space-between;gap:20px;font-size:10px;color:var(--muted)}footer .wordmark{font-weight:700;color:var(--ink);font-size:19px;letter-spacing:-1px}
+@media(min-width:1500px){.hero-content{padding-top:105px}.hero{height:920px}}@media(max-width:760px){.hero{min-height:740px;height:94svh;max-height:920px}nav{height:90px;margin:0 6%}.nav-links{gap:20px}.nav-links .nav-cta{display:none}.hero-content{padding:85px 6% 120px}.hero h1{font-size:120px;letter-spacing:-5px}.hero h1 span{margin-left:35px}.hero:before{background:linear-gradient(180deg,color-mix(in srgb, var(--rust) 67%, transparent),transparent 50%),linear-gradient(90deg,var(--rust) 0%,color-mix(in srgb, var(--rust) 95%, transparent) 25%,color-mix(in srgb, var(--rust) 60%, transparent) 65%,color-mix(in srgb, var(--rust) 13%, transparent) 100%)}.hero-photo{object-position:64% center}.hero-copy{max-width:240px}.photo-note{right:6%;bottom:100px;font-size:23px;max-width:120px}.hero-bottom{left:6%;right:6%;font-size:8px;letter-spacing:1px}.ticker{font-size:8px;letter-spacing:1px;gap:13px;padding:20px 5%}.ticker .optional{display:none}.story{min-height:740px;display:block;padding-top:310px}.story-photo{width:100%;height:430px}.story:before{background:linear-gradient(180deg,transparent 10%,color-mix(in srgb, var(--cream) 20%, transparent) 30%,var(--cream) 55%)}.story-content{padding:35px 7% 55px;position:relative}.story h2{font-size:55px}.story p{max-width:440px}.stamp{top:28px;bottom:auto;left:7%}.menu{padding:55px 7%}.menu-top{align-items:start;flex-direction:column;gap:25px}.menu-grid{grid-template-columns:1fr;gap:35px}.drink-image{height:330px}.closing{padding:45px 7%;align-items:start;flex-direction:column}.closing h2{font-size:47px}footer{padding:25px 7%;flex-wrap:wrap}footer span:last-child{width:100%}.menu h2{font-size:52px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+
+/* Scroll choreography: fixed navigation, expanding chapter backgrounds, and text reveals. */
+html{scroll-padding-top:100px}
+.site-nav{position:fixed;inset:0 0 auto;z-index:100;margin:0;padding:0 5%;height:111px;color:var(--cream);transition:height .35s,background .35s,color .35s,box-shadow .35s;border-bottom-color:color-mix(in srgb, var(--cream) 21%, transparent)}
+.site-nav.is-scrolled{height:76px;background:color-mix(in srgb, var(--cream) 94%, transparent);color:var(--ink);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 1px 0 color-mix(in srgb, var(--ink) 13%, transparent);border-bottom-color:transparent}
+.site-nav.is-scrolled .nav-cta{border-color:color-mix(in srgb, var(--ink) 25%, transparent)}
+.hero-content{padding-top:187px}
+.brand{position:relative;display:block;width:76px;height:50px}
+.brand .brand-wordmark{position:absolute;inset:5px auto auto 0;margin:0;font-size:28px;letter-spacing:-2px;font-weight:700;transition:opacity .35s,transform .5s}
+.brand .brand-wordmark span{font-size:10px;letter-spacing:3.8px;margin-top:9px;font-weight:500}
+.brand-ship{position:absolute;left:7px;top:0;width:54px;height:50px;opacity:0;transform:translateY(12px) rotate(-12deg) scale(.7);transition:opacity .4s,transform .6s cubic-bezier(.22,1,.36,1)}
+.is-scrolled .brand-wordmark{opacity:0;transform:translateY(-14px) scale(.8)}
+.is-scrolled .brand-ship{opacity:1;transform:translateY(0) rotate(0) scale(1)}
+/* The mark sits on its own water line. Roll, bob and swell run at periods that share no
+   common multiple, so the motion never settles into a visible repeat; the boat pivots at the
+   waterline rather than its centre, so the masthead sweeps and the hull barely moves.
+   These live on inner groups, leaving the outer .brand-ship transform free for the entrance. */
+.ship-roll{transform-box:view-box;transform-origin:32px 54px;animation:ship-roll 2.9s ease-in-out infinite alternate}
+.ship-bob{transform-box:view-box;animation:ship-bob 2.05s ease-in-out infinite alternate}
+.ship-flag{transform-box:view-box;transform-origin:33px 6px;animation:ship-flag 1.6s ease-in-out infinite alternate}
+.ship-water{transform-box:view-box;animation:ship-water 3.2s linear infinite}
+@keyframes ship-roll{from{transform:rotate(-5.5deg)}to{transform:rotate(5.5deg)}}
+@keyframes ship-bob{from{transform:translateY(-1.1px)}to{transform:translateY(1.1px)}}
+@keyframes ship-flag{from{transform:rotate(-7deg)}to{transform:rotate(4deg)}}
+@keyframes ship-water{from{transform:translateX(0)}to{transform:translateX(-15px)}}
+.chapter-transition{height:160vh;height:160lvh;position:relative;background:var(--from);isolation:isolate}
+.chapter-stage{height:100vh;height:100lvh;position:sticky;top:0;overflow:hidden;display:grid;place-items:center}
+/* Rasterised at 440px and feathered by a hair: an 80px circle blown up 20x keeps its
+   original raster and the edge stair-steps all the way through the sweep. */
+.chapter-orb{position:absolute;left:50%;top:50%;width:440px;height:440px;margin:-220px;background:radial-gradient(circle closest-side,var(--to) 99.6%,transparent 100%);transform:translate3d(0,var(--orb-y,0px),0) scale(var(--orb-scale,1));will-change:transform;backface-visibility:hidden}
+.chapter-caption{position:relative;text-align:center;color:var(--chapter-ink);opacity:var(--caption-opacity,0);transform:translate3d(0,var(--caption-y,44px),0) scale(var(--caption-scale,.94));will-change:transform,opacity;padding:0 7%;pointer-events:none}
+.chapter-caption small{display:block;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:22px}
+.chapter-caption p{font-family:var(--serif);font-size:clamp(65px,10vw,150px);letter-spacing:-3px;line-height:1;margin:0;font-style:italic}
+.chapter-caption .chapter-mark{font-size:30px;margin-top:22px;display:block}
+.menu{background:var(--surface)}.closing{min-height:55vh}
+.scroll-reveal{opacity:var(--reveal-opacity,1);transform:translate3d(0,var(--reveal-y,0px),0);will-change:transform,opacity}
+@media(min-width:1500px){.hero-content{padding-top:216px}}
+@media(max-width:760px){.site-nav{height:90px;padding:0 6%}.site-nav.is-scrolled{height:70px}.hero-content{padding-top:175px}.chapter-transition{height:142lvh}.chapter-caption p{letter-spacing:-2px}.closing{min-height:50svh}}
+@media(prefers-reduced-motion:reduce){.chapter-transition{display:none}.scroll-reveal{opacity:1!important;transform:none!important;will-change:auto}.brand-ship,.brand-wordmark{transition:none!important}.ship-roll,.ship-bob,.ship-flag,.ship-water{animation:none!important}}
+
+.menu-note{font-size:12px;line-height:1.8;color:var(--muted);margin:0}.photo-credits{padding:0 5% 25px;font-size:10px;line-height:1.8;color:var(--muted)}.photo-credits summary{cursor:pointer;width:fit-content}.photo-credits a{text-decoration:underline;text-underline-offset:3px}.photo-credits p{max-width:800px}.drink:nth-child(2) .drink-image img{object-position:center 48%}
+
+@media(min-width:761px){.menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.drink-image{height:320px}}
+/* Mobile. Three real breakages at phone widths: the decorative hero note landed on top of the
+   CTA pill, the headline was pinned at 120px so narrow screens ran out of vertical room, and
+   the stamp is cream-on-cream once the story photo goes full width onto a bright frame. */
+@media(max-width:760px){
+ .hero{height:auto;min-height:100svh;min-height:100dvh;max-height:none}
+ .hero-content{display:flex;flex-direction:column;justify-content:center;min-height:inherit;padding-top:clamp(96px,13vh,118px);padding-bottom:clamp(74px,10vh,92px)}
+ .hero h1{font-size:clamp(54px,min(21vw,12vh),84px);letter-spacing:-3px;margin:clamp(14px,3.4vh,32px) 0 clamp(12px,2.8vh,25px)}
+ .hero-copy{font-size:clamp(11.5px,1.6vh,14px);line-height:1.75;margin:clamp(9px,2.4vh,29px) 0}
+ .hero h1 span{margin-left:7vw}
+ .pill{gap:16px;padding:15px 20px;font-size:11px}
+ .photo-note{right:6%;bottom:164px;font-size:20px;max-width:104px}
+ .photo-note span{font-size:34px;margin-right:30px}
+ .stamp{text-shadow:0 1px 10px color-mix(in srgb, var(--ink) 80%, transparent);border-color:color-mix(in srgb, var(--cream) 85%, transparent);box-shadow:0 2px 20px color-mix(in srgb, var(--ink) 40%, transparent)}
+ /* 44px is the smallest comfortable tap target; these were all 24-30px. */
+ .nav-links a{padding:15px 0}
+ .hero-bottom a{padding:12px 0}
+ footer .wordmark{padding:11px 0}
+ .photo-credits summary{padding:14px 0}
+ .photo-credits a{display:inline-block;padding:6px 0}
+}
+/* Short phones (a 568px-tall SE): the hero's 740px floor pushed the CTA below the fold. Height
+   goes auto so the section grows to its content instead of clipping it under overflow:hidden. */
+/* The decorative note has nowhere to sit once the hero compresses. */
+@media(max-width:760px) and (max-height:780px){.photo-note{display:none}}
+/* Find us. Sits on the body cream so the closing rust resolves in one step, same as before. */
+.find-us{display:grid;grid-template-columns:1fr 1.15fr;gap:46px;align-items:center;padding:78px 5% 86px}
+.find-us .eyebrow{color:var(--rust)}
+.find-us h2{margin:24px 0 18px}
+.find-us p{font-size:13px;line-height:1.95;color:var(--muted);max-width:340px;margin:0}
+.find-us-map{border-radius:18px;overflow:hidden;box-shadow:0 18px 44px color-mix(in srgb, var(--ink) 15%, transparent)}
+.find-us-map iframe{display:block;width:100%;height:392px;border:0;filter:saturate(.88) contrast(.97)}
+@media(max-width:760px){.find-us{grid-template-columns:1fr;gap:26px;padding:56px 7% 62px}.find-us-map iframe{height:300px}}
+/* Ticker marquee. Two identical runs translated by exactly one run width, so the seam never
+   shows; the duplicate is aria-hidden so the line is announced once, not twice. */
+.ticker{display:block;overflow:hidden;padding:24px 0}
+.ticker-track{display:flex;width:max-content;animation:ticker 38s linear infinite}
+.ticker-run{display:flex;align-items:center;gap:46px;padding-right:46px;white-space:nowrap}
+.ticker:hover .ticker-track,.ticker:focus-within .ticker-track{animation-play-state:paused}
+@keyframes ticker{from{transform:translate3d(0,0,0)}to{transform:translate3d(calc(var(--ticker-shift,50%) * -1),0,0)}}
+/* The mark is the boat at every scroll position now, not only once the nav shrinks. */
+.brand{width:54px}
+.brand .brand-wordmark{display:none}
+.brand-ship{left:0;opacity:1;transform:none;transition:none}
+.story-by strong{font-weight:600;color:var(--ink)}
+.find-us-contact{display:flex;flex-wrap:wrap;gap:16px 48px;margin:26px 0 0;padding:0}
+.find-us-contact dt{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.find-us-contact dd{margin:0;font-family:var(--serif);font-size:24px;line-height:1.1}
+.find-us-contact a{border-bottom:1px solid color-mix(in srgb, var(--ink) 31%, transparent);display:inline-block}
+@media(max-width:760px){.ticker-run{gap:30px;padding-right:30px}.find-us-contact a{padding:10px 0}.find-us-contact{gap:14px 36px}}
+@media(prefers-reduced-motion:reduce){.ticker-track{animation:none;width:100%}.ticker-run[aria-hidden="true"]{display:none}.ticker-run{width:100%;justify-content:space-around;padding-right:0}}
+/* Desktop hero. It was pinned to 920px (and 187/216px of top padding) regardless of the window,
+   so on a laptop-height viewport the CTA sat below the fold on load. Same treatment as mobile:
+   fill the viewport exactly, and scale the vertical rhythm by height so it always fits inside it.
+   The headline takes whichever of width or height is the binding constraint. */
+/* The hero content is a flex column so it can centre vertically; flex children stretch to
+   full width by default, which blew the CTA pill out to the whole column. Hug its text. */
+.hero-content .pill{align-self:flex-start}
+@media(min-width:761px){
+ .hero{height:auto;min-height:100svh;min-height:100dvh;max-height:none}
+ .hero-content{display:flex;flex-direction:column;justify-content:center;min-height:inherit;padding-top:clamp(130px,17vh,200px);padding-bottom:clamp(96px,13vh,140px)}
+ .hero h1{font-size:clamp(76px,min(12.2vw,19vh),182px);margin:clamp(16px,3.2vh,32px) 0 clamp(14px,2.6vh,25px)}
+ .hero-copy{margin:clamp(14px,3vh,29px) 0}
+ .photo-note{bottom:clamp(88px,13vh,140px)}
+}
+/* Very short desktop windows only; leaves normal laptop heights untouched. */
+@media(min-width:761px) and (max-height:660px){
+ .hero-content{padding-top:118px;padding-bottom:72px}
+ .hero h1{font-size:clamp(64px,min(12.2vw,17vh),182px)}
+}
+
+/* First-load entrance complements the independent scroll-reveal transforms. */
+@keyframes welcome-nav{from{translate:0 -16px;opacity:0}to{translate:0 0;opacity:1}}
+@keyframes welcome-photo{from{scale:1.055;filter:brightness(.75)}to{scale:1;filter:brightness(1)}}
+@keyframes welcome-type{from{clip-path:inset(0 0 100% 0);translate:0 20px}to{clip-path:inset(0);translate:0 0}}
+@keyframes welcome-detail{from{clip-path:inset(0 100% 0 0);translate:0 8px}to{clip-path:inset(0);translate:0 0}}
+@media(prefers-reduced-motion:no-preference){
+ .site-nav{animation:welcome-nav .65s ease-out backwards}
+ .hero-photo{animation:welcome-photo 1.6s cubic-bezier(.22,1,.36,1) backwards}
+ .hero-content>.eyebrow{animation:welcome-detail .65s .12s ease-out backwards}
+ .hero-content>h1{animation:welcome-type 1s .2s cubic-bezier(.22,1,.36,1) backwards}
+ .hero-copy{animation:welcome-detail .85s .45s ease-out backwards}
+ .hero-content>.pill{animation:welcome-detail .7s .6s ease-out backwards}
+ .photo-note{animation:welcome-detail .9s .65s ease-out backwards}
+ .hero-bottom{animation:welcome-detail .8s .75s ease-out backwards}
+ .site-nav:focus-within,.hero-content>.pill:focus{animation:none}
+}
+
+/* ==================== ver 3: shared palette system ====================
+   "Original" = no [data-palette] attribute -> each file's own :root literals apply, so the
+   very first render of every design is pixel-identical to ver 2. The five palettes below are
+   additional, explicit choices; picking one is what sets the attribute. */
+:root[data-palette="terracotta"]{
+ --p-base:#F3ECDC;--p-surface:#E5D9C3;--p-ink:#413024;--p-muted:#6E5D4C;
+ --p-accent:#8C4029;--p-accent-2:#C08A4E;
+}
+:root[data-palette="forest"]{
+ --p-base:#F0EDE0;--p-surface:#D6DFC7;--p-ink:#2A3A2E;--p-muted:#5B6A56;
+ --p-accent:#33513F;--p-accent-2:#9C4A31;
+}
+:root[data-palette="roasted"]{
+ --p-base:#EFE6D3;--p-surface:#DFCBA6;--p-ink:#2E211A;--p-muted:#77644F;
+ --p-accent:#5C3A22;--p-accent-2:#C08A4E;
+}
+:root[data-palette="clay"]{
+ --p-base:#EEE3CE;--p-surface:#DCC9A2;--p-ink:#3B3226;--p-muted:#6B5F4A;
+ --p-accent:#8A4826;--p-accent-2:#5B6B3E;
+}
+:root[data-palette="espresso"]{
+ --p-base:#2B2018;--p-surface:#3A2C21;--p-ink:#F3ECDC;--p-muted:#B5A48F;
+ --p-accent:#D48864;--p-accent-2:#7C9473;
+}
+/* Derived roles: only meaningful once a named palette is active (see comment above each
+   file's own :root for why -- their NATIVE value is a plain literal, so this rule never fires
+   there). muted-on-ink / accent-on-ink exist for designs whose page background IS --p-ink
+   (night market): a colour tuned to read on --p-base doesn't reliably read on --p-ink too, so
+   these blend toward base until they do, in every palette. The botanical decorative roles (a
+   whiteboard illustration's hardware colours and its scattered coffee-bean icons) ride along
+   with whichever palette is chosen the same way. */
+:root[data-palette]{
+ --p-muted-on-ink:color-mix(in srgb, var(--p-base) 55%, var(--p-muted));
+ --p-accent-on-ink:color-mix(in srgb, var(--p-base) 55%, var(--p-accent));
+ --p-surface-2:var(--p-surface);
+ --p-board-frame:color-mix(in srgb, var(--p-ink) 22%, var(--p-surface));
+ --p-board-panel:color-mix(in srgb, var(--p-surface) 55%, var(--p-base));
+ --p-board-line:color-mix(in srgb, var(--p-ink) 28%, var(--p-surface));
+ --p-hover-tint:color-mix(in srgb, var(--p-accent) 8%, var(--p-base));
+ --p-bean-1:color-mix(in srgb, var(--p-accent-2) 55%, var(--p-muted));
+ --p-bean-2:color-mix(in srgb, var(--p-accent-2) 30%, var(--p-surface));
+ --p-bean-3:color-mix(in srgb, var(--p-accent-2) 18%, var(--p-surface));
+ --p-bean-4:color-mix(in srgb, var(--p-ink) 70%, var(--p-accent));
+}
+/* A switch fades every colour rather than snapping, so it reads as a wash of light, not a
+   flash. The class is added only for the ~550ms of the transition, then removed -- it must
+   never sit on the page permanently or it would blunt the site's own hover transitions. */
+html.palette-anim,html.palette-anim *{transition:background-color .5s ease,border-color .5s ease,color .5s ease,box-shadow .5s ease,fill .5s ease,stroke .5s ease,opacity .5s ease !important}
+
+.palette-switcher{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9999;
+ display:flex;align-items:center;gap:10px;padding:9px 10px 9px 16px;border-radius:999px;
+ background:color-mix(in srgb, var(--p-ink, #2A2016) 88%, transparent);color:var(--p-base, #F3ECDC);
+ font:500 11px/1 'DM Sans',Arial,sans-serif;letter-spacing:.06em;
+ box-shadow:0 10px 30px rgba(0,0,0,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+ -webkit-user-select:none;user-select:none}
+.palette-switcher .ps-label{text-transform:uppercase;white-space:nowrap;opacity:.85;min-width:78px}
+.palette-switcher .ps-swatches{display:flex;gap:6px}
+.palette-switcher button.ps-dot{width:20px;height:20px;border-radius:50%;border:2px solid transparent;
+ padding:0;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);transition:transform .2s,border-color .2s;flex:0 0 auto}
+.palette-switcher button.ps-dot:hover{transform:scale(1.14)}
+.palette-switcher button.ps-dot[aria-pressed="true"]{border-color:var(--p-base, #F3ECDC)}
+.palette-switcher button.ps-dot:focus-visible{outline:2px solid var(--p-base, #F3ECDC);outline-offset:2px}
+.palette-switcher button.ps-dot.ps-original{background:#fff !important;position:relative;overflow:hidden}
+.palette-switcher button.ps-dot.ps-original:before{content:'';position:absolute;inset:0;background:conic-gradient(from 0deg,#9C4A31,#33513F,#5C3A22,#98502B,#C97B54,#9C4A31)}
+@media(max-width:640px){
+ .palette-switcher{left:12px;right:12px;transform:none;bottom:14px;justify-content:center;padding:8px 12px}
+ .palette-switcher .ps-label{display:none}
+}
+@media(prefers-reduced-motion:reduce){html.palette-anim,html.palette-anim *{transition:none !important}}
+</style>
+</head>
+<body>
+<nav class="site-nav" aria-label="Main navigation"><a href="#top" class="brand" aria-label="NUH Coffee home"><span class="brand-wordmark"></span><svg class="brand-ship" viewBox="0 0 64 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="ship-tide" x1="0" x2="64" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".2" stop-color="#fff"/><stop offset=".8" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="ship-tide-mask"><rect x="-24" y="46" width="112" height="18" fill="url(#ship-tide)"/></mask></defs><g class="ship-bob"><g class="ship-roll"><path d="M32 5v38M28 11 10 37h18V11Zm8 5v21h17L36 16Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M10 43h46l-9 9H21L10 43Z" fill="currentColor"/><path class="ship-flag" d="M33 6h10l-5 5h-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g></g><g mask="url(#ship-tide-mask)"><path class="ship-water" d="M-8 56c5-4 10 4 15 0s10 4 15 0 10 4 15 0 10 4 15 0 10 4 15 0 10 4 15 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg></a><div class="nav-links"><a href="#story">Our story</a><a href="#menu">The menu</a><a href="#pause" class="nav-cta">Take a little pause <span aria-hidden="true">↗</span></a></div></nav>
+<header class="hero" id="top">
+<img class="hero-photo" src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?auto=format&fit=crop&w=2400&q=85" alt="Warm, freshly prepared coffee on a café table" fetchpriority="high">
+
+<div class="hero-content"><div class="eyebrow">Good coffee. No rush.</div><h1>NUH<span>Coffee.</span></h1><p class="hero-copy">For slow mornings, long conversations,<br>and a little time to yourself.<br>There's a cup for that.</p><a class="pill" href="#menu">Find your everyday favourite <span class="arrow" aria-hidden="true">↗</span></a></div>
+<div class="photo-note" aria-hidden="true">a little pause,<br>a good coffee.<span>⌁</span></div><div class="hero-bottom"><span>A slower kind of everyday</span><a href="#story">Stay a little longer <span class="arrow" aria-hidden="true">↓</span></a></div>
+</header>
+<div class="ticker" aria-label="Our philosophy"><div class="ticker-track"><div class="ticker-run"><span>Made with care</span><span class="star" aria-hidden="true">✳</span><span>Sipped slowly</span><span class="star" aria-hidden="true">✳</span><span>Better together</span><span class="star" aria-hidden="true">✳</span><span>Always NUH</span><span class="star" aria-hidden="true">✳</span></div><div class="ticker-run" aria-hidden="true"><span>Made with care</span><span class="star" aria-hidden="true">✳</span><span>Sipped slowly</span><span class="star" aria-hidden="true">✳</span><span>Better together</span><span class="star" aria-hidden="true">✳</span><span>Always NUH</span><span class="star" aria-hidden="true">✳</span></div></div></div>
+<main>
+<section class="story" id="story" aria-labelledby="story-title"><img class="story-photo" src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=1400&q=85" alt="A cosy coffee shop filled with warm light" loading="lazy"><div class="story-content"><div class="eyebrow">A space to just be</div><h2 id="story-title">Less hurry.<br><em>More here.</em></h2><p>We like our coffee thoughtful and our days a little less rushed. NUH is a place for both.</p><p>A familiar cup. Your favourite corner. That conversation that turns into another coffee. Sometimes, the little things are the whole thing.</p><p class="story-by">NUH Coffee is a place made by <strong>Tabah</strong>.</p><a href="#menu" class="text-link">Something good is brewing <span class="arrow" aria-hidden="true">↗</span></a></div></section>
+<section class="menu" id="menu" aria-labelledby="menu-title"><div class="menu-top"><div><div class="eyebrow">Meet your next regular</div><h2 id="menu-title">Small rituals. <em>Good things.</em></h2></div><p class="menu-note">A good coffee. A crispy bite.<br>A little taste of home.</p></div><div class="menu-grid" id="drinks"><article class="drink"><div class="drink-image"><img src="../assets/nuh-coffee.jpg" alt="A cup of coffee on a warm wooden table" loading="lazy" decoding="async"></div><div class="drink-heading"><h3>Nuh Coffee</h3><span>The daily ritual</span></div><p>Your familiar cup, made for slow mornings and good conversations.</p></article>
+<article class="drink"><div class="drink-image"><img src="../assets/cucur-udang.jpg" alt="Golden Malaysian prawn fritters, cucur udang" loading="lazy" decoding="async"></div><div class="drink-heading"><h3>Cucur Udang</h3><span>A crispy bite</span></div><p>Golden prawn fritters. Crisp edges, a tender centre, and one more bite.</p></article>
+<article class="drink"><div class="drink-image"><img src="../assets/nasi-lemak.jpg" alt="Nasi lemak with coconut rice, sambal, egg, cucumber and accompaniments" loading="lazy" decoding="async"></div><div class="drink-heading"><h3>Nasi Lemak</h3><span>A taste of home</span></div><p>Fragrant coconut rice and sambal. A comforting Malaysian favourite.</p></article><article class="drink"><div class="drink-image"><img src="../assets/lempeng.jpg" alt="Malaysian lempeng pancakes served with sambal ikan bilis" loading="lazy" decoding="async"></div><div class="drink-heading"><h3>Lempeng</h3><span>Simple comfort</span></div><p>Soft, golden pancakes. A familiar comfort, lovely with a cup of coffee.</p></article></div></section>
+<section class="closing" id="pause"><div><div class="eyebrow">Your daily exhale</div><h2>Make a little room for <i>NUH.</i></h2><p>Good company. A favourite cup. A moment that's yours.</p></div><a class="pill" href="#menu">Find your cup <span class="arrow" aria-hidden="true">↗</span></a></section>
+</main>
+<section class="find-us" id="find-us" aria-labelledby="find-us-title"><div class="find-us-text"><div class="eyebrow">Come say hello</div><h2 id="find-us-title">Find us <em>here.</em></h2><p>Pop in for a slow coffee and something warm from the kitchen. We are open for whichever part of the day needs a pause.</p><dl class="find-us-contact"><div><dt>In the kitchen</dt><dd>Chef Ana</dd></div><div><dt>Call us</dt><dd><a href="tel:+601724465560">017-2446 5560</a></dd></div></dl><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query=3.164041%2C101.577243" target="_blank" rel="noopener">Open in Google Maps <span class="arrow" aria-hidden="true">↗</span></a></div><div class="find-us-map"><iframe title="Map showing the location of NUH Coffee" src="https://maps.google.com/maps?q=3.164041%2C101.577243&amp;z=17&amp;hl=en&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div></section>
+<footer><a class="wordmark" href="#top">NUH Coffee.</a><span>A little pause. A good coffee.</span><span>© <span id="year">2026</span> NUH Coffee</span></footer>
+<details class="photo-credits"><summary>Photo credits</summary><p>Cucur Udang: <a href="https://commons.wikimedia.org/wiki/File:Cucur_Udang_(%20Prawn_Fritters).jpg">Dr.Francostein1975 / Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Nasi Lemak: <a href="https://commons.wikimedia.org/wiki/File:Nasi_lemak.jpg">Corey LF / LensaMalaysia; colour correction by Takeaway</a>, <a href="https://creativecommons.org/licenses/by/2.5/">CC BY 2.5</a>. Lempeng: <a href="https://commons.wikimedia.org/wiki/File:LEMPENG_DAN_SAMBAL_IKAN_BILIS.jpg">Hajar Aznam / Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Food photos displayed with layout cropping. Coffee photo via Unsplash.</p></details>
+<script>
+document.getElementById('year').textContent=new Date().getFullYear();
+
+// Ticker marquee: clone the run until the track out-spans the viewport by a whole run, so the
+// one-run-width loop can never expose a gap, and pace it by width so the speed stays constant.
+(() => {
+ const track = document.querySelector('.ticker-track');
+ if(!track) return;
+ const seed = track.firstElementChild;
+ const SPEED = 26;
+ function fill(){
+  while(track.children.length > 1) track.lastElementChild.remove();
+  const run = seed.offsetWidth;
+  if(!run) return;
+  track.style.setProperty('--ticker-shift', run+'px');
+  track.style.animationDuration = (run/SPEED)+'s';
+  for(let guard = 0; track.offsetWidth < innerWidth + run && guard < 40; guard++){
+   const copy = seed.cloneNode(true);
+   copy.setAttribute('aria-hidden','true');
+   track.append(copy);
+  }
+ }
+ fill();
+ addEventListener('resize', fill);
+ if(document.fonts) document.fonts.ready.then(fill);
+})();
+
+(() => {
+ const nav = document.querySelector('.site-nav');
+ const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+ const chapters = [
+  ['story','var(--rust)','var(--cream)','var(--ink)','01 / A space to just be','Less hurry. More here.'],
+  ['menu','var(--cream)','var(--surface)','var(--ink)','02 / Your daily ritual','A little taste of home.'],
+  ['pause','var(--surface)','var(--rust)','var(--cream)','03 / Stay a little longer','This moment is yours.']
+ ].map(([id,from,to,ink,label,title]) => {
+  const bridge = document.createElement('div');
+  bridge.className = 'chapter-transition';
+  bridge.setAttribute('aria-hidden','true');
+  bridge.style.cssText = '--from:'+from+';--to:'+to+';--chapter-ink:'+ink;
+  bridge.innerHTML = '<div class="chapter-stage"><div class="chapter-orb"></div><div class="chapter-caption"><small>'+label+'</small><p>'+title+'</p><span class="chapter-mark">&#10035;</span></div></div>';
+  document.getElementById(id).before(bridge);
+  return {bridge,stage:bridge.firstElementChild,value:null};
+ });
+ const reveals = [...document.querySelectorAll('.story-content > *, .menu-top > *, .menu-grid, .closing > *, .find-us-text > *, .hero-content > *')]
+  .map(el => {el.classList.add('scroll-reveal'); return {el,value:null};});
+ const clamp = n => Math.min(1,Math.max(0,n));
+ const between = (value,from,to) => clamp((value-from)/(to-from));
+ const smooth = p => p*p*(3-2*p);
+ const easeOut = p => 1-Math.pow(1-p,3);
+ // LEAD: where in the viewport a band starts growing. FILL: how much of the band is spent
+ // growing -- the remainder holds the disc full-screen so it reads as the next section's ground.
+ // SEED: the resting scale, which puts the 440px disc on screen at its 84px seed size.
+ const LEAD = .72, FILL = .74, SEED = .19;
+ let focusHold = null;
+
+ function settle(item,target,dt){
+  if(item.value === null){item.value = target; return true;}
+  item.value += (target-item.value)*(1-Math.exp(-dt/95));
+  if(Math.abs(target-item.value) < .0006){item.value = target; return true;}
+  return false;
+ }
+ function update(dt){
+  nav.classList.toggle('is-scrolled',window.scrollY > 45);
+  if(reducedMotion.matches){
+   reveals.forEach(({el}) => {el.style.removeProperty('--reveal-opacity');el.style.removeProperty('--reveal-y');});
+   return true;
+  }
+  const height = window.innerHeight;
+  // Take every measurement before writing a single style, so the frame only lays out once.
+  const bands = chapters.map(chapter => {
+   const rect = chapter.bridge.getBoundingClientRect();
+   if(rect.bottom < 0 || rect.top > height) return null;
+   const stageHeight = chapter.stage.clientHeight, start = height*LEAD;
+   return {chapter,width:chapter.stage.clientWidth,stageHeight,
+    target:clamp((start-rect.top)/(start+rect.height-stageHeight))};
+  });
+  const texts = reveals.map(item => ({item,
+   target:item.el === focusHold ? 1 : between(item.el.getBoundingClientRect().top,height*.94,height*.7)}));
+  let rested = true;
+  bands.forEach((band,index) => {
+   if(!band){chapters[index].value = null; return;}
+   const {chapter,width,stageHeight} = band;
+   rested = settle(chapter,band.target,dt) && rested;
+   const progress = chapter.value;
+   const grow = smooth(clamp(progress/FILL));
+   // Geometric growth: the disc gains the same *proportion* of its size per scrolled pixel.
+   // Interpolating the scale linearly instead buries the screen a third of the way in and
+   // leaves the rest of the band animating something nobody can see.
+   const full = Math.hypot(width,stageHeight)/440+.06;
+   const hold = easeOut(between(progress,FILL,1));
+   chapter.bridge.style.setProperty('--orb-scale',String(SEED*Math.pow(full/SEED,grow)*(1+.07*hold)));
+   chapter.bridge.style.setProperty('--orb-y',String((1-grow)*38)+'px');
+   // The caption waits until .6, the point where the disc is already wider than the headline.
+   // Its ink is chosen for the destination colour, so any earlier it spills onto the outgoing one.
+   const enter = easeOut(between(progress,.6,.78));
+   const leave = 1-smooth(between(progress,.87,.97));
+   chapter.bridge.style.setProperty('--caption-opacity',String(enter*leave));
+   chapter.bridge.style.setProperty('--caption-y',String((1-enter)*46-(1-leave)*32)+'px');
+   chapter.bridge.style.setProperty('--caption-scale',String(.94+enter*.06+(1-leave)*.05));
+  });
+  texts.forEach(({item,target}) => {
+   rested = settle(item,target,dt) && rested;
+   const shown = easeOut(item.value);
+   item.el.style.setProperty('--reveal-opacity',String(shown));
+   item.el.style.setProperty('--reveal-y',String((1-shown)*38)+'px');
+  });
+  return rested;
+ }
+ // A wheel notch arrives as one ~100px jump. Easing the driving value towards the scroll
+ // position instead of snapping to it is what turns the sweep from stepped into gliding.
+ let queued = false, last = 0;
+ function frame(now){
+  queued = false;
+  const delta = last ? Math.min(50,now-last) : 16;
+  last = now;
+  if(update(delta)) last = 0; else schedule();
+ }
+ function schedule(){if(!queued){queued = true; requestAnimationFrame(frame);}}
+ function remeasure(){chapters.forEach(c => c.value = null); reveals.forEach(r => r.value = null); schedule();}
+ window.addEventListener('scroll',schedule,{passive:true});
+ window.addEventListener('resize',remeasure);
+ window.addEventListener('load',remeasure);
+ window.addEventListener('pageshow',remeasure);
+ reducedMotion.addEventListener('change',remeasure);
+ if(document.fonts) document.fonts.ready.then(remeasure);
+ // Keyboard focus and direct anchor links always reveal their destination immediately.
+ document.addEventListener('focusin',event => {
+  const target = event.target.closest('.scroll-reveal');
+  focusHold = target || null;
+  if(target) schedule();
+ });
+ document.addEventListener('focusout',() => {focusHold = null; schedule();});
+ schedule();
+})();
+
+</script>
+
+<div class="palette-switcher" role="group" aria-label="Colour palette">
+ <span class="ps-label">Original</span>
+ <span class="ps-swatches" id="paletteSwatches"></span>
+</div>
+
+<script>
+// ver 3 palette switcher -- identical on every design. 'Original' removes the [data-palette]
+// attribute entirely, which is what lets each file's own :root literals (its true ver 2
+// colours) take over -- so the very first thing a visitor sees is never altered by this script.
+(() => {
+ const PALETTES = [
+  { id:'original',   name:'Original' },
+  { id:'terracotta', name:'Terracotta Dawn', base:'#F3ECDC', accent:'#8C4029' },
+  { id:'forest',     name:'Forest Morning',  base:'#F0EDE0', accent:'#33513F' },
+  { id:'roasted',    name:'Roasted Coffee',  base:'#EFE6D3', accent:'#5C3A22' },
+  { id:'clay',       name:'Clay & Olive',    base:'#EEE3CE', accent:'#8A4826' },
+  { id:'espresso',   name:'Espresso Night',  base:'#2B2018', accent:'#D48864' },
+ ];
+ const KEY = 'nuh-palette';
+ const root = document.documentElement;
+ const wrap = document.getElementById('paletteSwatches');
+ const label = document.querySelector('.palette-switcher .ps-label');
+ if(!wrap) return;
+
+ function apply(id, animate){
+  if(animate){
+   root.classList.add('palette-anim');
+   setTimeout(() => root.classList.remove('palette-anim'), 560);
+  }
+  if(id === 'original') root.removeAttribute('data-palette');
+  else root.setAttribute('data-palette', id);
+  [...wrap.children].forEach(btn => btn.setAttribute('aria-pressed', String(btn.dataset.id === id)));
+  const found = PALETTES.find(p => p.id === id);
+  if(label && found) label.textContent = found.name;
+  try{ localStorage.setItem(KEY, id); }catch(e){}
+ }
+
+ PALETTES.forEach(p => {
+  const btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'ps-dot' + (p.id === 'original' ? ' ps-original' : '');
+  btn.dataset.id = p.id;
+  if(p.id !== 'original'){
+   btn.style.background = p.base;
+   btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,.18), inset 0 0 0 7px ' + p.accent;
+  }
+  btn.setAttribute('aria-label', p.name);
+  btn.addEventListener('click', () => apply(p.id, true));
+  wrap.append(btn);
+ });
+
+ let start = 'original';
+ try{ start = localStorage.getItem(KEY) || start; }catch(e){}
+ apply(start, false);
+
+ window.addEventListener('storage', e => { if(e.key === KEY && e.newValue) apply(e.newValue, true); });
+})();
+</script>
+</body>
+</html>
