@@ -259,7 +259,7 @@ button { font: inherit; color: inherit; border: 0; background: none; cursor: poi
 .date { text-align: right; opacity: .7; font-size: .9em; }
 .greeting { font-weight: 700; font-size: 1.15em; }
 .front p.body { text-indent: 1.2em; }
-#outro > p:not(:first-child) { margin-top: 32px; }   /* one blank ruled line between blocks */
+#outro > p:not(:first-child), #outro > .photo-zone { margin-top: 32px; }   /* one blank ruled line between blocks */
 .front p.highlight {
   text-indent: 0;
   text-align: center;
@@ -743,10 +743,19 @@ const CONFIG = {
   ],
 
   // Each entry is a paragraph, { lead, items } for a line followed by a heart list,
-  // or { highlight } for a centred pink line.
+  // { highlight } for a centred pink line, or { morePhotos: true } for the second photo spot.
+  // Second set of polaroids, placed where { morePhotos: true } appears in the outro.
+  morePhotos: [
+    { src: 'be_mine/5.jpeg', caption: 'us again ♡',          note: 'my favourite seat is always the one next to you' },
+    { src: 'be_mine/6.jpeg', caption: 'pretty, as always',   note: 'how is one person this pretty?' },
+    { src: 'be_mine/7.jpeg', caption: 'so proud of you',     note: 'look at you up there, I`ll always be proud of you' },
+    { src: 'be_mine/8.jpeg', caption: 'my cutie ♡', note: 'this face lives rent-free in my head' },
+  ],
+
   intro: [
     'Ever since I stumbled onto your very first thread post, all I have wanted is to be yours, and my heart still feels that way every single day.',
     'Somewhere along the way you became my favourite part of every day. Your voice is my comfort, and hearing it is the sweetest way to unwind at the end of a long day.',
+    'Remember when we got into a whole fight over the right title for the Ottoman Empire? Only you could turn a history debate into one of my favourite memories, and make me fall for you even harder while we argued.',
   ],
 
   outro: [
@@ -762,7 +771,15 @@ const CONFIG = {
       'my favourite podcaster',
       'my partner',
       'my serenity',
-      'my mahaguru',
+      'my mahaguru 👀',
+    ] },
+    { morePhotos: true },
+    'I am so proud to be your first ever date. And I am sorry (not sorry) for being the one who broke the pattern of your exes leaving right before it. That date was only the first of thousands of dates, and the first of millions of memories I want to make with you.',
+    { lead: 'And these are my promises to you:', items: [
+      'one day I will buy you things without you ever feeling guilty, because I am your man and I will be your provider',
+      'I will be there for you, all the time',
+      'I will be the one you call when you have a nightmare',
+      'I will never be mad at you like the me in that dream you had before our first date. That version of me will never be real, I promise',
     ] },
     'So now, I have a very important question for you…',
   ],
@@ -844,6 +861,13 @@ $('date').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric',
 for (const [boxId, list] of [['intro', CONFIG.intro], ['outro', CONFIG.outro]]) {
   const box = $(boxId);
   list.forEach(t => {
+    if (t.morePhotos) {
+      const z = document.createElement('div');
+      z.className = 'photo-zone';
+      z.id = 'photoZone2';
+      box.appendChild(z);
+      return;
+    }
     const p = document.createElement('p');
     p.className = t.highlight ? 'body highlight' : 'body';
     p.textContent = typeof t === 'string' ? t : (t.highlight || t.lead);
@@ -1115,40 +1139,56 @@ function layoutPieces() {
   const pw = Math.round(Math.min(170, W * .42));
   front.style.setProperty('--pw', pw + 'px');
 
-  const photos = CONFIG.photos;
-  const pols = photos.map((ph, i) => makePolaroid(ph, i, front, .5 + i * .18));
-  const polH = pols.length ? pols[0].el.offsetHeight : 0;
+  // Build every photo group first, then size all zones, then position: sizing the
+  // first zone shifts the second one down, so positions must be read afterwards.
+  let n = 0;
+  const groups = [[$('photoZone'), CONFIG.photos], [$('photoZone2'), CONFIG.morePhotos || []]]
+    .filter(([z, photos]) => z && photos.length)
+    .map(([zone, photos]) => {
+      const pols = photos.map((ph, i) => makePolaroid(ph, n + i, front, .5 + (n + i) * .15));
+      n += photos.length;
+      return { zone, photos, pols };
+    });
+  const polH = groups.length ? groups[0].pols[0].el.offsetHeight : 0;
+  const rowH = polH * .9;
 
   // reserve room in the letter for the photos (snapped to the ruled lines)
-  const rows = Math.ceil(photos.length / 2);
-  const rowH = polH * .9;
-  const zone = $('photoZone');
-  zone.style.height = Math.ceil((rows * rowH + polH * .25 + 16) / 32) * 32 + 'px';
-  const zoneTop = zone.offsetTop;
+  groups.forEach(({ zone, photos }) => {
+    const rows = Math.ceil(photos.length / 2);
+    zone.style.height = Math.ceil((rows * rowH + polH * .25 + 16) / 32) * 32 + 'px';
+  });
 
   const edge = W * .04;
-  pols.forEach((p, i) => {
-    const row = Math.floor(i / 2), col = i % 2;
-    const lone = photos.length % 2 === 1 && i === photos.length - 1;
-    p.x = lone ? (W - pw) / 2 : col ? W - pw - edge : edge;
-    p.x += rand(-8, 8);
-    p.y = zoneTop + row * rowH + (col ? polH * .2 : 0) + rand(-6, 6);
-    p.rot = lone ? rand(-4, 4) : (col ? 1 : -1) * rand(3, 8);
+  groups.forEach(({ zone, photos, pols }) => {
+    const zoneTop = zone.offsetTop;
+    pols.forEach((p, i) => {
+      const row = Math.floor(i / 2), col = i % 2;
+      const lone = photos.length % 2 === 1 && i === photos.length - 1;
+      p.x = lone ? (W - pw) / 2 : col ? W - pw - edge : edge;
+      p.x += rand(-8, 8);
+      p.y = zoneTop + row * rowH + (col ? polH * .2 : 0) + rand(-6, 6);
+      p.rot = lone ? rand(-4, 4) : (col ? 1 : -1) * rand(3, 8);
+    });
   });
+  const zone = $('photoZone');
 
   // stickers: [name, size px, x fraction, y fraction, rotation]
   // names are SVGs from STICKERS (e.g. 'bow') or PNGs in be_mine/stickers/<name>.png
   const H = front.clientHeight;
+  // y positions are anchored to letter elements so stickers stay put when the text changes
+  const at = (el, dy = 0) => (el.offsetTop + dy) / H;
+  const introP = $('intro').querySelectorAll('p');
+  const outroP = $('outro').querySelectorAll('p');
   const frontStickers = [
     ['um-logo',       54, .83, .008, 10],
     ['upsi-logo',     56, .01, .01, -8],
-    ['red-rose',      58, -.03, .19, -12],
-    ['hagia-sophia',  88, .68, zone.offsetTop / H - .022, 7],
-    ['malatang',      60, -.05, (zone.offsetTop + zone.offsetHeight) / H - .01, -10],
-    ['rosetta-stone', 54, .84, .6, 8],
-    ['lipstick',      38, -.03, .775, -18],
-    ['bow',           60, .03, .9, -8],
-    ['glass-flower',  50, .84, .955, 6],
+    ['red-rose',      58, -.03, at(introP[1], 8), -12],
+    ['rosetta-stone', 50, -.04, at(introP[introP.length - 1], 36), -8],
+    ['hagia-sophia',  88, .68, at(zone, -44), 7],
+    ['malatang',      60, -.05, at(zone, zone.offsetHeight - 30), -10],
+    ['lipstick',      38, -.03, at(outroP[outroP.length - 3], 20), -18],
+    ['bow',           60, .03, at(outroP[outroP.length - 1], -8), -8],
+    ['glass-flower',  48, .86, at($('turnBtn'), 30), 6],
   ];
   frontStickers.forEach(([name, size, fx, fy, r], i) => {
     const s = makeSticker(name, size, front, 1.2 + i * .1);
