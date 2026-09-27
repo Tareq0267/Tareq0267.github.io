@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>for you 💌</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #fff6f8;
+  --pink: #ffd6e0;
+  --rose: #6b2c3e;
+  --hot: #ff5c8a;
+  --paper: #fffdf9;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 15% 10%, #ffe1e9 0, transparent 40%),
+    radial-gradient(circle at 85% 90%, #ffe9d9 0, transparent 45%),
+    var(--bg);
+  background-attachment: fixed;
+  color: var(--rose);
+  font-family: 'Quicksand', system-ui, sans-serif;
+  overflow-x: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+body.locked { overflow: hidden; }
+
+/* ---------- scrollbar ---------- */
+html { scrollbar-width: thin; scrollbar-color: #f4a9bd transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ffb3c6, #f48fab);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: #e76f93; background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: transparent; }
+
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; touch-action: manipulation; }
+
+/* ---------- floating background hearts ---------- */
+#bg-hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+#bg-hearts span {
+  position: absolute;
+  bottom: -40px;
+  color: #ffb3c6;
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  0%   { transform: translate(0, 0) rotate(0); opacity: 0; }
+  10%  { opacity: .55; }
+  100% { transform: translate(var(--drift), -115vh) rotate(45deg); opacity: 0; }
+}
+
+/* ---------- envelope scene ---------- */
+#envelope-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  perspective: 900px;
+  transition: opacity .8s ease, transform 1s cubic-bezier(.6, -0.2, .7, .4);
+}
+#envelope-scene.gone { opacity: 0; transform: translateY(35vh) scale(.8); pointer-events: none; }
+
+.env-bob { perspective: 900px; animation: bob 3.4s ease-in-out infinite; }
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+.env-tilt { transition: transform .25s ease-out; }
+
+.envelope {
+  --w: min(82vw, 340px);
+  position: relative;
+  width: var(--w);
+  height: calc(var(--w) * .64);
+  perspective: 900px;
+  cursor: pointer;
+  animation: wiggle 4s ease-in-out 1.5s infinite;
+}
+.envelope.open { animation: none; }
+@keyframes wiggle {
+  0%, 88%, 100% { transform: rotate(0); }
+  91% { transform: rotate(-3deg); }
+  94% { transform: rotate(3deg); }
+  97% { transform: rotate(-2deg); }
+}
+
+.env-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #ff97ae, #f2809b);
+  box-shadow: 0 18px 40px rgba(107, 44, 62, .22);
+}
+
+.env-letter {
+  position: absolute;
+  left: 7%; right: 7%; top: 6%; bottom: 8%;
+  z-index: 2;
+  border-radius: 6px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 17px, rgba(107,44,62,.08) 17px 18px),
+    var(--paper);
+  box-shadow: 0 -2px 10px rgba(107, 44, 62, .12);
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #d4466f;
+  transition: transform 1s cubic-bezier(.3, 1.35, .5, 1);
+}
+.envelope.pull .env-letter { transform: translateY(-62%); }
+
+.env-pocket {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.env-pocket svg, .env-flap svg { width: 100%; height: 100%; display: block; }
+
+.env-to {
+  position: absolute;
+  left: 0; right: 0; bottom: 9%;
+  z-index: 3;
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #b8345b;
+  pointer-events: none;
+}
+
+.env-flap {
+  position: absolute;
+  left: 0; top: 0;
+  width: 100%;
+  height: 62%;
+  z-index: 4;
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 4px 4px rgba(107, 44, 62, .18));
+  transition: transform .8s cubic-bezier(.45, 0, .2, 1) .2s;
+}
+.envelope.open .env-flap { transform: rotateX(180deg); }
+.envelope.flap-behind .env-flap { z-index: 1; }
+
+.seal {
+  position: absolute;
+  left: 50%;
+  top: calc(62% - 30px);
+  z-index: 5;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at 35% 30%, #ff7d98, #c42449 70%);
+  box-shadow: 0 3px 8px rgba(107, 44, 62, .35), inset 0 -3px 6px rgba(0,0,0,.18), inset 0 2px 4px rgba(255,255,255,.35);
+  display: grid;
+  place-items: center;
+  transition: transform .35s cubic-bezier(.5, -0.5, .7, 1), opacity .35s;
+}
+.seal::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 2px dashed rgba(255, 214, 224, .45);
+}
+.seal svg { width: 24px; height: 24px; }
+.envelope.open .seal { transform: translateX(-50%) scale(0) rotate(-40deg); opacity: 0; }
+
+.hint {
+  font-family: 'Caveat', cursive;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #c24a6c;
+  animation: pulse 1.6s ease-in-out infinite;
+  transition: opacity .3s;
+}
+.hint.hide { opacity: 0; }
+@keyframes pulse { 50% { opacity: .45; transform: scale(.96); } }
+
+/* ---------- letter scene ---------- */
+#letter-scene {
+  position: relative;
+  z-index: 2;
+  padding: 56px 14px 80px;
+}
+#letter-scene[hidden] { display: none; }
+
+.letter-stage {
+  width: min(92vw, 440px);
+  margin: 0 auto;
+  perspective: 2200px;
+}
+.letter-stage.enter { animation: unfold 1.1s cubic-bezier(.2, .9, .3, 1.15) both; }
+@keyframes unfold {
+  from { opacity: 0; transform: translateY(45vh) scale(.45) rotateX(55deg); }
+  to   { opacity: 1; transform: none; }
+}
+
+.letter {
+  position: relative;
+}
+
+.face {
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(107,44,62,.06), 0 18px 50px rgba(107, 44, 62, .18);
+}
+.back { visibility: hidden; }
+.letter.flipped .back { visibility: visible; }
+.letter.flipped .front { visibility: hidden; }
+
+.front {
+  position: relative;
+  padding: 64px 22px 48px 50px;
+  background:
+    linear-gradient(90deg, transparent 36px, rgba(255, 110, 145, .35) 36px, rgba(255, 110, 145, .35) 38px, transparent 38px),
+    repeating-linear-gradient(to bottom, transparent 0 31px, rgba(107, 44, 62, .10) 31px 32px),
+    var(--paper);
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 32px;
+}
+@media (max-width: 380px) { .front { font-size: 1.36rem; padding-right: 16px; } }
+
+.tape {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  width: 124px; height: 30px;
+  transform: translateX(-50%) rotate(-3deg);
+  background: repeating-linear-gradient(45deg, rgba(255, 179, 198, .8) 0 8px, rgba(255, 205, 218, .8) 8px 16px);
+  box-shadow: 0 1px 3px rgba(107,44,62,.12);
+  z-index: 1;
+}
+.date { text-align: right; opacity: .7; font-size: .9em; }
+.greeting { font-weight: 700; font-size: 1.15em; }
+.front p.body { text-indent: 1.2em; }
+#outro > p:not(:first-child) { margin-top: 32px; }   /* one blank ruled line between blocks */
+.front p.highlight {
+  text-indent: 0;
+  text-align: center;
+  font-weight: 700;
+  color: #d4466f;
+  padding: 0 .4em;
+}
+.front ul.hearts { list-style: none; padding-left: 1.7em; }
+.front ul.hearts li { position: relative; }
+.front ul.hearts li::before {
+  content: '♡';
+  position: absolute;
+  left: -1.15em;
+  color: #e0557a;
+  font-weight: 700;
+}
+.front .gap { height: 32px; }
+.photo-zone { position: relative; }
+.signoff { text-align: right; margin-top: 32px; }
+.signoff b { font-size: 1.4em; color: #d4466f; display: block; }
+
+.turn {
+  display: block;
+  margin: 40px auto 0;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: var(--pink);
+  color: var(--rose);
+  font-family: 'Caveat', cursive;
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.2;
+  box-shadow: 0 3px 0 #f4a9bd;
+  animation: nudge 2.2s ease-in-out infinite;
+}
+.turn:active { transform: translateY(2px); box-shadow: 0 1px 0 #f4a9bd; }
+@keyframes nudge { 0%, 70%, 100% { transform: rotate(0); } 80% { transform: rotate(-4deg); } 90% { transform: rotate(4deg); } }
+
+.back {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(#f4c3cf 1.3px, transparent 1.6px) 0 0 / 20px 20px,
+    #fff3f6;
+}
+.ask {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60px 18px 30px;
+  text-align: center;
+}
+.ask .ps { font-family: 'Caveat', cursive; font-size: 1.5rem; font-weight: 700; opacity: .7; }
+
+.capy-wrap { position: relative; margin-top: 60px; }
+.bubble {
+  position: absolute;
+  bottom: calc(100% - 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 6px 14px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(107,44,62,.14);
+  font-family: 'Caveat', cursive;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #c2406a;
+}
+.bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: 50%;
+  border: 8px solid transparent;
+  border-top-color: #fff;
+  transform: translateX(-50%);
+}
+
+.capy { width: 190px; cursor: pointer; }
+.capy svg, .sticker svg { width: 100%; height: auto; display: block; overflow: visible; }
+.diecut {
+  filter:
+    drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff)
+    drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff)
+    drop-shadow(0 calc(3px + var(--lift, 0) * 10px) calc(4px + var(--lift, 0) * 10px) rgba(107, 44, 62, .25));
+}
+.capy.wiggle svg, .sticker .stk.wiggle svg { animation: stickerWiggle .6s ease; }
+@keyframes stickerWiggle {
+  25% { transform: rotate(-10deg) scale(1.08); }
+  50% { transform: rotate(8deg) scale(1.08); }
+  75% { transform: rotate(-4deg); }
+}
+.capy.sad svg { animation: shake .45s ease; }
+@keyframes shake { 20%, 60% { transform: translateX(-7px); } 40%, 80% { transform: translateX(7px); } }
+.capy .blush { transition: opacity .3s; }
+.capy.blushing .blush { opacity: 1 !important; }
+
+.question {
+  margin-top: 26px;
+  font-family: 'Caveat', cursive;
+  font-size: 2.3rem;
+  line-height: 1.1;
+  font-weight: 700;
+  color: #b8345b;
+}
+
+.choices { position: relative; width: 100%; height: 220px; margin-top: 12px; }
+.btn {
+  position: absolute;
+  top: 40px;
+  --s: 1;
+  transform: translateX(-50%) scale(var(--s));
+  padding: 12px 26px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  white-space: nowrap;
+  transition: left .35s cubic-bezier(.3, 1.4, .5, 1), top .35s cubic-bezier(.3, 1.4, .5, 1), transform .3s cubic-bezier(.3, 1.4, .5, 1);
+}
+.btn.yes {
+  left: 30%;
+  z-index: 2;
+  background: linear-gradient(180deg, #ff7a9c, #ff4f7e);
+  color: #fff;
+  box-shadow: 0 4px 0 #d63a63, 0 8px 18px rgba(255, 79, 126, .35);
+}
+.btn.yes:active { transform: translateX(-50%) scale(var(--s)) translateY(3px); box-shadow: 0 1px 0 #d63a63; }
+.btn.no {
+  left: 70%;
+  background: #fff;
+  color: var(--rose);
+  box-shadow: 0 3px 0 #f0c3cf;
+}
+.back-turn { position: static; margin-top: 10px; animation: none; }
+
+/* ---------- draggable pieces ---------- */
+.piece {
+  position: absolute;
+  left: 0; top: 0;
+  touch-action: none;
+  cursor: grab;
+  --lift: 0;
+  will-change: transform;
+}
+.piece:active { cursor: grabbing; }
+.pop { perspective: 700px; animation: popIn .6s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes popIn { from { transform: scale(0) rotate(-20deg); opacity: 0; } }
+.polaroid .pop { animation-name: dropIn; animation-duration: .8s; }
+@keyframes dropIn { from { transform: translateY(-60px) scale(1.4); opacity: 0; } }
+
+.pol-inner, .stk { transform-style: preserve-3d; -webkit-transform-style: preserve-3d; }
+
+.polaroid { width: var(--pw, 150px); }
+.pol-front, .pol-back {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 3px;
+  box-shadow:
+    0 1px 2px rgba(107, 44, 62, .12),
+    0 calc(4px + var(--lift) * 18px) calc(8px + var(--lift) * 28px) rgba(107, 44, 62, calc(.16 + var(--lift) * .1));
+}
+.pol-front {
+  position: relative;
+  background: #fff;
+  padding: 7% 7% 0;
+}
+.pol-img {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: #f3e6ea;
+}
+.pol-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  filter: sepia(.08) saturate(1.1) contrast(1.03);
+}
+.pol-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.4) 48%, transparent 62%);
+  background-size: 300% 100%;
+  background-position: var(--shine, 50%) 0;
+  pointer-events: none;
+}
+.pol-img.missing {
+  background: linear-gradient(135deg, #ffd6e0, #ffe9d9);
+  display: grid;
+  place-items: center;
+}
+.pol-img.missing::before {
+  content: '📷\A' attr(data-label);
+  white-space: pre;
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  color: #c2406a;
+}
+.pol-cap {
+  padding: 5px 2px 9px;
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  font-weight: 700;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  color: var(--rose);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pol-back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 21px, rgba(107,44,62,.08) 21px 22px),
+    #fffaf3;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 12%;
+  text-align: center;
+  font-family: 'Caveat', cursive;
+  font-size: 1.2rem;
+  line-height: 1.15;
+  color: var(--rose);
+}
+.pol-back small { font-size: .85rem; opacity: .6; }
+
+.sticker .stk { will-change: transform; }
+.sticker img { width: 100%; height: auto; display: block; pointer-events: none; -webkit-user-drag: none; }
+
+/* ---------- flip hint toast ---------- */
+/* ---------- sound gate popup ---------- */
+#gate {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(255, 246, 248, .72);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: opacity .5s ease;
+}
+#gate.hide { opacity: 0; pointer-events: none; }
+.gate-card {
+  max-width: 300px;
+  padding: 26px 28px 24px;
+  border-radius: 26px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 18px 50px rgba(107, 44, 62, .2);
+  animation: popIn .7s cubic-bezier(.3, 1.6, .5, 1) both, gatePulse 2.2s ease-in-out 1.2s infinite;
+}
+@keyframes gatePulse { 50% { transform: scale(1.04); } }
+.gate-capy { width: 110px; margin: 0 auto 12px; }
+.gate-title {
+  font-family: 'Caveat', cursive;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.05;
+  color: #c2406a;
+}
+.gate-sub { margin-top: 10px; font-size: .9rem; font-weight: 700; opacity: .7; }
+
+/* ---------- music toggle ---------- */
+.music {
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  right: 12px;
+  z-index: 35;
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .85);
+  box-shadow: 0 3px 10px rgba(107, 44, 62, .18);
+  font-size: 1.2rem;
+  display: grid;
+  place-items: center;
+}
+.music.playing { animation: spin 4s linear infinite; }
+.music.muted { opacity: .55; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  z-index: 20;
+  transform: translate(-50%, 20px);
+  opacity: 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(107, 44, 62, .88);
+  color: #fff;
+  font-size: .85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity .4s, transform .4s;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- celebration ---------- */
+#celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(255, 246, 248, .9);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: fadeIn .5s ease both;
+}
+#celebrate[hidden] { display: none; }
+@keyframes fadeIn { from { opacity: 0; } }
+.cele-card { text-align: center; max-width: 360px; animation: popIn .7s cubic-bezier(.3, 1.6, .5, 1) both; }
+.cele-card .capy { width: 170px; margin: 0 auto; animation: hop .6s ease-in-out infinite alternate; }
+@keyframes hop { from { transform: translateY(0) rotate(-4deg); } to { transform: translateY(-18px) rotate(4deg); } }
+.cele-card h1 { font-family: 'Caveat', cursive; font-size: 3.2rem; color: #e0426f; margin-top: 16px; line-height: 1; }
+.cele-card p { margin-top: 10px; font-size: 1.05rem; font-weight: 700; }
+.cele-card p.small { font-weight: 500; font-size: .9rem; opacity: .75; }
+.cele-card .btn { position: static; display: inline-block; transform: none; margin-top: 22px; text-decoration: none; }
+.cele-card .btn:active { transform: translateY(3px); }
+#waBtn[hidden] { display: none; }
+.linkish { display: block; margin: 18px auto 0; font-size: .9rem; text-decoration: underline; opacity: .7; }
+
+.confetti {
+  position: fixed;
+  top: -40px;
+  z-index: 40;
+  pointer-events: none;
+  animation: fall linear forwards;
+}
+@keyframes fall { to { transform: translate(var(--dx), 110vh) rotate(var(--rot)); } }
+
+.float-heart {
+  position: fixed;
+  z-index: 25;
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
+}
+@keyframes floatUp { to { transform: translate(var(--dx), -90px) scale(1.4); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  #bg-hearts, .env-bob, .envelope, .turn { animation: none !important; }
+}
+</style>
+</head>
+<body class="locked">
+
+<audio id="song" src="song.mp3" loop preload="auto"></audio>
+<button class="music" id="musicBtn" aria-label="Pause music">🎵</button>
+
+<div id="gate" role="button" tabindex="0" aria-label="Tap for the full experience">
+  <div class="gate-card">
+    <div class="gate-capy diecut" id="gateCapy"></div>
+    <p class="gate-title">tap here for the full experience</p>
+    <p class="gate-sub">🎧 turn your sound on</p>
+  </div>
+</div>
+
+<div id="bg-hearts"></div>
+
+<!-- ============ ENVELOPE ============ -->
+<section id="envelope-scene">
+  <div class="env-bob">
+    <div class="env-tilt" id="envTilt">
+      <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open the letter">
+        <div class="env-back"></div>
+        <div class="env-letter">for you ♡</div>
+        <div class="env-pocket">
+          <svg viewBox="0 0 300 192" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0 0 L146 104 L0 192Z" fill="#ffc2d0"/>
+            <path d="M300 0 L154 104 L300 192Z" fill="#ffc2d0"/>
+            <path d="M0 192 L138 94 Q150 86 162 94 L300 192Z" fill="#ffadc0"/>
+            <path d="M0 192 L138 94 Q150 86 162 94 L300 192" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="env-to" id="envTo"></div>
+        <div class="env-flap">
+          <svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+              <linearGradient id="flapGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#ffa3b8"/>
+                <stop offset="1" stop-color="#ff8ba7"/>
+              </linearGradient>
+            </defs>
+            <path d="M0 0 H300 L165 110 Q150 121 135 110 Z" fill="url(#flapGrad)"/>
+          </svg>
+        </div>
+        <div class="seal" aria-hidden="true">
+          <svg viewBox="0 0 100 90"><path d="M50 86 C20 64 4 46 4 28 C4 13 16 3 29 3 C39 3 46 9 50 16 C54 9 61 3 71 3 C84 3 96 13 96 28 C96 46 80 64 50 86Z" fill="#ffd6e0"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="hint" id="hint">tap to open 💌</p>
+</section>
+
+<!-- ============ LETTER ============ -->
+<main id="letter-scene" hidden>
+  <div class="letter-stage" id="stage">
+    <div class="letter" id="letter">
+
+      <div class="face front" id="front">
+        <div class="tape"></div>
+        <p class="date" id="date"></p>
+        <p class="greeting" id="greeting"></p>
+        <div id="intro"></div>
+        <div class="gap"></div>
+        <div class="photo-zone" id="photoZone"></div>
+        <div id="outro"></div>
+        <div class="signoff">
+          <span id="signoffLine"></span>
+          <b id="fromName"></b>
+        </div>
+        <button class="turn" id="turnBtn">psst… turn me over ↻</button>
+      </div>
+
+      <div class="face back" id="back">
+        <div class="ask">
+          <p class="ps">p.s.</p>
+          <div class="capy-wrap">
+            <div class="bubble" id="bubble">psst… i have a question</div>
+            <div class="capy diecut" id="capy"></div>
+          </div>
+          <h2 class="question" id="question"></h2>
+          <div class="choices" id="choices">
+            <button class="btn yes" id="yesBtn">yes 💖</button>
+            <button class="btn no" id="noBtn">no</button>
+          </div>
+          <button class="turn back-turn" id="turnBackBtn">↺ turn back</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div id="celebrate" hidden>
+  <div class="cele-card">
+    <div class="capy diecut" id="celeCapy"></div>
+    <h1>YAYYYY!!! 💞</h1>
+    <p id="celeLine"></p>
+    <p class="small">no take-backs. the capybara is a witness. 🍊</p>
+    <a class="btn yes" id="waBtn" target="_blank" rel="noopener" hidden></a>
+    <button class="linkish" id="closeCele">read the letter again</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   ✏️  EDIT EVERYTHING IN HERE
+   ===================================================================== */
+const CONFIG = {
+  to: 'Safa Alvina Khan', // her name (shows on envelope + greeting)
+  from: 'Tareq',        // your name everywhere except the signature
+
+  // Put your photos in a "be_mine" folder next to this file.
+  // caption = written under the photo, note = written on the back (tap to flip)
+  photos: [
+    { src: 'be_mine/1.jpeg', caption: 'us ♡',            note: 'the day i’ll remember forever 🥰' },
+    { src: 'be_mine/2.jpeg', caption: 'my favourite',     note: 'i still love the day you nicknamed me "suami idaman" AHAHAHAHAH' },
+    { src: 'be_mine/3.jpeg', caption: 'that smile tho',   note: 'this one lives rent-free in my head' },
+    { src: 'be_mine/4.jpeg', caption: 'more of these pls', note: 'let\'s make a hundred more of these' },
+  ],
+
+  // Each entry is a paragraph, { lead, items } for a line followed by a heart list,
+  // or { highlight } for a centred pink line.
+  intro: [
+    'Ever since I stumbled onto your very first thread post, all I have wanted is to be yours, and my heart still feels that way every single day.',
+    'Somewhere along the way you became my favourite part of every day. Your voice is my comfort, and hearing it is the sweetest way to unwind at the end of a long day.',
+  ],
+
+  outro: [
+    { lead: 'Here are just a few of the things I adore about you:', items: [
+      'the way you pour your heart out when you share your feelings and thoughts',
+      'how passionate you are about everything you love',
+      'those beautiful, haunting eyes I could get lost in forever',
+      'how crazy and quirky you are (I love every bit of it)',
+      'all your little screams and all our little moments',
+    ] },
+    { highlight: 'and I want to spend the rest of my life making a million more of them with you ♡' },
+    { lead: 'To me, you are:', items: [
+      'my favourite podcaster',
+      'my partner',
+      'my serenity',
+      'my mahaguru',
+    ] },
+    'So now, I have a very important question for you…',
+  ],
+
+  signoff: 'yours, now and forever,',
+  signature: 'Tareq your yayang🤍',   // the name under the sign-off (everywhere else uses `from`)
+  question: 'will you be my girlfriend and be my better half?',
+
+  // Optional: your WhatsApp number in international format, no + or spaces
+  // (e.g. '60123456789'). If set, the "yes" screen gets a button to text you.
+  whatsapp: '',
+};
+/* ===================================================================== */
+
+const $ = id => document.getElementById(id);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rand = (a, b) => a + Math.random() * (b - a);
+
+/* ---------- svg stickers ---------- */
+const HEART_PATH = 'M50 86 C20 64 4 46 4 28 C4 13 16 3 29 3 C39 3 46 9 50 16 C54 9 61 3 71 3 C84 3 96 13 96 28 C96 46 80 64 50 86Z';
+const STICKERS = {
+  heart: `<svg viewBox="0 0 100 90"><path d="${HEART_PATH}" fill="#ff6b8b"/><ellipse cx="28" cy="25" rx="10" ry="6" fill="#fff" opacity=".55" transform="rotate(-35 28 25)"/></svg>`,
+  star: `<svg viewBox="0 0 100 100"><path d="M50 6 L62 36 L94 38 L69 59 L78 91 L50 73 L22 91 L31 59 L6 38 L38 36Z" fill="#ffd45c" stroke="#f5b82e" stroke-width="5" stroke-linejoin="round"/><circle cx="41" cy="52" r="3.5" fill="#6b2c3e"/><circle cx="59" cy="52" r="3.5" fill="#6b2c3e"/><path d="M45 60 Q50 65 55 60" stroke="#6b2c3e" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="34" cy="60" rx="5" ry="3" fill="#ff9fb2"/><ellipse cx="66" cy="60" rx="5" ry="3" fill="#ff9fb2"/></svg>`,
+  flower: `<svg viewBox="0 0 100 100"><g fill="#ffb3c6"><circle cx="50" cy="27" r="17"/><circle cx="72" cy="43" r="17"/><circle cx="64" cy="69" r="17"/><circle cx="36" cy="69" r="17"/><circle cx="28" cy="43" r="17"/></g><circle cx="50" cy="50" r="14" fill="#ffd45c"/><circle cx="45" cy="47" r="2.5" fill="#6b2c3e"/><circle cx="55" cy="47" r="2.5" fill="#6b2c3e"/><path d="M46 54 Q50 57 54 54" stroke="#6b2c3e" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
+  bow: `<svg viewBox="0 0 120 84"><path d="M55 42 L38 80 L51 75 L58 82 L61 44Z" fill="#ff7096"/><path d="M65 42 L82 80 L69 75 L62 82 L59 44Z" fill="#ff7096"/><path d="M60 40 C40 8 6 8 9 31 C12 54 40 54 60 40Z" fill="#ff8fab"/><path d="M60 40 C80 8 114 8 111 31 C108 54 80 54 60 40Z" fill="#ff8fab"/><circle cx="60" cy="40" r="11" fill="#ff5c8a"/></svg>`,
+  strawberry: `<svg viewBox="0 0 100 110"><path d="M50 104 C22 90 8 60 14 42 C20 26 38 28 50 32 C62 28 80 26 86 42 C92 60 78 90 50 104Z" fill="#ff4d6d"/><g fill="#ffe08a"><ellipse cx="32" cy="50" rx="2.5" ry="3.5"/><ellipse cx="50" cy="48" rx="2.5" ry="3.5"/><ellipse cx="68" cy="50" rx="2.5" ry="3.5"/><ellipse cx="40" cy="66" rx="2.5" ry="3.5"/><ellipse cx="60" cy="66" rx="2.5" ry="3.5"/><ellipse cx="50" cy="82" rx="2.5" ry="3.5"/></g><path d="M50 36 L34 22 L44 25 L40 10 L50 22 L60 10 L56 25 L66 22Z" fill="#5cb85c" stroke="#5cb85c" stroke-width="3" stroke-linejoin="round"/></svg>`,
+  cutie: `<svg viewBox="0 0 130 56"><rect x="3" y="3" width="124" height="50" rx="25" fill="#fff" stroke="#ff8fab" stroke-width="4"/><text x="65" y="37" text-anchor="middle" font-family="Caveat, cursive" font-size="30" font-weight="700" fill="#e0557a">cutie ♡</text></svg>`,
+  sparkle: `<svg viewBox="0 0 100 100"><path d="M50 4 C54 38 62 46 96 50 C62 54 54 62 50 96 C46 62 38 54 4 50 C38 46 46 38 50 4Z" fill="#c9b6ff"/></svg>`,
+  orange: `<svg viewBox="0 0 100 100"><circle cx="50" cy="56" r="38" fill="#ffa53a"/><path d="M50 19 C50 11 54 7 58 5" stroke="#6b8e23" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M52 17 C62 5 80 7 84 13 C74 21 60 21 52 17Z" fill="#7cc45a"/><ellipse cx="36" cy="42" rx="9" ry="6" fill="#fff" opacity=".5" transform="rotate(-35 36 42)"/></svg>`,
+};
+
+const CAPYBARA = `<svg viewBox="0 0 220 220">
+  <ellipse cx="110" cy="158" rx="74" ry="54" fill="#a86f45"/>
+  <ellipse cx="110" cy="168" rx="46" ry="36" fill="#c28a5e"/>
+  <ellipse cx="72" cy="206" rx="18" ry="9" fill="#8a5634"/>
+  <ellipse cx="148" cy="206" rx="18" ry="9" fill="#8a5634"/>
+  <ellipse cx="60" cy="58" rx="13" ry="11" fill="#8a5634"/>
+  <ellipse cx="160" cy="58" rx="13" ry="11" fill="#8a5634"/>
+  <ellipse cx="60" cy="59" rx="6" ry="5" fill="#6e4127"/>
+  <ellipse cx="160" cy="59" rx="6" ry="5" fill="#6e4127"/>
+  <rect x="46" y="48" width="128" height="96" rx="46" fill="#b97d50"/>
+  <ellipse cx="110" cy="118" rx="40" ry="24" fill="#9c653d"/>
+  <ellipse cx="99" cy="110" rx="4.5" ry="3.5" fill="#3b2415"/>
+  <ellipse cx="121" cy="110" rx="4.5" ry="3.5" fill="#3b2415"/>
+  <path d="M102 124 Q110 130 110 122 Q110 130 118 124" stroke="#3b2415" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <ellipse cx="80" cy="88" rx="6" ry="7" fill="#2b1a10"/>
+  <ellipse cx="140" cy="88" rx="6" ry="7" fill="#2b1a10"/>
+  <circle cx="82" cy="85" r="2.2" fill="#fff"/>
+  <circle cx="142" cy="85" r="2.2" fill="#fff"/>
+  <ellipse class="blush" cx="66" cy="110" rx="11" ry="6.5" fill="#ff8fa8" opacity=".7"/>
+  <ellipse class="blush" cx="154" cy="110" rx="11" ry="6.5" fill="#ff8fa8" opacity=".7"/>
+  <circle cx="110" cy="40" r="18" fill="#ffa53a"/>
+  <path d="M112 22 C120 12 134 14 138 20 C130 26 118 26 112 22Z" fill="#7cc45a"/>
+  <ellipse cx="103" cy="33" rx="5" ry="3.5" fill="#fff" opacity=".55" transform="rotate(-35 103 33)"/>
+  <path d="${HEART_PATH}" fill="#ff5c7c" transform="translate(88 148) scale(.44)"/>
+  <ellipse cx="89" cy="168" rx="11" ry="9" fill="#8a5634"/>
+  <ellipse cx="131" cy="168" rx="11" ry="9" fill="#8a5634"/>
+</svg>`;
+
+/* ---------- background hearts ---------- */
+(function bgHearts() {
+  const box = $('bg-hearts');
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('span');
+    s.textContent = Math.random() < .75 ? '♥' : '✿';
+    s.style.left = rand(0, 100) + '%';
+    s.style.fontSize = rand(12, 28) + 'px';
+    s.style.animationDuration = rand(10, 20) + 's';
+    s.style.animationDelay = -rand(0, 20) + 's';
+    s.style.setProperty('--drift', rand(-60, 60) + 'px');
+    box.appendChild(s);
+  }
+})();
+
+/* ---------- fill text ---------- */
+$('envTo').textContent = `for ${CONFIG.to} ♡`;
+$('greeting').textContent = `Dear ${CONFIG.to},`;
+$('date').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+for (const [boxId, list] of [['intro', CONFIG.intro], ['outro', CONFIG.outro]]) {
+  const box = $(boxId);
+  list.forEach(t => {
+    const p = document.createElement('p');
+    p.className = t.highlight ? 'body highlight' : 'body';
+    p.textContent = typeof t === 'string' ? t : (t.highlight || t.lead);
+    box.appendChild(p);
+    if (!t.items) return;
+    const ul = document.createElement('ul');
+    ul.className = 'hearts';
+    t.items.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      ul.appendChild(li);
+    });
+    box.appendChild(ul);
+  });
+}
+$('signoffLine').textContent = CONFIG.signoff;
+$('fromName').textContent = CONFIG.signature || CONFIG.from;
+$('question').textContent = CONFIG.question;
+$('capy').innerHTML = CAPYBARA;
+$('celeCapy').innerHTML = CAPYBARA;
+$('celeLine').textContent = `it's official, you're ${CONFIG.from}'s girlfriend now 🥹`;
+
+/* =====================================================================
+   Draggable piece: drag, throw, 3D tilt, pinch-rotate/zoom, tap
+   ===================================================================== */
+let Z = 10;
+const pieces = [];
+
+class Piece {
+  constructor(el, inner, opts = {}) {
+    Object.assign(this, {
+      el, inner,
+      onTap: opts.onTap,
+      liftScale: opts.liftScale ?? .08,
+      x: 0, y: 0, rot: 0, scale: 1,
+      vx: 0, vy: 0,
+      tiltX: 0, tiltY: 0, hoverTX: 0, hoverTY: 0,
+      lift: 0, flipA: 0, flipT: 0,
+      dragging: false, multi: false, moved: 0, t0: 0,
+      pointers: new Map(),
+      lastT: '', lastI: '', lastLift: -1,
+    });
+    el.addEventListener('pointerdown', e => this.down(e));
+    el.addEventListener('pointermove', e => this.move(e));
+    el.addEventListener('pointerup', e => this.up(e));
+    el.addEventListener('pointercancel', e => this.up(e));
+    el.addEventListener('pointerleave', e => {
+      if (e.pointerType === 'mouse' && !this.dragging) this.hoverTX = this.hoverTY = 0;
+    });
+    pieces.push(this);
+  }
+
+  down(e) {
+    if (e.button > 0) return;
+    e.preventDefault();
+    this.el.setPointerCapture(e.pointerId);
+    this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    this.el.style.zIndex = ++Z;
+    this.hoverTX = this.hoverTY = 0;
+    if (this.pointers.size === 1) {
+      this.dragging = true;
+      this.multi = false;
+      this.moved = 0;
+      this.t0 = performance.now();
+    } else {
+      this.multi = true;
+      this.startGesture();
+    }
+  }
+
+  startGesture() {
+    const [a, b] = [...this.pointers.values()];
+    this.g = {
+      ang: Math.atan2(b.y - a.y, b.x - a.x),
+      dist: Math.hypot(b.x - a.x, b.y - a.y) || 1,
+      mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2,
+      rot: this.rot, scale: this.scale, x: this.x, y: this.y,
+    };
+  }
+
+  move(e) {
+    const p = this.pointers.get(e.pointerId);
+    if (!p) {
+      if (e.pointerType === 'mouse') {
+        const r = this.el.getBoundingClientRect();
+        this.hoverTY = ((e.clientX - r.left) / r.width - .5) * 24;
+        this.hoverTX = -((e.clientY - r.top) / r.height - .5) * 24;
+      }
+      return;
+    }
+    const dx = e.clientX - p.x, dy = e.clientY - p.y;
+    p.x = e.clientX; p.y = e.clientY;
+
+    if (this.pointers.size === 1) {
+      this.x += dx; this.y += dy;
+      this.moved += Math.abs(dx) + Math.abs(dy);
+      this.vx = this.vx * .5 + dx * .5;
+      this.vy = this.vy * .5 + dy * .5;
+    } else {
+      const [a, b] = [...this.pointers.values()];
+      const g = this.g;
+      this.rot = g.rot + (Math.atan2(b.y - a.y, b.x - a.x) - g.ang) * 180 / Math.PI;
+      this.scale = clamp(g.scale * Math.hypot(b.x - a.x, b.y - a.y) / g.dist, .6, 2);
+      this.x = g.x + (a.x + b.x) / 2 - g.mx;
+      this.y = g.y + (a.y + b.y) / 2 - g.my;
+      this.vx = this.vy = 0;
+    }
+    this.clamp();
+  }
+
+  up(e) {
+    if (!this.pointers.has(e.pointerId)) return;
+    this.pointers.delete(e.pointerId);
+    if (this.pointers.size === 0) {
+      this.dragging = false;
+      if (!this.multi && this.moved < 8 && performance.now() - this.t0 < 350 && this.onTap) this.onTap(this);
+    } else if (this.pointers.size >= 2) {
+      this.startGesture();
+    }
+  }
+
+  clamp() {
+    const parent = this.el.parentElement;
+    const w = this.el.offsetWidth, h = this.el.offsetHeight;
+    this.x = clamp(this.x, -w * .35, parent.clientWidth - w * .65);
+    this.y = clamp(this.y, -h * .35, parent.clientHeight - h * .65);
+  }
+
+  update() {
+    let tgtTX, tgtTY, tgtLift;
+    if (this.dragging) {
+      this.vx *= .8; this.vy *= .8;
+      tgtTX = clamp(-this.vy * 2.2, -32, 32);
+      tgtTY = clamp(this.vx * 2.2, -32, 32);
+      tgtLift = 1;
+    } else {
+      if (Math.abs(this.vx) > .05 || Math.abs(this.vy) > .05) {
+        this.x += this.vx; this.y += this.vy;
+        this.vx *= .9; this.vy *= .9;
+        this.clamp();
+      } else {
+        this.vx = this.vy = 0;
+      }
+      tgtTX = this.hoverTX; tgtTY = this.hoverTY;
+      tgtLift = Math.abs(this.flipT - this.flipA) > 8 ? .8 : 0;
+    }
+    this.tiltX += (tgtTX - this.tiltX) * .16;
+    this.tiltY += (tgtTY - this.tiltY) * .16;
+    this.lift += (tgtLift - this.lift) * .2;
+    this.flipA += (this.flipT - this.flipA) * .11;
+    this.render();
+  }
+
+  render() {
+    const s = this.scale * (1 + this.lift * this.liftScale);
+    const t = `translate3d(${this.x.toFixed(1)}px,${this.y.toFixed(1)}px,0) rotate(${this.rot.toFixed(2)}deg) scale(${s.toFixed(3)})`;
+    if (t !== this.lastT) { this.el.style.transform = t; this.lastT = t; }
+    if (this.inner) {
+      const ty = this.tiltY + this.flipA;
+      const i = `rotateX(${this.tiltX.toFixed(2)}deg) rotateY(${ty.toFixed(2)}deg)`;
+      if (i !== this.lastI) {
+        this.inner.style.transform = i;
+        this.inner.style.setProperty('--shine', (50 - this.tiltY * 2.5).toFixed(1) + '%');
+        this.lastI = i;
+      }
+    }
+    if (Math.abs(this.lift - this.lastLift) > .004) {
+      this.el.style.setProperty('--lift', this.lift.toFixed(3));
+      this.lastLift = this.lift;
+    }
+  }
+}
+
+(function loop() {
+  for (const p of pieces) p.update();
+  requestAnimationFrame(loop);
+})();
+
+/* ---------- builders ---------- */
+function makePolaroid(photo, i, parent, delay) {
+  const el = document.createElement('div');
+  el.className = 'piece polaroid';
+  el.innerHTML = `
+    <div class="pop" style="animation-delay:${delay}s">
+      <div class="pol-inner">
+        <div class="pol-front">
+          <div class="pol-img"><img alt="" draggable="false"></div>
+          <div class="pol-cap"></div>
+        </div>
+        <div class="pol-back"><span class="note"></span><small>tap to flip back</small></div>
+      </div>
+    </div>`;
+  const img = el.querySelector('img');
+  const box = el.querySelector('.pol-img');
+  img.onerror = () => { img.remove(); box.classList.add('missing'); box.dataset.label = `photo ${i + 1}`; };
+  img.src = photo.src;
+  el.querySelector('.pol-cap').textContent = photo.caption || '';
+  el.querySelector('.note').textContent = photo.note || '♡';
+  parent.appendChild(el);
+  return new Piece(el, el.querySelector('.pol-inner'), {
+    onTap: p => { p.flipT = p.flipT ? 0 : 180; },
+  });
+}
+
+function makeSticker(name, size, parent, delay) {
+  const el = document.createElement('div');
+  el.className = 'piece sticker';
+  el.style.width = size + 'px';
+  const art = STICKERS[name] || `<img src="be_mine/stickers/${name}.png" alt="" draggable="false">`;
+  el.innerHTML = `<div class="pop" style="animation-delay:${delay}s"><div class="stk diecut">${art}</div></div>`;
+  parent.appendChild(el);
+  const stk = el.querySelector('.stk');
+  return new Piece(el, stk, {
+    liftScale: .15,
+    onTap: () => {
+      stk.classList.remove('wiggle');
+      void stk.offsetWidth;
+      stk.classList.add('wiggle');
+    },
+  });
+}
+
+/* ---------- envelope ---------- */
+const scene = $('envelope-scene');
+const envelope = $('envelope');
+const envTilt = $('envTilt');
+let opened = false;
+
+function tiltEnvelope(x, y) {
+  if (opened) return;
+  const rx = (y / innerHeight - .5) * -18;
+  const ry = (x / innerWidth - .5) * 22;
+  envTilt.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+}
+addEventListener('pointermove', e => tiltEnvelope(e.clientX, e.clientY));
+
+function openEnvelope() {
+  if (opened) return;
+  opened = true;
+  startSong();
+  envTilt.style.transform = '';
+  $('hint').classList.add('hide');
+  envelope.classList.add('open');
+  setTimeout(() => envelope.classList.add('flap-behind'), 650);
+  setTimeout(() => envelope.classList.add('pull'), 800);
+  setTimeout(() => { scene.classList.add('gone'); showLetter(); }, 2000);
+  setTimeout(() => { scene.style.display = 'none'; }, 3100);
+}
+envelope.addEventListener('click', openEnvelope);
+envelope.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openEnvelope(); } });
+
+/* ---------- letter ---------- */
+const front = $('front');
+const back = $('back');
+const letter = $('letter');
+
+async function showLetter() {
+  $('letter-scene').hidden = false;
+  document.body.classList.remove('locked');
+  scrollTo(0, 0);
+  $('stage').classList.add('enter');
+  try { await document.fonts.ready; } catch (_) {}
+  layoutPieces();
+  setTimeout(() => toast('drag the photos around & tap to flip them ✨'), 2600);
+}
+
+function layoutPieces() {
+  const W = front.clientWidth;
+  const pw = Math.round(Math.min(170, W * .42));
+  front.style.setProperty('--pw', pw + 'px');
+
+  const photos = CONFIG.photos;
+  const pols = photos.map((ph, i) => makePolaroid(ph, i, front, .5 + i * .18));
+  const polH = pols.length ? pols[0].el.offsetHeight : 0;
+
+  // reserve room in the letter for the photos (snapped to the ruled lines)
+  const rows = Math.ceil(photos.length / 2);
+  const rowH = polH * .9;
+  const zone = $('photoZone');
+  zone.style.height = Math.ceil((rows * rowH + polH * .25 + 16) / 32) * 32 + 'px';
+  const zoneTop = zone.offsetTop;
+
+  const edge = W * .04;
+  pols.forEach((p, i) => {
+    const row = Math.floor(i / 2), col = i % 2;
+    const lone = photos.length % 2 === 1 && i === photos.length - 1;
+    p.x = lone ? (W - pw) / 2 : col ? W - pw - edge : edge;
+    p.x += rand(-8, 8);
+    p.y = zoneTop + row * rowH + (col ? polH * .2 : 0) + rand(-6, 6);
+    p.rot = lone ? rand(-4, 4) : (col ? 1 : -1) * rand(3, 8);
+  });
+
+  // stickers: [name, size px, x fraction, y fraction, rotation]
+  // names are SVGs from STICKERS (e.g. 'bow') or PNGs in be_mine/stickers/<name>.png
+  const H = front.clientHeight;
+  const frontStickers = [
+    ['um-logo',       54, .83, .008, 10],
+    ['upsi-logo',     56, .01, .01, -8],
+    ['red-rose',      58, -.03, .19, -12],
+    ['hagia-sophia',  88, .68, zone.offsetTop / H - .022, 7],
+    ['malatang',      60, -.05, (zone.offsetTop + zone.offsetHeight) / H - .01, -10],
+    ['rosetta-stone', 54, .84, .6, 8],
+    ['lipstick',      38, -.03, .775, -18],
+    ['bow',           60, .03, .9, -8],
+    ['glass-flower',  50, .84, .955, 6],
+  ];
+  frontStickers.forEach(([name, size, fx, fy, r], i) => {
+    const s = makeSticker(name, size, front, 1.2 + i * .1);
+    s.x = fx * W; s.y = fy * H; s.rot = r;
+    s.clamp();
+  });
+}
+
+// Created on first flip: pieces positioned while the back is visibility:hidden
+// get painted at stale positions in Chrome.
+let backBuilt = false;
+function layoutBackStickers() {
+  if (backBuilt) return;
+  backBuilt = true;
+  const bW = back.clientWidth, bH = back.clientHeight;
+  const backStickers = [
+    ['red-roses',    74, .03, .02, -10],
+    ['glass-flower', 56, .8, .04, 12],
+    ['lipstick',     40, .14, Math.min(.8, 800 / bH), -16],
+    ['red-rose',     56, .74, Math.min(.8, 780 / bH), 10],
+    ['bow',          56, .46, Math.min(.88, 930 / bH), 8],
+    ['malatang',     56, .18, Math.min(.94, 1050 / bH), -8],
+  ];
+  backStickers.forEach(([name, size, fx, fy, r]) => {
+    const s = makeSticker(name, size, back, .3 + Math.random() * .4);
+    s.x = fx * bW; s.y = fy * bH; s.rot = r;
+    s.clamp();
+  });
+}
+
+addEventListener('resize', () => pieces.forEach(p => p.clamp()));
+
+// Flip in two halves (0 -> 90deg, swap faces, -90 -> 0) so the back face is never
+// rendered mirrored inside a nested 3D context, which Chrome/Safari composite badly.
+let flipping = false;
+function flipLetter(toBack) {
+  if (flipping) return;
+  flipping = true;
+  const top = $('stage').getBoundingClientRect().top + scrollY - 30;
+  const far = Math.abs(scrollY - top) > 40;
+  if (far) scrollTo({ top, behavior: 'smooth' });
+  const dir = toBack ? 1 : -1;
+  setTimeout(() => {
+    letter.style.transition = 'transform .4s cubic-bezier(.55, 0, .8, .3)';
+    letter.style.transform = `rotateY(${90 * dir}deg)`;
+    setTimeout(() => {
+      letter.classList.toggle('flipped', toBack);
+      if (toBack) layoutBackStickers();
+      letter.style.transition = 'none';
+      letter.style.transform = `rotateY(${-90 * dir}deg)`;
+      void letter.offsetWidth;
+      letter.style.transition = 'transform .6s cubic-bezier(.2, .7, .3, 1.2)';
+      letter.style.transform = 'rotateY(0deg)';
+      setTimeout(() => { flipping = false; }, 600);
+    }, 400);
+  }, far ? 450 : 0);
+}
+$('turnBtn').addEventListener('click', () => flipLetter(true));
+$('turnBackBtn').addEventListener('click', () => flipLetter(false));
+
+/* ---------- music ---------- */
+// Browsers block autoplay with sound until the first tap/click, so try on load
+// and fall back to starting on the first interaction (e.g. tapping the envelope).
+const song = $('song');
+const musicBtn = $('musicBtn');
+let musicOff = false;
+song.volume = 0.6;
+
+function startSong() {
+  if (musicOff || !song.paused) return;
+  song.play().then(syncMusicBtn).catch(() => {});
+}
+function syncMusicBtn() {
+  const playing = !song.paused;
+  musicBtn.classList.toggle('playing', playing);
+  musicBtn.classList.toggle('muted', !playing);
+  musicBtn.setAttribute('aria-label', playing ? 'Pause music' : 'Play music');
+}
+// Popup asking for a tap, since that's what browsers need before they'll play sound.
+// If autoplay is allowed anyway, the song just starts and the popup goes away by itself.
+const gate = $('gate');
+$('gateCapy').innerHTML = CAPYBARA;
+function hideGate() {
+  if (gate.classList.contains('hide')) return;
+  gate.classList.add('hide');
+  setTimeout(() => gate.remove(), 600);
+}
+function enterFromGate(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  musicOff = false;
+  song.play().catch(() => {});
+  hideGate();
+}
+gate.addEventListener('click', enterFromGate);
+gate.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') enterFromGate(e); });
+song.play().then(() => { syncMusicBtn(); hideGate(); }).catch(() => {});
+// Only the *end* of a tap (touchend / pointerup / click) counts as a user gesture on
+// mobile, so listen for those; pointerdown/touchstart get rejected by iOS/Android.
+['pointerdown', 'pointerup', 'touchend', 'click', 'keydown'].forEach(ev =>
+  addEventListener(ev, e => { if (!musicBtn.contains(e.target)) startSong(); }, { capture: true, passive: true }));
+song.addEventListener('play', syncMusicBtn);
+song.addEventListener('pause', syncMusicBtn);
+musicBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  if (song.paused) { musicOff = false; song.play().catch(() => {}); }
+  else { musicOff = true; song.pause(); }
+});
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+/* ---------- capybara ---------- */
+const capy = $('capy');
+capy.addEventListener('click', e => {
+  capy.classList.remove('wiggle');
+  void capy.offsetWidth;
+  capy.classList.add('wiggle', 'blushing');
+  setTimeout(() => capy.classList.remove('blushing'), 1200);
+  floatHearts(e.clientX, e.clientY, 5);
+});
+
+function floatHearts(x, y, n) {
+  for (let i = 0; i < n; i++) {
+    const h = document.createElement('span');
+    h.className = 'float-heart';
+    h.textContent = ['💖', '💕', '💗'][i % 3];
+    h.style.left = x - 10 + 'px';
+    h.style.top = y - 10 + 'px';
+    h.style.fontSize = rand(16, 26) + 'px';
+    h.style.setProperty('--dx', rand(-50, 50) + 'px');
+    h.style.animationDelay = i * .06 + 's';
+    document.body.appendChild(h);
+    h.addEventListener('animationend', () => h.remove());
+  }
+}
+
+/* ---------- yes / no ---------- */
+const yesBtn = $('yesBtn');
+const noBtn = $('noBtn');
+const choices = $('choices');
+const bubble = $('bubble');
+const NO_TEXTS = ['no', 'are you sure?', 'really sure??', 'think again 🥺', 'pls 🥹', 'the capybara is sad', 'last chance…'];
+const BUBBLES = ['psst… i have a question', 'hey!! 😤', 'wrong button hehe', 'that one\'s broken', '🥺🥺🥺', 'just press yes', 'ok it\'s basically decided'];
+let noCount = 0;
+
+const FLEE_RADIUS = 70;   // px from the button edge that counts as "too close"
+let lastStep = 0, lastFlee = 0;
+
+// One "no" attempt: change the texts, grow yes, upset the capybara.
+// Rate-limited so chasing the button doesn't burn through every message at once.
+function nextAttempt() {
+  const now = performance.now();
+  if (now - lastStep < 450) return;
+  lastStep = now;
+  noCount++;
+  if (noCount >= NO_TEXTS.length) {
+    noBtn.dataset.surrender = '1';
+    noBtn.textContent = 'ok fine, yes 💖';
+    noBtn.className = 'btn yes';
+    bubble.textContent = 'knew it 😌';
+    return;
+  }
+  noBtn.textContent = NO_TEXTS[noCount];
+  bubble.textContent = BUBBLES[noCount];
+  yesBtn.style.setProperty('--s', Math.min(1 + noCount * .14, 1.9));
+  capy.classList.remove('sad');
+  void capy.offsetWidth;
+  capy.classList.add('sad');
+}
+
+// Jump to the spot in the choices area farthest from (px, py), avoiding the yes button.
+function flee(px, py) {
+  const box = choices.getBoundingClientRect();
+  const yr = yesBtn.getBoundingClientRect();
+  const yes = { x: yr.left + yr.width / 2 - box.left, y: yr.top + yr.height / 2 - box.top };
+  const threat = px == null ? null : { x: px - box.left, y: py - box.top };
+  const bw = noBtn.offsetWidth, bh = noBtn.offsetHeight;
+  let best = null, bestScore = -1;
+  for (let i = 0; i < 24; i++) {
+    const x = rand(bw / 2 + 4, box.width - bw / 2 - 4);   // x is the button centre (translateX(-50%))
+    const y = rand(0, box.height - bh);
+    const cy = y + bh / 2;
+    if (Math.abs(x - yes.x) < (yr.width + bw) / 2 + 12 && Math.abs(cy - yes.y) < (yr.height + bh) / 2 + 12) continue;
+    const score = threat ? Math.hypot(x - threat.x, cy - threat.y) : Math.random();
+    if (score > bestScore) { bestScore = score; best = { x, y }; }
+  }
+  if (!best) return;
+  noBtn.style.left = best.x + 'px';
+  noBtn.style.top = best.y + 'px';
+  lastFlee = performance.now();
+}
+
+function dodge(px, py) {
+  if (noBtn.dataset.surrender) return;
+  nextAttempt();
+  if (!noBtn.dataset.surrender) flee(px, py);
+}
+
+function nearNo(x, y, pad) {
+  const r = noBtn.getBoundingClientRect();
+  const dx = Math.max(r.left - x, 0, x - r.right);
+  const dy = Math.max(r.top - y, 0, y - r.bottom);
+  return Math.hypot(dx, dy) < pad;
+}
+
+// Desktop: run away as soon as the cursor gets close.
+addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || !letter.classList.contains('flipped') || noBtn.dataset.surrender) return;
+  if (performance.now() - lastFlee < 180) return;
+  if (nearNo(e.clientX, e.clientY, FLEE_RADIUS)) dodge(e.clientX, e.clientY);
+});
+
+// Mobile: a tap on (or near) the button makes it jump away instead of clicking.
+addEventListener('touchstart', e => {
+  if (!letter.classList.contains('flipped') || noBtn.dataset.surrender) return;
+  const t = e.touches[0];
+  if (!nearNo(t.clientX, t.clientY, 36)) return;
+  e.preventDefault();
+  dodge(t.clientX, t.clientY);
+}, { passive: false });
+
+// Keyboard / anything that still manages to click it.
+noBtn.addEventListener('click', e => {
+  if (noBtn.dataset.surrender) sayYes(e);
+  else { e.preventDefault(); dodge(e.clientX || null, e.clientY || null); }
+});
+yesBtn.addEventListener('click', sayYes);
+
+/* ---------- celebration ---------- */
+function sayYes(e) {
+  if (e) floatHearts(e.clientX, e.clientY, 8);
+  const wa = $('waBtn');
+  if (CONFIG.whatsapp) {
+    wa.hidden = false;
+    wa.textContent = `tell ${CONFIG.from} 💌`;
+    wa.href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent('YES 💖 i\'ll be your girlfriend 🥹🍊')}`;
+  }
+  setTimeout(() => {
+    $('celebrate').hidden = false;
+    confettiShower(3500);
+  }, 300);
+}
+$('closeCele').addEventListener('click', () => { $('celebrate').hidden = true; });
+
+function confettiShower(ms) {
+  const bits = ['💖', '💕', '🌸', '✨', '💗', '🍊', '🎀', '♥'];
+  const end = performance.now() + ms;
+  (function drop() {
+    for (let i = 0; i < 4; i++) {
+      const c = document.createElement('span');
+      c.className = 'confetti';
+      c.textContent = bits[Math.floor(Math.random() * bits.length)];
+      c.style.left = rand(0, 100) + 'vw';
+      c.style.fontSize = rand(16, 34) + 'px';
+      c.style.animationDuration = rand(2.4, 4.2) + 's';
+      c.style.setProperty('--dx', rand(-80, 80) + 'px');
+      c.style.setProperty('--rot', rand(-360, 360) + 'deg');
+      document.body.appendChild(c);
+      c.addEventListener('animationend', () => c.remove());
+    }
+    if (performance.now() < end) setTimeout(drop, 90);
+  })();
+}
+</script>
+</body>
+</html>
