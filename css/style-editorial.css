@@ -255,8 +255,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 }
 .hero-top{ align-items: start; row-gap: 32px; }
 .hero-top .intro{ grid-column: 1 / span 3; }
-.hero-top .stat-a{ grid-column: 5 / span 2; }
-.hero-top .stat-b{ grid-column: 7 / span 2; }
+.hero-top .stat-b{ grid-column: 6 / span 2; }
 .hero-top .tagline{ grid-column: 9 / span 4; }
 .hero-stat .h4{ margin-bottom: 8px; }
 .hero-name{ width: 100%; overflow: hidden; }
@@ -403,8 +402,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 @media (max-width: 991px){
   .hero-top .intro{ grid-column: 1 / span 6; }
   .hero-top .tagline{ grid-column: 7 / span 6; }
-  .hero-top .stat-a{ grid-column: 1 / span 6; }
-  .hero-top .stat-b{ grid-column: 7 / span 6; }
+  .hero-top .stat-b{ grid-column: 1 / span 6; }
   .about-col, .about-col:nth-child(1){ grid-column: span 6; }
   .honour .place{ grid-column: 1 / span 2; }
   .honour .body{ grid-column: 3 / span 10; }
@@ -489,6 +487,99 @@ html.cursor-down .cursor-ring{ transform: scale(.8); }
 
 /* magnetic pull (set by the cursor script) */
 .btn, .menu-toggle, .style-switch a, .brand{ transition: translate .45s var(--ease), background .3s, color .3s; }
+
+/* =========================================================
+   16) PLAYFUL EXTRAS (js/fun.js)
+========================================================= */
+/* directional hover fills for rows and skill cells */
+.fillable{ position: relative; isolation: isolate; transition: color .35s; }
+.fillable::before{
+  content: ""; position: absolute; inset: 0 calc(var(--gutter) * -1); z-index: -1;
+  background: var(--ink);
+  transform: scaleY(0); transform-origin: top;
+  transition: transform .55s var(--ease);
+  pointer-events: none;
+}
+.skill.fillable::before{ inset: 0; }
+.fillable[data-from="bottom"]::before{ transform-origin: bottom; }
+.fillable[data-from="left"]::before{ transform: scaleX(0); transform-origin: left; }
+.fillable[data-from="right"]::before{ transform: scaleX(0); transform-origin: right; }
+.fillable.is-hot::before{ transform: none; }
+.fillable.is-hot{ color: var(--sand); }
+.fillable.is-hot .muted{ color: var(--sand-70); }
+.section.dark .fillable::before{ background: var(--sand); }
+.section.dark .fillable.is-hot{ color: var(--ink); }
+.section.dark .fillable.is-hot .muted{ color: var(--ink-70); }
+.honour .place{ transition: translate .55s var(--ease); }
+.honour.is-hot .place{ translate: 16px 0; }
+
+/* experience as minimal file folders: hairline outline, the date is the tab,
+   and the whole file (tab included) turns ink on hover */
+/* files have no bottom edge and sit flush, so each file's top line and tab
+   close off the one behind it, like a drawer of files seen from the front */
+#experience .rows{ display: grid; gap: 0; padding-top: 40px; }
+#experience .rows > .row, #experience .rows > .row:last-child{ border: 0; }
+#experience .exp{
+  position: relative; isolation: isolate;
+  padding: clamp(24px, 2.6vw, 40px) clamp(20px, 2.4vw, 36px) clamp(64px, 6vw, 84px);
+  transition: color .35s;
+}
+#experience .exp::before{
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  border: 1px solid var(--ink-10); border-bottom: 0;
+  border-radius: var(--radius, 0 8px 0 0);
+  transition: background-color .35s, border-color .35s;
+}
+#experience .exp:not(:nth-child(1)){ --radius: 8px 8px 0 0; }
+#experience .exp .when{
+  position: absolute; bottom: 100%; left: var(--tab, 0px);
+  margin-bottom: -1px;
+  padding: 9px 18px 8px;
+  background: var(--sand);
+  border: 1px solid var(--ink-10); border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  white-space: nowrap;
+  transition: background-color .35s, border-color .35s, color .35s;
+}
+#experience .exp:nth-child(2) .when{ --tab: 30%; }
+#experience .exp:nth-child(3) .when{ --tab: 60%; }
+#experience .exp:hover{ color: var(--sand); }
+#experience .exp:hover .muted{ color: var(--sand-70); }
+#experience .exp:hover::before, #experience .exp:hover .when{ background-color: var(--ink); border-color: var(--ink); }
+#experience .exp .role{ grid-column: 1 / span 5; }
+#experience .exp .detail{ grid-column: 6 / span 7; }
+@media (max-width: 640px){
+  #experience .exp .role, #experience .exp .detail{ grid-column: 1 / -1; }
+  #experience .exp:nth-child(2) .when{ --tab: 18%; }
+  #experience .exp:nth-child(3) .when{ --tab: 36%; }
+}
+
+/* section indicator on the right edge: same negative trick as the trail, so it reads on sand and ink */
+.indicator{
+  position: fixed; right: 10px; top: 50%; z-index: 330;
+  writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg);
+  color: #d4bc98; mix-blend-mode: difference;
+  pointer-events: none; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* text laid over the project animations */
+.art-readout{ position: absolute; top: 14px; right: 24px; z-index: 1; font-variant-numeric: tabular-nums; }
+.art-flash{
+  position: absolute; inset: 0; z-index: 1;
+  display: grid; place-items: center;
+  opacity: 0; transform: scale(.7);
+  transition: opacity .25s, transform .6s var(--ease);
+  pointer-events: none;
+}
+.art-flash.on{ opacity: 1; transform: scale(1); animation: goal-pop .9s var(--ease); }
+@keyframes goal-pop{
+  0%{ transform: scale(.3) rotate(-10deg); }
+  35%{ transform: scale(1.2) rotate(5deg); }
+  55%{ transform: scale(.94) rotate(-3deg); }
+  75%{ transform: scale(1.04) rotate(1deg); }
+  100%{ transform: scale(1) rotate(0); }
+}
+@media (max-width: 640px){ .indicator{ display: none; } }
 
 @media (prefers-reduced-motion: reduce){
   *, *::before, *::after{ animation-duration: .01ms !important; transition-duration: .01ms !important; }

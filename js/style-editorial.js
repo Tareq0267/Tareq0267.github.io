@@ -98,7 +98,7 @@ window.initStyle = function () {
   ========================================================= */
   let lenis = null;
   if (!reduceMotion && typeof Lenis !== 'undefined') {
-    lenis = new Lenis({ lerp: 0.09 });
+    lenis = window.__lenis = new Lenis({ lerp: 0.09 });
     if (hasGsap) {
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add(t => lenis.raf(t * 1000));
@@ -266,7 +266,8 @@ window.initStyle = function () {
     if (hasSplit) {
       const split = SplitText.create(name, { type: 'chars', mask: 'chars' });
       fitText();
-      tl.from(split.chars, { yPercent: 110, duration: 1.3, ease: 'power4.out', stagger: .04 });
+      tl.from(split.chars, { yPercent: 110, duration: 1.3, ease: 'power4.out', stagger: .04 })
+        .add(() => document.dispatchEvent(new CustomEvent('hero:ready', { detail: split })));
     } else {
       tl.from(name, { yPercent: 40, opacity: 0, duration: 1.2, ease: 'power4.out' });
     }

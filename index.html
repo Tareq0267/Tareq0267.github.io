@@ -85,14 +85,10 @@
 
   <main>
     <!-- Hero -->
-    <section class="hero has-art" id="main">
-      <canvas class="art" data-dither="hero" data-lens data-cell="6" aria-hidden="true"></canvas>
+    <section class="hero has-art" id="main" data-label="Intro">
+      <canvas class="art" data-dither="hero" data-lens data-cell="6" data-avoid=".hero .intro, .hero-stat .h4, .hero-stat .p6, .hero .tagline, .hero-bottom > *" aria-hidden="true"></canvas>
       <div class="grid-12 hero-top">
         <p class="p6 intro" data-fade>Portfolio<br><span class="muted">AI Developer &amp; CS Graduate</span></p>
-        <div class="hero-stat stat-a" data-fade>
-          <div class="h4">3<sup style="font-size:.45em">rd</sup></div>
-          <p class="p6 muted">International ranking<br>RoboCup Beijing Masters 2026</p>
-        </div>
         <div class="hero-stat stat-b" data-fade>
           <div class="h4">3.71</div>
           <p class="p6 muted">CGPA<br>University of Malaya</p>
@@ -113,7 +109,7 @@
     </section>
 
     <!-- Prologue -->
-    <section class="section prologue wrap center has-art">
+    <section class="section prologue wrap center has-art" data-label="Prologue">
       <canvas class="art art-prologue" data-dither="prologue" data-cell="6" data-avoid=".prologue .label, .prologue .h5, .prologue .actions .btn" aria-hidden="true"></canvas>
       <h2 class="p6 label">prologue</h2>
       <p class="h5 sentence" data-split>
@@ -126,7 +122,7 @@
     </section>
 
     <!-- About -->
-    <section class="section wrap" id="about">
+    <section class="section wrap" id="about" data-label="About">
       <div class="about-head">
         <h2 class="h1" data-split>About</h2>
         <p class="h6 italic">Muhammad Tareq Adam bin Ellias</p>
@@ -163,7 +159,7 @@
     </section>
 
     <!-- Honours / News -->
-    <section class="section dark wrap" id="honours" data-theme="dark">
+    <section class="section dark wrap" id="honours" data-theme="dark" data-label="News">
       <div class="section-head center">
         <h2 class="p6 label">news</h2>
         <h3 class="h3" data-split>What’s been happening lately</h3>
@@ -221,7 +217,7 @@
     </section>
 
     <!-- Experience -->
-    <section class="section wrap" id="experience">
+    <section class="section wrap" id="experience" data-label="Experience">
       <div class="section-head center">
         <h2 class="p6 label">experience</h2>
         <h3 class="h3" data-split>Where I've worked</h3>
@@ -267,7 +263,7 @@
     </section>
 
     <!-- Skills -->
-    <section class="section wrap" id="skills">
+    <section class="section wrap" id="skills" data-label="Skills">
       <div class="section-head center">
         <h2 class="p6 label">toolkit</h2>
         <h3 class="h3" data-split>Technical skills</h3>
@@ -284,7 +280,7 @@
     </section>
 
     <!-- Projects -->
-    <section class="section wrap" id="projects">
+    <section class="section wrap" id="projects" data-label="Projects">
       <div class="section-head center">
         <h2 class="p6 label">selected work</h2>
         <h3 class="h3" data-split>Featured projects</h3>
@@ -294,37 +290,19 @@
         <div class="project-tabs">
           <p class="p6 muted label">Projects</p>
           <ul role="tablist" aria-label="Projects">
-            <li><button role="tab" id="tab-1" aria-controls="panel-1" aria-selected="true"><span class="p6">01</span><span class="h6">RoboCup @Home</span></button></li>
-            <li><button role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false" tabindex="-1"><span class="p6">02</span><span class="h6">RoboCup Sim</span></button></li>
-            <li><button role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1"><span class="p6">03</span><span class="h6">Project AWA</span></button></li>
-            <li><button role="tab" id="tab-4" aria-controls="panel-4" aria-selected="false" tabindex="-1"><span class="p6">04</span><span class="h6">Rumi to Jawi</span></button></li>
-            <li><button role="tab" id="tab-5" aria-controls="panel-5" aria-selected="false" tabindex="-1"><span class="p6">05</span><span class="h6">Avicenna</span></button></li>
-            <li><button role="tab" id="tab-6" aria-controls="panel-6" aria-selected="false" tabindex="-1"><span class="p6">06</span><span class="h6">30Juz</span></button></li>
+            <li><button role="tab" id="tab-1" aria-controls="panel-1" aria-selected="true"><span class="p6">01</span><span class="h6">RoboCup Sim</span></button></li>
+            <li><button role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false" tabindex="-1"><span class="p6">02</span><span class="h6">Project AWA</span></button></li>
+            <li><button role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1"><span class="p6">03</span><span class="h6">Rumi to Jawi</span></button></li>
+            <li><button role="tab" id="tab-4" aria-controls="panel-4" aria-selected="false" tabindex="-1"><span class="p6">04</span><span class="h6">Avicenna</span></button></li>
+            <li><button role="tab" id="tab-5" aria-controls="panel-5" aria-selected="false" tabindex="-1"><span class="p6">05</span><span class="h6">30Juz</span></button></li>
           </ul>
         </div>
 
         <div class="project-panels">
           <div class="panel" role="tabpanel" id="panel-1" aria-labelledby="tab-1">
             <div class="panel-card">
-              <div class="panel-top"><span class="p6">01 / 06</span><span class="p6 muted">Robotics · Winner</span></div>
-              <div class="panel-art" data-scene="radar"><canvas class="art" data-dither="radar" data-lens data-cell="5" aria-hidden="true"></canvas></div>
-              <div class="panel-body">
-                <h4 class="h3">RoboCup @Home: Champion Robot</h4>
-                <p class="p5 desc">First place winning autonomous service robot for RoboCup Malaysia 2025. Features navigation, object recognition, and human-robot interaction.</p>
-              </div>
-              <div>
-                <ul class="panel-feats p6"><li>Navigation</li><li>Object recognition</li><li>Human-robot interaction</li><li>RobotEdge UM</li></ul>
-                <div class="panel-links">
-                  <a class="btn p6" href="https://www.instagram.com/robocupmalaysia/p/DNOFP1iPjKx/" target="_blank" rel="noreferrer"><span class="roll"><span>View announcement</span><span>View announcement</span></span><span class="arrow" aria-hidden="true">↗</span></a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="panel" role="tabpanel" id="panel-2" aria-labelledby="tab-2" hidden>
-            <div class="panel-card">
-              <div class="panel-top"><span class="p6">02 / 06</span><span class="p6 muted">Robotics · TypeScript</span></div>
-              <div class="panel-art" data-scene="pitch"></div>
+              <div class="panel-top"><span class="p6">01 / 05</span><span class="p6 muted">Robotics · TypeScript</span></div>
+              <div class="panel-art" data-scene="pitch"><span class="art-flash h2" data-flash>Goal!</span><canvas class="art" data-dither="pitch" data-cell="5" aria-hidden="true"></canvas></div>
               <div class="panel-body">
                 <h4 class="h3">RoboCup 2D Sim</h4>
                 <p class="p5 desc">A simple top-view 2D RoboCup simulator built with TypeScript and deployed on Vercel. Tune the parameters and simulate the robots' logic to understand how a Booster T1 thinks and moves in a standard RoboCup humanoid soccer game.</p>
@@ -338,9 +316,9 @@
             </div>
           </div>
 
-          <div class="panel" role="tabpanel" id="panel-3" aria-labelledby="tab-3" hidden>
+          <div class="panel" role="tabpanel" id="panel-2" aria-labelledby="tab-2" hidden>
             <div class="panel-card">
-              <div class="panel-top"><span class="p6">03 / 06</span><span class="p6 muted">Education · Web</span></div>
+              <div class="panel-top"><span class="p6">02 / 05</span><span class="p6 muted">Education · Web</span></div>
               <div class="panel-art" data-scene="planet"></div>
               <div class="panel-body">
                 <h4 class="h3">Project AWA</h4>
@@ -355,9 +333,9 @@
             </div>
           </div>
 
-          <div class="panel" role="tabpanel" id="panel-4" aria-labelledby="tab-4" hidden>
+          <div class="panel" role="tabpanel" id="panel-3" aria-labelledby="tab-3" hidden>
             <div class="panel-card">
-              <div class="panel-top"><span class="p6">04 / 06</span><span class="p6 muted">Language · Web</span></div>
+              <div class="panel-top"><span class="p6">03 / 05</span><span class="p6 muted">Language · Web</span></div>
               <div class="panel-art" data-scene="glyph"></div>
               <div class="panel-body">
                 <h4 class="h3">Rumi to Jawi Translator</h4>
@@ -372,10 +350,10 @@
             </div>
           </div>
 
-          <div class="panel" role="tabpanel" id="panel-5" aria-labelledby="tab-5" hidden>
+          <div class="panel" role="tabpanel" id="panel-4" aria-labelledby="tab-4" hidden>
             <div class="panel-card">
-              <div class="panel-top"><span class="p6">05 / 06</span><span class="p6 muted">AI · Django</span></div>
-              <div class="panel-art" data-scene="ecg"></div>
+              <div class="panel-top"><span class="p6">04 / 05</span><span class="p6 muted">AI · Django</span></div>
+              <div class="panel-art" data-scene="ecg"><span class="art-readout p6" data-readout>72 BPM</span></div>
               <div class="panel-body">
                 <h4 class="h3">Avicenna: AI Fitness Tracker</h4>
                 <p class="p5 desc">Django-based fitness tracker with AI-powered calorie detection. Tracks dietary intake, exercise, and weight management with a smart dashboard.</p>
@@ -389,10 +367,10 @@
             </div>
           </div>
 
-          <div class="panel" role="tabpanel" id="panel-6" aria-labelledby="tab-6" hidden>
+          <div class="panel" role="tabpanel" id="panel-5" aria-labelledby="tab-5" hidden>
             <div class="panel-card">
-              <div class="panel-top"><span class="p6">06 / 06</span><span class="p6 muted">Web App · 2026</span></div>
-              <div class="panel-art" data-scene="crescent"></div>
+              <div class="panel-top"><span class="p6">05 / 05</span><span class="p6 muted">Web App · 2026</span></div>
+              <div class="panel-art" data-scene="book"><span class="art-readout p6" data-readout>Juz 1 / 30</span></div>
               <div class="panel-body">
                 <h4 class="h3">30Juz: Ramadan Quran Tracker</h4>
                 <p class="p5 desc">Web app to help users complete the Quran during Ramadan 2026. Track daily progress through all 30 juz with a beautiful, focused interface.</p>
@@ -411,7 +389,7 @@
     </section>
 
     <!-- Contact -->
-    <section class="section dark wrap contact" id="contact" data-theme="dark">
+    <section class="section dark wrap contact" id="contact" data-theme="dark" data-label="Contact">
       <div class="section-head center">
         <h2 class="p6 label">contact</h2>
         <h3 class="h3" data-split>Get in touch</h3>
@@ -444,6 +422,9 @@
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.15/dist/lenis.min.js"></script>
   <script src="js/dither.js"></script>
   <script src="js/style-editorial.js"></script>
+  <div class="indicator p6" aria-hidden="true"><span class="ind-num">01</span> / <span class="ind-total">08</span> · <span class="ind-name">Intro</span></div>
+
+  <script src="js/fun.js"></script>
   <script src="js/site.js"></script>
 </body>
 </html>

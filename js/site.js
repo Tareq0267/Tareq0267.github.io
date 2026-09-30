@@ -41,4 +41,5 @@
   });
 
   if (typeof window.initStyle === 'function') window.initStyle();
+  if (typeof window.initFun === 'function') window.initFun();
 })();

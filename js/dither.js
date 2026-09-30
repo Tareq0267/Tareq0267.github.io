@@ -218,6 +218,54 @@
   const moonSpots = makeSpots(7, 14);
   const marsSpots = makeSpots(21, 9);
 
+  /* ---------- click effects shared by the sky scenes ---------- */
+  // st.clicks: recent clicks in this canvas's grid coords, with their age in seconds
+  function comets(ctx, w, h, st) {
+    for (const c of st.clicks) {
+      if (c.age > 1.6) continue;
+      const life = 1 - c.age / 1.6;
+      const dir = c.id % 2 ? [-.82, .57] : [.82, .57];
+      const sp = Math.max(w, h) * .55;
+      const hx = c.x + dir[0] * sp * c.age, hy = c.y + dir[1] * sp * c.age;
+      const tail = Math.min(sp * c.age, Math.max(w, h) * .22);
+      const g = ctx.createLinearGradient(hx, hy, hx - dir[0] * tail, hy - dir[1] * tail);
+      g.addColorStop(0, `rgba(0,0,0,${life})`);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx - dir[0] * tail, hy - dir[1] * tail); ctx.stroke();
+      ctx.fillStyle = `rgba(0,0,0,${life})`;
+      ctx.beginPath(); ctx.arc(hx, hy, 1.6, 0, TAU); ctx.fill();
+      if (c.age < .35) {
+        // a little flash where you clicked
+        ctx.strokeStyle = `rgba(0,0,0,${1 - c.age / .35})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(c.x, c.y, 1 + c.age * 18, 0, TAU); ctx.stroke();
+      }
+    }
+  }
+
+  function birdBurst(ctx, w, h, st) {
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    for (const c of st.clicks) {
+      if (c.age > 2.2) continue;
+      const life = 1 - c.age / 2.2;
+      for (let i = 0; i < 7; i++) {
+        const a = -Math.PI * (.15 + .7 * i / 6) + Math.sin(c.id + i) * .15;
+        const d = c.age * (14 + (i % 3) * 5) * (1 + c.age * .6);
+        const x = c.x + Math.cos(a) * d, y = c.y + Math.sin(a) * d - c.age * 4;
+        const flap = Math.sin(c.age * 14 + i) * 1.6;
+        ctx.globalAlpha = life;
+        ctx.beginPath();
+        ctx.moveTo(x - 2.6, y - flap); ctx.lineTo(x, y); ctx.lineTo(x + 2.6, y - flap);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
   const scenes = {
     hero(ctx, w, h, t, st) {
       const portrait = h > w * 1.1;
@@ -227,18 +275,23 @@
       const cx = w * (portrait ? .6 : .62) + st.mx * 3;
       const cy = h * (portrait ? .58 : .43) + st.my * 2 - out * h * .35 + Math.sin(t * .5) * 1.2;
       const tilt = -.32 + Math.sin(t * .2) * .03;
+      // moving the pointer quickly spins the planet up
+      const H = heroState;
+      H.spin += (1 + Math.min(4, st.speed / 500) - H.spin) * .05;
+      H.t += st.dt * H.spin;
       clouds(ctx, w, h, t, 4, { count: portrait ? 2 : 4, area: [0, portrait ? .5 : .36, 1, .16], size: .07, alpha: .6, tone: 165 });
       // orbiting moon: behind the planet on the far half of its orbit
-      const a = t * .35;
+      const a = H.t * .35;
       const mx = cx + Math.cos(a) * r * 2.9, my = cy + Math.sin(a) * r * .7 - r * .25;
       const moonFront = Math.sin(a) > 0;
       if (!moonFront) sphere(ctx, mx, my, r * .13);
       ring(ctx, cx, cy, r, tilt, false);
       sphere(ctx, cx, cy, r);
-      surface(ctx, cx, cy, r, t, { bands: 9, bandAlpha: .22 });
+      surface(ctx, cx, cy, r, H.t, { bands: 9, bandAlpha: .22 });
       ring(ctx, cx, cy, r, tilt, true);
       if (moonFront) sphere(ctx, mx, my, r * .16);
       birds(ctx, w, h, t, 9, portrait ? 3 : 6, portrait ? [0, .46, 1, .06] : [0, .3, 1, .15]);
+      comets(ctx, w, h, st);
     },
 
     prologue(ctx, w, h, t, st) {
@@ -251,11 +304,12 @@
         clouds(ctx, w, h, t * .6, 31, { count: 2, area: [-.2 - drift, .3, .3, .4], size: .1, alpha: .85 });
         clouds(ctx, w, h, t * .6, 57, { count: 2, area: [.9 + drift, .35, .3, .4], size: .1, alpha: .85 });
         birds(ctx, w, h, t, 3, 3, [0, .1, 1, .08]);
-        return;
+      } else {
+        clouds(ctx, w, h, t * .6, 31, { count: 3, area: [-.12 - drift, .15, .3, .7], size: .16, alpha: .9 });
+        clouds(ctx, w, h, t * .6, 57, { count: 3, area: [.82 + drift, .2, .3, .7], size: .16, alpha: .9 });
+        birds(ctx, w, h, t, 3, 4, [0, .08, 1, .12]);
       }
-      clouds(ctx, w, h, t * .6, 31, { count: 3, area: [-.12 - drift, .15, .3, .7], size: .16, alpha: .9 });
-      clouds(ctx, w, h, t * .6, 57, { count: 3, area: [.82 + drift, .2, .3, .7], size: .16, alpha: .9 });
-      birds(ctx, w, h, t, 3, 4, [0, .08, 1, .12]);
+      birdBurst(ctx, w, h, st);
     },
 
     moonrise(ctx, w, h, t, st) {
@@ -267,6 +321,7 @@
       sphere(ctx, cx, cy, r, { hi: '#000000', mid: '#3a3a3a', lo: '#9a9a9a' });
       surface(ctx, cx, cy, r, t, { spots: moonSpots, spin: .08, spotAlpha: .45, spotRGB: '255,255,255' });
       clouds(ctx, w, h, t, 77, { count: 4, area: [0, .66, 1, .28], size: .1, alpha: .9, tone: 90 });
+      comets(ctx, w, h, st);
     },
 
     sunset(ctx, w, h, t, st) {
@@ -286,96 +341,222 @@
       ctx.restore();
       clouds(ctx, w, h, t, 91, { count: 4, area: [0, .6, 1, .25], size: .09, alpha: .85, tone: 95 });
       birds(ctx, w, h, t, 13, 5, [0, .1, 1, .3]);
+      birdBurst(ctx, w, h, st);
     },
 
     // ----- project panels -----
-    radar(ctx, w, h, t) {
-      const cx = w * .5, cy = h * .5, R = h * .46;
-      ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1;
-      for (const k of [.33, .66, 1]) { ctx.beginPath(); ctx.arc(cx, cy, R * k, 0, TAU); ctx.stroke(); }
-      ctx.beginPath(); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke();
-      const a = (t * 1.3) % TAU;
-      if (ctx.createConicGradient) {
-        const g = ctx.createConicGradient(a - TAU * .25, cx, cy);
-        g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.25, 'rgba(0,0,0,.95)'); g.addColorStop(.2501, 'rgba(0,0,0,0)');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.fill();
-      }
-      ctx.strokeStyle = '#000'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * R, cy + Math.sin(a) * R); ctx.stroke();
-      const blips = [[.3, .55], [1.9, .8], [3.4, .4], [4.6, .7], [5.5, .3]];
-      for (const [ang, d] of blips) {
-        const diff = ((a - ang) % TAU + TAU) % TAU;
-        const alpha = Math.max(0, 1 - diff / 2.4);
-        if (!alpha) continue;
-        ctx.fillStyle = `rgba(0,0,0,${alpha})`;
-        ctx.fillRect(Math.round(cx + Math.cos(ang) * R * d) - 1, Math.round(cy + Math.sin(ang) * R * d) - 1, 3, 3);
-      }
-      // side readouts
-      ctx.fillStyle = 'rgba(0,0,0,.6)';
-      for (let i = 0; i < 6; i++) {
-        const len = (Math.sin(t * 2 + i) * .5 + .5) * w * .12 + 2;
-        ctx.fillRect(w * .06, h * .2 + i * h * .11, len, 1);
-        ctx.fillRect(w * .94 - len, h * .2 + i * h * .11, len, 1);
-      }
-    },
+    // Top-view humanoid soccer. Hover and the ball follows your cursor (drag it
+    // into a goal to score); leave and the robots play on their own.
+    // Keepers guard, defenders cover, strikers shoot. Goals get a party.
+    pitch(ctx, w, h, t, st) {
+      const fh = h * .78, fw = Math.min(w * .82, fh * 1.6);
+      const x0 = (w - fw) / 2, y0 = (h - fh) / 2 + h * .04, cx = w / 2, cy = y0 + fh / 2;
+      const gh = fh * .3, gd = fw * .05, br = Math.max(1.2, fh * .03), rr = Math.max(2, fh * .06);
+      const P = pitchState;
+      const dt = Math.min(.05, st.dt || .016);
+      const slot = st.el.parentElement;
 
-    // Top-view humanoid soccer: two teams of robots chasing the ball
-    pitch(ctx, w, h, t) {
-      const fh = h * .84, fw = Math.min(w * .82, fh * 1.6);
-      const x0 = (w - fw) / 2, y0 = (h - fh) / 2, cx = w / 2, cy = h / 2;
+      if (!P.robots || P.w !== w || P.h !== h) {
+        P.w = w; P.h = h;
+        P.ball = { x: cx, y: cy, vx: 0, vy: 0 };
+        P.confetti = [];
+        P.robots = [
+          // team, role, home x/y as field fractions
+          [0, 'keeper', -.46, 0], [0, 'defender', -.25, -.18], [0, 'striker', -.1, .15],
+          [1, 'keeper', .46, 0], [1, 'defender', .25, .18], [1, 'striker', .1, -.15]
+        ].map(([team, role, hx, hy]) => ({ team, role, hx, hy, x: cx + hx * fw, y: cy + hy * fh, hd: team ? Math.PI : 0, cool: 0 }));
+      }
+      const B = P.ball;
+
+      // side: 'left' or 'right' goal; the other team gets the point
+      function scoreGoal(side) {
+        const team = side === 'left' ? 1 : 0;
+        P.goal = 1.8; P.shake = 1; P.shakeSide = side; P.partyTeam = team; P.party = 2;
+        const gx = side === 'left' ? x0 : x0 + fw, away = side === 'left' ? 1 : -1;
+        for (let i = 0; i < 44; i++) {
+          P.confetti.push({
+            x: gx, y: cy + (Math.random() - .5) * gh,
+            vx: away * (.2 + Math.random()) * fw * .7, vy: (Math.random() - .7) * fh * 1.4,
+            life: 1.2 + Math.random() * .9, age: 0, spin: Math.random() * TAU, big: Math.random() > .6
+          });
+        }
+        const flash = slot.querySelector('[data-flash]');
+        if (flash) {
+          flash.textContent = ['Goal!', 'Gooool!', 'What a goal!', 'Siuuu!'][P.goals++ % 4];
+          flash.classList.remove('on'); void flash.offsetWidth; flash.classList.add('on');
+        }
+      }
+
+      // the ball: your cursor while hovering, physics otherwise.
+      // A goal counts when the cursor is inside a net exactly as drawn; the ball then
+      // waits on the centre spot until the cursor leaves that net, so one goal is one goal.
+      const inMouth = Math.abs(st.py - cy) <= gh / 2;
+      const cursorNet = !st.inside || !inMouth ? null
+        : st.px >= x0 - gd && st.px <= x0 ? 'left'
+        : st.px >= x0 + fw && st.px <= x0 + fw + gd ? 'right' : null;
+      if (P.waitForExit && cursorNet !== P.waitForExit) P.waitForExit = null;
+      if (st.inside && !P.waitForExit) {
+        if (cursorNet) {
+          scoreGoal(cursorNet);
+          P.waitForExit = cursorNet;
+          Object.assign(B, { x: cx, y: cy, vx: 0, vy: 0 });
+        } else {
+          const px = clamp(st.px, x0 + br, x0 + fw - br), py = clamp(st.py, y0 + br, y0 + fh - br);
+          B.vx = (px - B.x) / dt * .3; B.vy = (py - B.y) / dt * .3;
+          B.x += (px - B.x) * .3; B.y += (py - B.y) * .3;
+        }
+      } else if (!st.inside && P.party > 0) {
+        // celebration pause: ball waits on the centre spot until kick-off
+        P.waitForExit = null;
+        Object.assign(B, { x: cx, y: cy, vx: 0, vy: 0 });
+      } else if (!st.inside) {
+        P.waitForExit = null;
+        B.x += B.vx * dt; B.y += B.vy * dt;
+        const f = Math.pow(.45, dt);
+        B.vx *= f; B.vy *= f;
+        if (B.y < y0 + br) { B.y = y0 + br; B.vy = Math.abs(B.vy); }
+        if (B.y > y0 + fh - br) { B.y = y0 + fh - br; B.vy = -Math.abs(B.vy); }
+        const inMouth = Math.abs(B.y - cy) < gh / 2;
+        if (B.x < x0 || B.x > x0 + fw) {
+          if (inMouth) {
+            scoreGoal(B.x < x0 ? 'left' : 'right');
+            Object.assign(B, { x: cx, y: cy, vx: (Math.random() - .5) * fw * .4, vy: (Math.random() - .5) * fh * .4 });
+          } else {
+            B.x = clamp(B.x, x0 + br, x0 + fw - br);
+            B.vx = -B.vx * .7;
+          }
+        }
+      }
+
+      // robots
+      if (P.party > 0) P.party -= dt;
+      for (const R of P.robots) {
+        if (P.party > 0) {
+          // play stops: the scorers do a victory spin, everyone else waits
+          if (R.team === P.partyTeam) R.hd += dt * 14;
+          continue;
+        }
+        const dirToGoal = R.team ? -1 : 1;
+        const ownGoalX = R.team ? x0 + fw : x0;
+        const oppGoalX = R.team ? x0 : x0 + fw;
+        let tx, ty, speed = R.role === 'keeper' ? fw * .16 : fw * .3;
+        if (R.role === 'keeper') {
+          tx = ownGoalX + dirToGoal * fw * .04;
+          ty = clamp(B.y, cy - gh * .6, cy + gh * .6);
+        } else if (R.role === 'defender') {
+          tx = ownGoalX + (B.x - ownGoalX) * .5;
+          ty = cy + (B.y - cy) * .8 + R.hy * fh * .3;
+        } else {
+          // come at the ball from behind, lined up with the opponent's goal
+          const gx = oppGoalX - B.x, gy = cy - B.y, gn = Math.hypot(gx, gy) || 1;
+          tx = B.x - gx / gn * rr * 1.6; ty = B.y - gy / gn * rr * 1.6;
+          speed = fw * .42;
+        }
+        tx = clamp(tx, x0, x0 + fw); ty = clamp(ty, y0, y0 + fh);
+        const dx = tx - R.x, dy = ty - R.y, d = Math.hypot(dx, dy);
+        if (d > .3) {
+          const step = Math.min(d, speed * dt);
+          R.x += dx / d * step; R.y += dy / d * step;
+        }
+        // face the ball
+        const want = Math.atan2(B.y - R.y, B.x - R.x);
+        let diff = want - R.hd;
+        diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+        R.hd += diff * Math.min(1, dt * 8);
+        // kick when close
+        R.cool -= dt;
+        const bd = Math.hypot(B.x - R.x, B.y - R.y);
+        if (bd < rr + br + .8 && R.cool <= 0) {
+          R.cool = .6;
+          const aimY = cy + (Math.random() - .5) * gh * .9;
+          const kx = oppGoalX - B.x, ky = aimY - B.y, kn = Math.hypot(kx, ky) || 1;
+          const power = fw * (R.role === 'keeper' ? .8 : 1.7);
+          if (!st.inside) { B.vx = kx / kn * power; B.vy = ky / kn * power; }
+        }
+      }
+      // keep robots from stacking on top of each other
+      for (let i = 0; i < P.robots.length; i++) for (let j = i + 1; j < P.robots.length; j++) {
+        const a = P.robots[i], b = P.robots[j];
+        const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || .01, min = rr * 2.1;
+        if (d < min) { const push = (min - d) / 2; a.x -= dx / d * push; a.y -= dy / d * push; b.x += dx / d * push; b.y += dy / d * push; }
+      }
+
+      // draw the field
       ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 1;
       ctx.strokeRect(x0, y0, fw, fh);
       ctx.beginPath(); ctx.moveTo(cx, y0); ctx.lineTo(cx, y0 + fh); ctx.stroke();
       ctx.beginPath(); ctx.arc(cx, cy, fh * .17, 0, TAU); ctx.stroke();
-      const bh = fh * .5, bw = fw * .08, gh = fh * .28;
+      const bh = fh * .5, bw = fw * .08;
       ctx.strokeRect(x0, cy - bh / 2, bw, bh); ctx.strokeRect(x0 + fw - bw, cy - bh / 2, bw, bh);
-      ctx.fillStyle = 'rgba(0,0,0,.7)';
-      ctx.fillRect(x0 - 3, cy - gh / 2, 3, gh); ctx.fillRect(x0 + fw, cy - gh / 2, 3, gh);
 
-      const ball = tt => ({
-        x: cx + Math.sin(tt * .45) * fw * .36 + Math.sin(tt * 1.3) * fw * .05,
-        y: cy + Math.sin(tt * .75 + 1) * fh * .32 + Math.cos(tt * 1.7) * fh * .04
-      });
-      const robots = [
-        // home position (field fraction), lag behind the ball (s), how hard it presses, team
-        [-.38, 0, .9, .15, 0], [-.18, -.22, .5, .55, 0], [-.12, .24, .7, .5, 0],
-        [.38, 0, .9, .15, 1], [.2, .2, .45, .6, 1], [.1, -.25, .8, .5, 1]
-      ];
-      const at = (rb, tt) => {
-        const bl = ball(tt - rb[2]);
-        const hx = cx + rb[0] * fw, hy = cy + rb[1] * fh;
-        return { x: hx + (bl.x - hx) * rb[3], y: hy + (bl.y - hy) * rb[3] };
-      };
-      const b = ball(t);
-      for (const rb of robots) {
-        const p = at(rb, t), q = at(rb, t - .15);
-        let hx = p.x - q.x, hy = p.y - q.y;
-        if (Math.hypot(hx, hy) < .05) { hx = b.x - p.x; hy = b.y - p.y; }
-        const n = Math.hypot(hx, hy) || 1, r = Math.max(2, fh * .06);
-        ctx.fillStyle = rb[4] ? 'rgba(0,0,0,.55)' : '#000';
-        ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, TAU); ctx.fill();
+      // goals with nets; the net ripples after a goal
+      if (P.shake > 0) P.shake -= dt;
+      for (const side of ['left', 'right']) {
+        const gx = side === 'left' ? x0 - gd : x0 + fw;
+        const wob = P.shake > 0 && P.shakeSide === side ? Math.sin(t * 40) * P.shake * gd * .35 : 0;
+        ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineWidth = 1;
+        ctx.strokeRect(gx + (side === 'left' ? wob : 0), cy - gh / 2, gd - Math.abs(wob) * .5, gh);
+        ctx.strokeStyle = 'rgba(0,0,0,.35)';
+        for (let k = 1; k < 4; k++) {
+          const ny = cy - gh / 2 + gh * k / 4 + (P.shake > 0 && P.shakeSide === side ? Math.sin(t * 30 + k) * P.shake * 1.5 : 0);
+          ctx.beginPath(); ctx.moveTo(gx, ny); ctx.lineTo(gx + gd, ny); ctx.stroke();
+        }
+        ctx.beginPath(); ctx.moveTo(gx + gd / 2 + wob, cy - gh / 2); ctx.lineTo(gx + gd / 2 + wob, cy + gh / 2); ctx.stroke();
+      }
+
+      for (const R of P.robots) {
+        const hop = P.party > 0 && R.team === P.partyTeam ? Math.abs(Math.sin(t * 12 + R.hx * 9)) * rr * .6 : 0;
+        const rad = rr + hop * .5;
+        ctx.fillStyle = R.team ? 'rgba(0,0,0,.55)' : '#000';
+        ctx.beginPath(); ctx.arc(R.x, R.y - hop, rad, 0, TAU); ctx.fill();
         ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + hx / n * r * 2.2, p.y + hy / n * r * 2.2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(R.x, R.y - hop); ctx.lineTo(R.x + Math.cos(R.hd) * rad * 2.2, R.y - hop + Math.sin(R.hd) * rad * 2.2); ctx.stroke();
       }
       ctx.fillStyle = '#000';
-      ctx.beginPath(); ctx.arc(b.x, b.y, Math.max(1.2, fh * .03), 0, TAU); ctx.fill();
+      ctx.beginPath(); ctx.arc(B.x, B.y, br, 0, TAU); ctx.fill();
+
+      // confetti
+      for (let i = P.confetti.length - 1; i >= 0; i--) {
+        const c = P.confetti[i];
+        c.age += dt;
+        if (c.age > c.life) { P.confetti.splice(i, 1); continue; }
+        c.vy += fh * 1.3 * dt;
+        c.vx *= Math.pow(.6, dt);
+        c.x += c.vx * dt; c.y += c.vy * dt; c.spin += dt * 9;
+        ctx.fillStyle = `rgba(0,0,0,${1 - c.age / c.life})`;
+        const s = c.big ? 2 : 1;
+        ctx.fillRect(c.x, c.y, Math.max(1, Math.abs(Math.cos(c.spin)) * s + .5), s);
+      }
+
+      // goal flash is real text over the canvas
+      const flash = slot.querySelector('[data-flash]');
+      if (P.goal > 0) { P.goal -= dt; if (P.goal <= 0 && flash) flash.classList.remove('on'); }
     },
 
-    planet(ctx, w, h, t) {
+    planet(ctx, w, h, t, st) {
       stars(ctx, w, h, t, 50, 5);
       const cx = w * .5, cy = h * .52, r = h * .34;
       const a = t * .5;
-      const ox = cx + Math.cos(a) * r * 2.4, oy = cy + Math.sin(a) * r * .45;
+      // hover and the moon follows your cursor instead of orbiting
+      const M = planetState;
+      const ox = st.inside ? st.px : cx + Math.cos(a) * r * 2.4;
+      const oy = st.inside ? st.py : cy + Math.sin(a) * r * .45;
+      M.x += (ox - M.x) * .12; M.y += (oy - M.y) * .12;
+      const behind = !st.inside && Math.sin(a) < 0;
       ctx.strokeStyle = 'rgba(0,0,0,.3)'; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.ellipse(cx, cy, r * 2.4, r * .45, 0, 0, TAU); ctx.stroke();
-      if (Math.sin(a) < 0) sphere(ctx, ox, oy, r * .18);
+      if (behind) sphere(ctx, M.x, M.y, r * .18);
       sphere(ctx, cx, cy, r);
-      surface(ctx, cx, cy, r, t, { spots: marsSpots, spin: .25, spotAlpha: .45 });
-      if (Math.sin(a) >= 0) sphere(ctx, ox, oy, r * .2);
+      surface(ctx, cx, cy, r, t, { spots: marsSpots, spin: st.inside ? .8 : .25, spotAlpha: .45 });
+      if (!behind) sphere(ctx, M.x, M.y, r * .2);
     },
 
-    glyph(ctx, w, h, t) {
-      const k = (Math.sin(t * .9) + 1) / 2;
-      const p = k * k * (3 - 2 * k);
+    glyph(ctx, w, h, t, st) {
+      // hover to read it in Jawi; otherwise it drifts between the two
+      const G = glyphState;
+      const auto = (Math.sin(t * .9) + 1) / 2;
+      G.k += ((st.inside ? 1 : auto) - G.k) * .08;
+      const p = G.k * G.k * (3 - 2 * G.k);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = `rgba(0,0,0,${1 - p})`;
@@ -388,7 +569,7 @@
       ctx.fillRect(w * .5 - w * .3, h * .9, w * .6 * p, 1);
     },
 
-    ecg(ctx, w, h, t) {
+    ecg(ctx, w, h, t, st) {
       ctx.fillStyle = 'rgba(0,0,0,.35)';
       for (let x = 4; x < w; x += 8) for (let y = 3; y < h; y += 8) ctx.fillRect(x, y, 1, 1);
       const beat = x => {
@@ -402,7 +583,11 @@
         if (u < 31) return -.22 * Math.sin((u - 26) / 5 * Math.PI);
         return 0;
       };
-      const head = (t * 26) % w;
+      // move the mouse fast and the heart rate climbs
+      const E = ecgState;
+      E.rate += ((26 * (1 + Math.min(2.5, st.speed / 700))) - E.rate) * .03;
+      E.head = (E.head + E.rate * (st.dt || .016)) % w;
+      const head = E.head;
       ctx.lineWidth = 2;
       for (let x = 0; x < w - 1; x++) {
         const age = ((head - x) % w + w) % w;
@@ -410,25 +595,110 @@
         if (a <= 0) continue;
         ctx.strokeStyle = `rgba(0,0,0,${a})`;
         ctx.beginPath();
-        ctx.moveTo(x, h * .55 + beat(x - t * 0) * h * .42);
+        ctx.moveTo(x, h * .55 + beat(x) * h * .42);
         ctx.lineTo(x + 1, h * .55 + beat(x + 1) * h * .42);
         ctx.stroke();
       }
       ctx.fillStyle = '#000';
       ctx.fillRect(Math.floor(head) - 1, Math.floor(h * .55 + beat(head) * h * .42) - 1, 3, 3);
+      E.shown -= st.dt || .016;
+      const readout = st.el.parentElement.querySelector('[data-readout]');
+      if (readout && E.shown <= 0) { readout.textContent = `${Math.round(72 * E.rate / 26)} BPM`; E.shown = .2; }
     },
 
-    crescent(ctx, w, h, t) {
-      stars(ctx, w, h, t, 60, 17);
-      const cx = w * .5, cy = h * .5, r = h * .38;
-      sphere(ctx, cx, cy, r, { hi: '#bdbdbd', mid: '#555', lo: '#1a1a1a', lx: -.5, ly: -.2 });
-      ctx.save();
-      ctx.globalCompositeOperation = 'destination-out';
-      const k = (Math.sin(t * .35) + 1) / 2;
-      ctx.beginPath(); ctx.arc(cx + r * (.35 + k * .5), cy - r * .12, r * .92, 0, TAU); ctx.fill();
-      ctx.restore();
+    // An open book of 30 juz. Slide across the panel to flip through it;
+    // left alone it leafs through slowly on its own.
+    book(ctx, w, h, t, st) {
+      const Bk = bookState;
+      const dt = st.dt || .016;
+      if (st.inside) {
+        const target = clamp(st.px / w, 0, 1) * 29.999;
+        Bk.pos += (target - Bk.pos) * Math.min(1, dt * 5);
+      } else {
+        Bk.pos += dt * .45;
+        if (Bk.pos >= 29.999) Bk.pos = 0;
+      }
+      const n = Math.floor(Bk.pos), f = Bk.pos - n;
+
+      const H = h * .66, W = Math.min(w * .3, H * 1.2);
+      const cx = w / 2, top = h * .17, bottom = top + H;
+
+      function pagePath(ox, lift) {
+        ctx.beginPath();
+        ctx.moveTo(cx, top + H * .05);
+        ctx.quadraticCurveTo(cx + ox * .5, top - lift * .5 - H * .03, cx + ox, top - lift);
+        ctx.lineTo(cx + ox, bottom - lift);
+        ctx.quadraticCurveTo(cx + ox * .5, bottom - lift * .5 + H * .02, cx, bottom + H * .03);
+        ctx.closePath();
+      }
+      // lines of "text": each page gets its own pattern so flipping visibly changes it
+      function pageText(ox, lift, seed, star) {
+        const r = rng(seed * 7919 + 13);
+        const dir = Math.sign(ox) || 1, span = Math.abs(ox);
+        if (span < W * .25) return;
+        ctx.fillStyle = 'rgba(0,0,0,.55)';
+        const first = top + H * (star ? .26 : .14);
+        for (let y = first; y < bottom - H * .1; y += 3) {
+          const len = (.55 + r() * .35) * (span - 5);
+          const x = dir > 0 ? cx + 3 : cx - 3 - len;
+          ctx.fillRect(x, y - lift * .6, len, 1);
+        }
+        if (star) {
+          // a small eight-point star marks the start of each juz
+          const sx = cx + dir * span * .5, sy = top + H * .14 - lift * .6, s = Math.max(1.5, H * .06);
+          ctx.fillStyle = '#000';
+          for (const a of [0, Math.PI / 4]) {
+            ctx.save(); ctx.translate(sx, sy); ctx.rotate(a); ctx.fillRect(-s / 2, -s / 2, s, s); ctx.restore();
+          }
+        }
+      }
+
+      // page edges fanning out under the open pages
+      ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 1;
+      for (let k = 1; k <= 3; k++) {
+        ctx.beginPath();
+        ctx.moveTo(cx - W - k * .8, top + k); ctx.lineTo(cx - W - k * .8, bottom + k);
+        ctx.quadraticCurveTo(cx - W / 2, bottom + k + H * .02, cx, bottom + H * .03 + k);
+        ctx.quadraticCurveTo(cx + W / 2, bottom + k + H * .02, cx + W + k * .8, bottom + k);
+        ctx.lineTo(cx + W + k * .8, top + k);
+        ctx.stroke();
+      }
+
+      // the resting left and right pages
+      for (const side of [-1, 1]) {
+        pagePath(side * W, 0);
+        ctx.fillStyle = '#d6d6d6'; ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.stroke();
+      }
+      pageText(-W, 0, n * 2, true);
+      pageText(W, 0, f > .02 ? (n + 1) * 2 + 1 : n * 2 + 1, false);
+
+      // the page mid-flip
+      if (f > .02 && f < .98) {
+        const ox = W * Math.cos(Math.PI * f), lift = Math.sin(Math.PI * f) * H * .12;
+        const tone = Math.round(214 - (1 - Math.abs(Math.cos(Math.PI * f))) * 90);
+        pagePath(ox, lift);
+        ctx.fillStyle = `rgb(${tone},${tone},${tone})`; ctx.fill();
+        ctx.strokeStyle = '#000'; ctx.stroke();
+        pageText(ox, lift, f < .5 ? n * 2 + 1 : (n + 1) * 2, f >= .5);
+      }
+
+      // spine
+      ctx.strokeStyle = '#000';
+      ctx.beginPath(); ctx.moveTo(cx, top + H * .05); ctx.lineTo(cx, bottom + H * .03); ctx.stroke();
+
+      const label = `Juz ${Math.min(30, n + 1)} / 30`;
+      const readout = st.el.parentElement.querySelector('[data-readout]');
+      if (readout && readout.textContent !== label) readout.textContent = label;
     }
   };
+
+  const heroState = { spin: 1, t: 0 };
+  const pitchState = { robots: null, ball: null, goal: 0, goals: 0, shake: 0, party: 0, confetti: [], waitForExit: null };
+  const planetState = { x: 0, y: 0 };
+  const glyphState = { k: 0 };
+  const ecgState = { head: 0, rate: 26, shown: 0 };
+  const bookState = { pos: 0 };
 
   /* ---------- pointer, lens, click waves, trail ---------- */
   const finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -437,14 +707,28 @@
   const WAVE_LIFE = 1.1;       // seconds
   const TRAIL_LIFE = .3;       // seconds
 
-  const pointer = { x: 0, y: 0, sx: 0, sy: 0, cx: -9999, cy: -9999, inside: false };
+  const pointer = { x: 0, y: 0, sx: 0, sy: 0, cx: -9999, cy: -9999, inside: false, speed: 0, lastT: 0 };
   const waves = [];
   const trail = [];
+  const clicks = [];
+  let clickId = 0;
   window.addEventListener('pointermove', e => {
+    const now = performance.now();
+    if (pointer.inside && pointer.lastT) {
+      const dt = Math.max(1, now - pointer.lastT) / 1000;
+      const v = Math.hypot(e.clientX - pointer.cx, e.clientY - pointer.cy) / dt;
+      pointer.speed = Math.max(pointer.speed, Math.min(v, 4000));
+    }
+    pointer.lastT = now;
     pointer.x = e.clientX / innerWidth * 2 - 1;
     pointer.y = e.clientY / innerHeight * 2 - 1;
     pointer.cx = e.clientX; pointer.cy = e.clientY;
     pointer.inside = true;
+  }, { passive: true });
+  window.addEventListener('pointerdown', e => {
+    if (e.target.closest && e.target.closest('a, button')) return;
+    clicks.push({ x: e.clientX, y: e.clientY, t0: performance.now() / 1000, id: clickId++ });
+    if (clicks.length > 8) clicks.shift();
   }, { passive: true });
   document.addEventListener('pointerleave', () => { pointer.inside = false; });
   window.addEventListener('blur', () => { pointer.inside = false; });
@@ -579,8 +863,15 @@
       const st = {
         p: clamp(1 - r.bottom / (vh + r.height), 0, 1),
         mx: pointer.sx, my: pointer.sy,
-        now, left: r.left, top: r.top, cell: this.cell
+        now, left: r.left, top: r.top, cell: this.cell, el: this.canvas,
+        dt: this.lastNow ? Math.min(.05, now - this.lastNow) : .016,
+        inside: this.hovered(r),
+        px: (pointer.cx - r.left) / this.cell, py: (pointer.cy - r.top) / this.cell,
+        speed: pointer.speed,
+        clicks: clicks.filter(c => now - c.t0 < 3 && c.x >= r.left && c.x <= r.right && c.y >= r.top && c.y <= r.bottom)
+          .map(c => ({ x: (c.x - r.left) / this.cell, y: (c.y - r.top) / this.cell, age: now - c.t0, id: c.id }))
       };
+      this.lastNow = now;
       const { ctx, gl } = this;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, this.cols, this.rows);
@@ -635,6 +926,7 @@
       const now = ms / 1000;
       pointer.sx += (pointer.x - pointer.sx) * .05;
       pointer.sy += (pointer.y - pointer.sy) * .05;
+      pointer.speed *= .9;
       if (pointer.inside && (pointer.cx !== lastX || pointer.cy !== lastY)) {
         trail.push({ x: pointer.cx, y: pointer.cy, t: now });
         lastX = pointer.cx; lastY = pointer.cy;
