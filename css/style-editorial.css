@@ -277,11 +277,6 @@ a:hover .arrow{ transform: translate(3px,-3px); }
    8) PROLOGUE + ABOUT
 ========================================================= */
 .prologue .h5{ max-width: 22em; margin: 0 auto; }
-/* sand halo: clears the cloud lines right around each letter so the words pop */
-.prologue .h5, .prologue .label{
-  text-shadow: 0 0 1px var(--sand), 0 0 3px var(--sand), 0 0 6px var(--sand),
-               0 0 10px var(--sand), 0 0 16px var(--sand), 0 0 22px var(--sand);
-}
 .prologue .actions{ display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: clamp(32px, 4vw, 56px); }
 
 .about-head{ display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 32px; margin-bottom: clamp(48px, 6vw, 104px); }
@@ -334,7 +329,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
    11) SKILLS
 ========================================================= */
 .skills-grid{
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--ink-10);
 }
 .skill{
@@ -343,7 +338,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   min-height: 240px;
   display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
 }
-.skill:not(:nth-child(4n+1)){ padding-left: var(--gutter); border-left: 1px solid var(--ink-10); }
+.skill:not(:nth-child(3n+1)){ padding-left: var(--gutter); border-left: 1px solid var(--ink-10); }
 .skill .h6{ margin-bottom: 12px; }
 
 /* =========================================================
@@ -418,7 +413,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .exp .role{ grid-column: 1 / span 5; }
   .exp .detail{ grid-column: 6 / span 7; }
   .skills-grid{ grid-template-columns: repeat(2, 1fr); }
-  .skill:not(:nth-child(4n+1)){ padding-left: 0; border-left: 0; }
+  .skill:not(:nth-child(3n+1)){ padding-left: 0; border-left: 0; }
   .skill:nth-child(even){ padding-left: var(--gutter); border-left: 1px solid var(--ink-10); }
   .project-tabs, .project-panels{ grid-column: 1 / -1; }
   .project-tabs{ position: static; }
@@ -451,7 +446,6 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .skills-grid{ grid-template-columns: 1fr; }
   .skill, .skill:nth-child(even){ padding-left: 0; border-left: 0; min-height: 0; padding-bottom: 28px; }
   .panel-feats{ grid-template-columns: 1fr; }
-  .art-prologue{ display: none; }
   .header .style-switch{ display: none; }
   .menu .style-switch{ display: flex; }
   .menu-role{ display: none; }

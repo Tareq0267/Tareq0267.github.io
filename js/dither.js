@@ -9,7 +9,8 @@
 
    Ink colour = the canvas element's CSS `color`.
    Optional attributes: data-cell="6" (cell size in CSS px), data-lens
-   (magnify under the cursor).
+   (magnify under the cursor), data-avoid="selector" (never draw behind
+   those elements; text is avoided line by line).
 ========================================================= */
 (function () {
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -242,6 +243,16 @@
 
     prologue(ctx, w, h, t, st) {
       const drift = (st.p - .5) * .08;
+      if (h > w * .9) {
+        // phones: cloud banks along the top and bottom edges mark out the section,
+        // with smaller clouds peeking in from the sides
+        clouds(ctx, w, h, t * .6, 71, { count: 4, area: [0, .12, 1, .04], size: .11, alpha: .9 });
+        clouds(ctx, w, h, t * .6, 83, { count: 4, area: [0, .84, 1, .04], size: .11, alpha: .9 });
+        clouds(ctx, w, h, t * .6, 31, { count: 2, area: [-.2 - drift, .3, .3, .4], size: .1, alpha: .85 });
+        clouds(ctx, w, h, t * .6, 57, { count: 2, area: [.9 + drift, .35, .3, .4], size: .1, alpha: .85 });
+        birds(ctx, w, h, t, 3, 3, [0, .1, 1, .08]);
+        return;
+      }
       clouds(ctx, w, h, t * .6, 31, { count: 3, area: [-.12 - drift, .15, .3, .7], size: .16, alpha: .9 });
       clouds(ctx, w, h, t * .6, 57, { count: 3, area: [.82 + drift, .2, .3, .7], size: .16, alpha: .9 });
       birds(ctx, w, h, t, 3, 4, [0, .08, 1, .12]);
@@ -479,6 +490,7 @@
       this.cell = parseFloat(canvas.dataset.cell || '6');
       this.scene = canvas.dataset.dither;
       this.lens = finePointer && 'lens' in canvas.dataset;
+      this.avoid = canvas.dataset.avoid ? [...document.querySelectorAll(canvas.dataset.avoid)] : [];
       this.lensR = 0;
       this.idle = false;
       this.visible = false;
@@ -527,6 +539,32 @@
       this.ink = parseColor(getComputedStyle(this.canvas).color);
     }
 
+    // Erase the picture behind the avoided elements (per text line, softly padded)
+    cutOut(r) {
+      const { ctx, cell } = this;
+      const pad = 1.5;
+      ctx.save();
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.fillStyle = '#000';
+      ctx.shadowColor = '#000';
+      ctx.shadowBlur = 3;
+      for (const el of this.avoid) {
+        let boxes;
+        if (el.matches('a, button')) boxes = [el.getBoundingClientRect()];
+        else {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          boxes = range.getClientRects();
+        }
+        for (const b of boxes) {
+          if (!b.width || !b.height) continue;
+          ctx.fillRect((b.left - r.left) / cell - pad, (b.top - r.top) / cell - pad,
+                       b.width / cell + pad * 2, b.height / cell + pad * 2);
+        }
+      }
+      ctx.restore();
+    }
+
     setScene(name) { this.scene = name; this.resize(); if (reduceMotion) this.render(6, 0); }
 
     hovered(r) {
@@ -547,6 +585,7 @@
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, this.cols, this.rows);
       const result = draw(ctx, this.cols, this.rows, t, st);
+      if (this.avoid.length) this.cutOut(r);
       // nothing new to show: skip the GPU work after clearing once
       if (result === 'idle' && this.idle) return;
       this.idle = result === 'idle';
