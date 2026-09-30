@@ -1,4 +1,4 @@
-/* Playful extras for the editorial page: letters that ripple under the cursor,
+/* Playful extras for the editorial page: the moon-pop theme flip, letters that ripple under the cursor,
    glyph-scramble labels, directional hover fills,
    a corner section indicator and stats that count again on hover.
    Called by js/site.js after js/style-editorial.js. */
@@ -44,6 +44,53 @@ window.initFun = function () {
       requestAnimationFrame(() => { queued = false; updateHover(); });
     }, { passive: true });
   }
+
+  /* =========================================================
+     EASTER EGG: popping the hero's moon (js/dither.js) flips the theme.
+     A circle grows from the moon until it covers the screen, then the
+     colours are switched for real and the choice is remembered.
+  ========================================================= */
+  const root = document.documentElement;
+  function setInverted(on) {
+    root.classList.toggle('inverted', on);
+    try { localStorage.setItem('site-inverted', on ? '1' : '0'); } catch (e) {}
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = on ? '#2c2824' : '#a89474';
+    if (window.Dither && Dither.refresh) Dither.refresh();
+  }
+  if (root.classList.contains('inverted')) {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = '#2c2824';
+  }
+  document.addEventListener('moon:pop', e => {
+    if (root.classList.contains('theme-flipping')) return;
+    const next = !root.classList.contains('inverted');
+    if (reduceMotion) { setInverted(next); return; }
+    const { x, y } = e.detail;
+    const reach = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 8;
+    const wipe = document.createElement('div');
+    wipe.className = 'theme-wipe';
+    wipe.style.cssText = `left:${x}px;top:${y}px;width:${reach * 2}px;height:${reach * 2}px`;
+    document.body.appendChild(wipe);
+    root.classList.add('theme-flipping');
+    const anim = wipe.animate(
+      [{ transform: 'translate(-50%, -50%) scale(0)' }, { transform: 'translate(-50%, -50%) scale(1)' }],
+      { duration: 1100, easing: 'cubic-bezier(.65,.05,.36,1)', fill: 'forwards' }
+    );
+    // ease the art's shading across while the circle grows
+    (function mix() {
+      if (!wipe.isConnected || !window.Dither) return;
+      Dither.flipMix = Math.min(1, (anim.currentTime || 0) / 1100);
+      requestAnimationFrame(mix);
+    })();
+    anim.onfinish = () => {
+      // switch and redraw in the same frame the circle is removed, so nothing flashes
+      if (window.Dither) Dither.flipMix = 0;
+      setInverted(next);
+      wipe.remove();
+      root.classList.remove('theme-flipping');
+    };
+  });
 
   /* =========================================================
      GLYPH SCRAMBLE: text decodes itself into place

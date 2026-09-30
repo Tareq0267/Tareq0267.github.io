@@ -97,12 +97,27 @@
     }
   }
 
+  // True while the canvas being drawn has light ink on a dark ground. Dense bars
+  // then read as bright, not dark, so shaded shapes flip their greys to keep their look.
+  let lightInk = false;
+  // api.flipMix runs 0 to 1 while the theme wipe is on screen, easing shaded shapes
+  // into the other ink's greys so nothing snaps when the colours switch.
+  const grey = b => {
+    const base = lightInk ? 1 - b : b, m = api.flipMix;
+    const v = Math.round((base * (1 - m) + (1 - base) * m) * 255);
+    return `rgb(${v},${v},${v})`;
+  };
+  // what to paint with to darken a shape: more ink on a light ground, less ink on a dark one
+  const shade = () => (lightInk !== api.flipMix > .5 ? '255,255,255' : '0,0,0');
+
+  // o.b: how bright the ball looks at its highlight, middle and edge (0..1)
   function sphere(ctx, x, y, r, o = {}) {
     const lx = o.lx ?? -.4, ly = o.ly ?? -.45;
+    const b = o.b ?? [.77, .43, .08];
     const g = ctx.createRadialGradient(x + lx * r, y + ly * r, r * .05, x, y, r * 1.02);
-    g.addColorStop(0, o.hi ?? '#c4c4c4');
-    g.addColorStop(.55, o.mid ?? '#6e6e6e');
-    g.addColorStop(1, o.lo ?? '#141414');
+    g.addColorStop(0, grey(b[0]));
+    g.addColorStop(.55, grey(b[1]));
+    g.addColorStop(1, grey(b[2]));
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
   }
@@ -116,7 +131,7 @@
       for (let i = 0; i < n; i++) {
         if (i % 2) continue;
         const y0 = y - r + i * (2 * r / n);
-        ctx.fillStyle = `rgba(0,0,0,${o.bandAlpha ?? .28})`;
+        ctx.fillStyle = `rgba(${shade()},${o.bandAlpha ?? .28})`;
         ctx.beginPath();
         ctx.moveTo(x - r, y0);
         for (let k = 0; k <= 30; k++) {
@@ -135,7 +150,7 @@
         if (c <= 0) continue;
         const px = x + r * Math.sin(lon) * Math.cos(s.lat);
         const py = y + r * Math.sin(s.lat);
-        ctx.fillStyle = `rgba(${o.spotRGB ?? '0,0,0'},${(o.spotAlpha ?? .4) * c})`;
+        ctx.fillStyle = `rgba(${shade()},${(o.spotAlpha ?? .4) * c})`;
         ctx.beginPath();
         ctx.ellipse(px, py, s.size * r * c, s.size * r, 0, 0, TAU);
         ctx.fill();
@@ -313,12 +328,32 @@
       const a = H.t * .35;
       const mx = cx + Math.cos(a) * r * 2.9, my = cy + Math.sin(a) * r * .7 - r * .25;
       const moonFront = Math.sin(a) > 0;
-      if (!moonFront) sphere(ctx, mx, my, r * .13);
+      // easter egg: click the moon and it pops (which flips the site's theme), then regrows
+      const popAge = H.pop == null ? 99 : Math.max(0, st.now - H.pop);
+      const grow = clamp((popAge - 2.6) / .7, 0, 1);
+      const mr = r * (moonFront ? .16 : .13) * grow;
+      H.moon = { x: mx, y: my, r: mr, hidden: !grow || (!moonFront && Math.hypot(mx - cx, my - cy) < r) };
+      if (!moonFront && grow) sphere(ctx, mx, my, mr);
       ring(ctx, cx, cy, r, tilt, false);
       sphere(ctx, cx, cy, r);
       surface(ctx, cx, cy, r, H.t, { bands: 9, bandAlpha: .22 });
       ring(ctx, cx, cy, r, tilt, true);
-      if (moonFront) sphere(ctx, mx, my, r * .16);
+      if (moonFront && grow) sphere(ctx, mx, my, mr);
+      if (popAge < 1.5) {
+        const k = popAge / 1.5, px = H.popAt.x, py = H.popAt.y;
+        ctx.strokeStyle = `rgba(0,0,0,${1 - k})`;
+        ctx.lineWidth = 2;
+        for (const d of [0, .18]) {
+          if (k <= d) continue;
+          ctx.beginPath(); ctx.arc(px, py, (k - d) * r * 2.4, 0, TAU); ctx.stroke();
+        }
+        ctx.fillStyle = `rgba(0,0,0,${1 - k})`;
+        for (let i = 0; i < 12; i++) {
+          const ang = i / 12 * TAU + (i % 2) * .3, dist = ease(Math.min(1, k * 1.4)) * r * (1.1 + (i % 3) * .5);
+          const size = i % 3 ? 1.5 : 2.5;
+          ctx.fillRect(px + Math.cos(ang) * dist - size / 2, py + Math.sin(ang) * dist - size / 2, size, size);
+        }
+      }
       birds(ctx, w, h, t, 9, portrait ? 3 : 6, portrait ? [0, .46, 1, .06] : [0, .3, 1, .15]);
       comets(ctx, w, h, st);
     },
@@ -347,8 +382,8 @@
       const r = Math.min(h * .52, w * .3);
       const cx = w * .5 + st.mx * 2;
       const cy = h * (1.45 - rise * .95);
-      sphere(ctx, cx, cy, r, { hi: '#000000', mid: '#3a3a3a', lo: '#9a9a9a' });
-      surface(ctx, cx, cy, r, t, { spots: moonSpots, spin: .08, spotAlpha: .45, spotRGB: '255,255,255' });
+      sphere(ctx, cx, cy, r, { b: [1, .77, .4] });
+      surface(ctx, cx, cy, r, t, { spots: moonSpots, spin: .08, spotAlpha: .45 });
       clouds(ctx, w, h, t, 77, { count: 4, area: [0, .66, 1, .28], size: .1, alpha: .9, tone: 90 });
       comets(ctx, w, h, st);
     },
@@ -374,7 +409,7 @@
       const r = Math.min(h * .55, w * .3);
       const cx = w * .5;
       const cy = h * (.35 + sink * .55);
-      sphere(ctx, cx, cy, r, { hi: '#000000', mid: '#2e2e2e', lo: '#8a8a8a', lx: 0, ly: -.6 });
+      sphere(ctx, cx, cy, r, { b: [1, .82, .46], lx: 0, ly: -.6 });
       // retro sun cut-outs, thicker towards the horizon
       ctx.save();
       ctx.globalCompositeOperation = 'destination-out';
@@ -747,7 +782,7 @@
     }
   };
 
-  const heroState = { spin: 1, t: 0 };
+  const heroState = { spin: 1, t: 0, moon: null, pop: null, popAt: null };
   const pitchState = { robots: null, ball: null, goal: 0, goals: 0, shake: 0, party: 0, confetti: [], waitForExit: null };
   const planetState = { x: 0, y: 0 };
   const glyphState = { k: 0 };
@@ -781,9 +816,28 @@
   }, { passive: true });
   window.addEventListener('pointerdown', e => {
     if (e.target.closest && e.target.closest('a, button')) return;
+    if (popMoon(e)) return;
     clicks.push({ x: e.clientX, y: e.clientY, t0: performance.now() / 1000, id: clickId++ });
     if (clicks.length > 8) clicks.shift();
   }, { passive: true });
+  // Easter egg: a click on the hero's moon pops it and announces it with a
+  // 'moon:pop' event carrying the moon's position on screen.
+  function popMoon(e) {
+    const H = heroState, hero = instances.find(i => i.scene === 'hero');
+    const root = document.documentElement;
+    if (!hero || !hero.visible || !H.moon || H.moon.hidden) return false;
+    if (root.classList.contains('menu-open') || root.classList.contains('theme-flipping') || document.querySelector('.preloader')) return false;
+    const r = hero.canvas.getBoundingClientRect();
+    const gx = (e.clientX - r.left) / hero.cell, gy = (e.clientY - r.top) / hero.cell;
+    // generous target: the moon plus a few cells around it
+    if (Math.hypot(gx - H.moon.x, gy - H.moon.y) > H.moon.r + 3.5) return false;
+    H.pop = performance.now() / 1000;
+    H.popAt = { x: H.moon.x, y: H.moon.y };
+    document.dispatchEvent(new CustomEvent('moon:pop', {
+      detail: { x: r.left + H.moon.x * hero.cell, y: r.top + H.moon.y * hero.cell }
+    }));
+    return true;
+  }
   document.addEventListener('pointerleave', () => { pointer.inside = false; });
   window.addEventListener('blur', () => { pointer.inside = false; });
   window.addEventListener('pointerdown', e => {
@@ -911,6 +965,8 @@
 
     render(t, now) {
       const draw = scenes[this.scene];
+      this.lastT = t;
+      lightInk = this.ink[0] * .299 + this.ink[1] * .587 + this.ink[2] * .114 > .4;
       if (!draw || !this.cols) return;
       const r = this.canvas.getBoundingClientRect();
       const vh = window.innerHeight;
@@ -923,7 +979,7 @@
         px: (pointer.cx - r.left) / this.cell, py: (pointer.cy - r.top) / this.cell,
         speed: pointer.speed,
         clicks: clicks.filter(c => now - c.t0 < 3 && c.x >= r.left && c.x <= r.right && c.y >= r.top && c.y <= r.bottom)
-          .map(c => ({ x: (c.x - r.left) / this.cell, y: (c.y - r.top) / this.cell, age: now - c.t0, id: c.id }))
+          .map(c => ({ x: (c.x - r.left) / this.cell, y: (c.y - r.top) / this.cell, age: Math.max(0, now - c.t0), id: c.id }))
       };
       this.lastNow = now;
       const { ctx, gl } = this;
@@ -965,7 +1021,24 @@
   }
 
   // suppressLens: set by the cursor while it's over a link or button
-  const api = { init, scenes, lensHover: false, suppressLens: false };
+  const api = { init, scenes, lensHover: false, suppressLens: false, flipMix: 0, refresh, moonPoint };
+
+  // Where the hero's moon is on screen right now (null while it is popped or hidden)
+  function moonPoint() {
+    const hero = instances.find(i => i.scene === 'hero'), m = heroState.moon;
+    if (!hero || !m || m.hidden) return null;
+    const r = hero.canvas.getBoundingClientRect();
+    return { x: r.left + m.x * hero.cell, y: r.top + m.y * hero.cell };
+  }
+
+  // Re-read every canvas's ink colour and redraw at once (used when the theme flips)
+  function refresh() {
+    for (const i of instances) {
+      i.ink = parseColor(getComputedStyle(i.canvas).color);
+      i.idle = false;
+      if (i.visible && i.lastT != null) i.render(i.lastT, i.lastNow || 0);
+    }
+  }
 
   function init() {
     document.querySelectorAll('canvas[data-dither]').forEach(c => {

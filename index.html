@@ -9,6 +9,8 @@
 
   <script>
     document.documentElement.classList.add('js');
+    // Easter egg: the theme flipped by popping the hero's moon is remembered
+    try { if (localStorage.getItem('site-inverted') === '1') document.documentElement.classList.add('inverted'); } catch (e) {}
     // Style switcher: send returning visitors to the look they last picked
     try {
       if (localStorage.getItem('site-style') === 'classic') location.replace('classic.html' + location.hash);

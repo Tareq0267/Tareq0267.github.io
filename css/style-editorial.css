@@ -494,6 +494,31 @@ html.cursor-down .cursor-ring{ transform: scale(.8); }
 .btn, .menu-toggle, .style-switch a, .brand{ transition: translate .45s var(--ease), background .3s, color .3s; }
 
 /* =========================================================
+   FLIPPED THEME (easter egg: pop the hero's moon)
+   Sand and ink trade places; every colour on the page follows.
+========================================================= */
+html.inverted{
+  --sand: #2c2824;
+  --ink: #a89474;
+  --ink-70: rgba(168,148,116,.72);
+  --ink-10: rgba(168,148,116,.14);
+  --sand-70: rgba(44,40,36,.75);
+  --sand-10: rgba(44,40,36,.18);
+}
+/* the paper grain is dark specks; on a dark page it needs to be light ones */
+html.inverted body::after{ filter: invert(1); mix-blend-mode: screen; }
+/* The wipe: a circle that grows from the moon. Difference blending with sand + ink
+   shows the flipped theme inside it, so the real switch at the end is seamless. */
+.theme-wipe{
+  position: fixed; z-index: 450;
+  border-radius: 50%;
+  background: #d4bc98; mix-blend-mode: difference;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(0);
+  will-change: transform;
+}
+
+/* =========================================================
    16) PLAYFUL EXTRAS (js/fun.js)
 ========================================================= */
 /* directional hover fills for rows and skill cells */
