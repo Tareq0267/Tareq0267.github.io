@@ -606,8 +606,9 @@
       if (readout && E.shown <= 0) { readout.textContent = `${Math.round(72 * E.rate / 26)} BPM`; E.shown = .2; }
     },
 
-    // An open book of 30 juz. Slide across the panel to flip through it;
-    // left alone it leafs through slowly on its own.
+    // An open book of 30 juz resting on a rehal (the X-shaped folding stand),
+    // seen from the front and a little above. Slide across the panel to flip
+    // through it; left alone it leafs through slowly on its own.
     book(ctx, w, h, t, st) {
       const Bk = bookState;
       const dt = st.dt || .016;
@@ -620,72 +621,80 @@
       }
       const n = Math.floor(Bk.pos), f = Bk.pos - n;
 
-      const H = h * .66, W = Math.min(w * .3, H * 1.2);
-      const cx = w / 2, top = h * .17, bottom = top + H;
+      // space: X across the pages (spine at 0), Y along the spine toward the viewer, Z up.
+      // The two boards cross at height zc; above it they form the V the book sits in,
+      // below it they spread into the legs.
+      const TH = Math.PI / 7;                      // how steeply the boards lean
+      const co = Math.cos(TH), si = Math.sin(TH);
+      const W = 1, D = 1.35;                       // page width and depth
+      const ARM = 1.06, LEG = .92;                 // board length above and below the crossing
+      const zc = LEG * si, zh = zc + .11;          // crossing height, page surface height at the spine
+      const y0 = -.06, y1 = D + .06;               // boards are a touch deeper than the book
+      const s = h * .42;
+      const ox = w / 2 + .12 * s, oy = h * .5 + .45 * s;
+      const P = (X, Y, Z) => [ox + (X - .18 * Y) * s, oy + Y * .45 * s - Z * s];
 
-      function pagePath(ox, lift) {
+      function quad(pts, fill, stroke) {
         ctx.beginPath();
-        ctx.moveTo(cx, top + H * .05);
-        ctx.quadraticCurveTo(cx + ox * .5, top - lift * .5 - H * .03, cx + ox, top - lift);
-        ctx.lineTo(cx + ox, bottom - lift);
-        ctx.quadraticCurveTo(cx + ox * .5, bottom - lift * .5 + H * .02, cx, bottom + H * .03);
+        pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
         ctx.closePath();
+        if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
       }
-      // lines of "text": each page gets its own pattern so flipping visibly changes it
-      function pageText(ox, lift, seed, star) {
+      function line(a, b, style, width) {
+        ctx.strokeStyle = style; ctx.lineWidth = width || 1;
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+      }
+      // a point on a page hinged at the spine and opened to angle a
+      // (TH = resting on the right arm, PI - TH = resting on the left arm)
+      const onPage = (a, d, Y) => P(d * Math.cos(a), Y, zh + d * Math.sin(a));
+      function pageText(a, seed, star) {
         const r = rng(seed * 7919 + 13);
-        const dir = Math.sign(ox) || 1, span = Math.abs(ox);
-        if (span < W * .25) return;
-        ctx.fillStyle = 'rgba(0,0,0,.55)';
-        const first = top + H * (star ? .26 : .14);
-        for (let y = first; y < bottom - H * .1; y += 3) {
-          const len = (.55 + r() * .35) * (span - 5);
-          const x = dir > 0 ? cx + 3 : cx - 3 - len;
-          ctx.fillRect(x, y - lift * .6, len, 1);
+        for (let Y = star ? .42 : .2; Y < D - .12; Y += .24) {
+          const len = .5 + r() * .36;
+          line(onPage(a, .12, Y), onPage(a, .12 + len, Y), 'rgba(0,0,0,.9)');
         }
         if (star) {
-          // a small eight-point star marks the start of each juz
-          const sx = cx + dir * span * .5, sy = top + H * .14 - lift * .6, s = Math.max(1.5, H * .06);
-          ctx.fillStyle = '#000';
-          for (const a of [0, Math.PI / 4]) {
-            ctx.save(); ctx.translate(sx, sy); ctx.rotate(a); ctx.fillRect(-s / 2, -s / 2, s, s); ctx.restore();
-          }
+          // a small diamond marks the start of each juz
+          const m = .09;
+          quad([onPage(a, .5 - m, .2), onPage(a, .5, .2 - m * 1.6), onPage(a, .5 + m, .2), onPage(a, .5, .2 + m * 1.6)], '#000');
         }
       }
 
-      // page edges fanning out under the open pages
-      ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.lineWidth = 1;
-      for (let k = 1; k <= 3; k++) {
-        ctx.beginPath();
-        ctx.moveTo(cx - W - k * .8, top + k); ctx.lineTo(cx - W - k * .8, bottom + k);
-        ctx.quadraticCurveTo(cx - W / 2, bottom + k + H * .02, cx, bottom + H * .03 + k);
-        ctx.quadraticCurveTo(cx + W / 2, bottom + k + H * .02, cx + W + k * .8, bottom + k);
-        ctx.lineTo(cx + W + k * .8, top + k);
-        ctx.stroke();
-      }
+      const fx = LEG * co, ax = ARM * co, az = ARM * si;
 
-      // the resting left and right pages
+      // soft shadow on the floor
+      quad([P(-fx - .1, y0, 0), P(fx + .1, y0, 0), P(fx + .2, y1 + .12, 0), P(-fx, y1 + .12, 0)], 'rgba(0,0,0,.1)');
+
+      // legs, then the arms of the cradle
       for (const side of [-1, 1]) {
-        pagePath(side * W, 0);
-        ctx.fillStyle = '#d6d6d6'; ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.stroke();
+        quad([P(0, y0, zc), P(side * fx, y0, 0), P(side * fx, y1, 0), P(0, y1, zc)], '#9a9a9a', '#000');
       }
-      pageText(-W, 0, n * 2, true);
-      pageText(W, 0, f > .02 ? (n + 1) * 2 + 1 : n * 2 + 1, false);
+      for (const side of [-1, 1]) {
+        quad([P(0, y0, zc), P(side * ax, y0, zc + az), P(side * ax, y1, zc + az), P(0, y1, zc)], '#7a7a7a', '#000');
+      }
 
-      // the page mid-flip
+      // the book: page blocks (with their near edges showing the thickness), then the pages
+      for (const side of [-1, 1]) {
+        const tipX = side * W * co, tipZ = W * si;
+        quad([P(0, D, zc), P(tipX, D, zc + tipZ), P(tipX, D, zh + tipZ), P(0, D, zh)], '#b4b4b4', '#000');
+        quad([P(0, 0, zh), P(tipX, 0, zh + tipZ), P(tipX, D, zh + tipZ), P(0, D, zh)], '#f4f4f4', '#000');
+      }
+      pageText(Math.PI - TH, n * 2, true);
+      pageText(TH, f > .02 ? (n + 1) * 2 + 1 : n * 2 + 1, false);
+
+      // the page mid-flip swings from the right arm, up and over, to the left arm
       if (f > .02 && f < .98) {
-        const ox = W * Math.cos(Math.PI * f), lift = Math.sin(Math.PI * f) * H * .12;
-        const tone = Math.round(214 - (1 - Math.abs(Math.cos(Math.PI * f))) * 90);
-        pagePath(ox, lift);
-        ctx.fillStyle = `rgb(${tone},${tone},${tone})`; ctx.fill();
-        ctx.strokeStyle = '#000'; ctx.stroke();
-        pageText(ox, lift, f < .5 ? n * 2 + 1 : (n + 1) * 2, f >= .5);
+        const a = TH + (Math.PI - 2 * TH) * f;
+        const tone = Math.round(240 - Math.sin(Math.PI * f) * 70);
+        quad([onPage(a, 0, 0), onPage(a, W, 0), onPage(a, W, D), onPage(a, 0, D)], `rgb(${tone},${tone},${tone})`, '#000');
+        pageText(a, f < .5 ? n * 2 + 1 : (n + 1) * 2, f >= .5);
       }
 
-      // spine
-      ctx.strokeStyle = '#000';
-      ctx.beginPath(); ctx.moveTo(cx, top + H * .05); ctx.lineTo(cx, bottom + H * .03); ctx.stroke();
+      // spine, and the crossed near edges of the boards: the X of the rehal
+      line(P(0, 0, zh), P(0, D, zh), '#000');
+      line(P(-fx, y1, 0), P(ax, y1, zc + az), '#000', 2);
+      line(P(fx, y1, 0), P(-ax, y1, zc + az), '#000', 2);
 
       const label = `Juz ${Math.min(30, n + 1)} / 30`;
       const readout = st.el.parentElement.querySelector('[data-readout]');
