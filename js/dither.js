@@ -324,6 +324,36 @@
       comets(ctx, w, h, st);
     },
 
+    // Light-to-dark transition: bars thicken downwards until they merge into solid
+    // ink, under a slow rolling skyline with a fainter ridge behind it
+    fade(ctx, w, h, t, st) {
+      const lift = (st.p - .5) * .12;
+      // the waves are measured across the band's width so they keep their shape on any screen
+      const detail = w < 90 ? .4 : 1;
+      // far ridge: short, thin bars
+      for (let x = 0; x < w; x++) {
+        const u = x / w;
+        const top = h * (.3 - lift + .14 * Math.sin(u * 3.4 + t * .12 + 2) + .05 * detail * Math.sin(u * 9.6 - t * .2));
+        const g = ctx.createLinearGradient(0, top, 0, top + h * .22);
+        g.addColorStop(0, 'rgba(0,0,0,0)');
+        g.addColorStop(1, 'rgba(0,0,0,.2)');
+        ctx.fillStyle = g;
+        ctx.fillRect(x, top, 1, h * .22);
+      }
+      // near slope: fades in from its skyline to solid at the bottom
+      for (let x = 0; x < w; x++) {
+        const u = x / w;
+        const top = h * (.42 - lift + .16 * Math.sin(u * 2.6 - t * .16) + .06 * detail * Math.sin(u * 7.2 + t * .25));
+        const g = ctx.createLinearGradient(0, top, 0, h * .8);
+        g.addColorStop(0, 'rgba(0,0,0,.12)');
+        g.addColorStop(.55, 'rgba(0,0,0,.5)');
+        g.addColorStop(1, 'rgba(0,0,0,1)');
+        ctx.fillStyle = g;
+        ctx.fillRect(x, top, 1, h - top);
+      }
+      birdBurst(ctx, w, h, st);
+    },
+
     sunset(ctx, w, h, t, st) {
       const sink = ease(clamp(st.p * 1.4 - .1, 0, 1));
       const r = Math.min(h * .55, w * .3);

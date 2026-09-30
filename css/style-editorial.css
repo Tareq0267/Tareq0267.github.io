@@ -64,6 +64,8 @@ html.sb-dark ::-webkit-scrollbar-thumb{ background: var(--sand); }
 .art{ position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; color: var(--ink); }
 .section.dark .art, .art-band.on-dark .art{ color: var(--sand); }
 .art-band{ position: relative; height: clamp(240px, 36vw, 520px); }
+/* sand dissolving into the dark contact section; the 1px overlap hides any seam */
+.fade-band{ position: relative; height: clamp(200px, 26vw, 380px); margin-bottom: -1px; }
 .has-art{ position: relative; }
 .has-art > :not(.art){ position: relative; z-index: 1; }
 
