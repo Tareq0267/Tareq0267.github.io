@@ -9,6 +9,43 @@ window.initFun = function () {
   const hasSplit = typeof SplitText !== 'undefined';
 
   /* =========================================================
+     HOVER TRACKER: what is under the cursor, re-checked on scroll.
+     Browsers only fire hover events when the mouse itself moves, so a
+     page scrolling under a still cursor would otherwise trigger nothing.
+  ========================================================= */
+  const hover = { x: -1, y: -1, inside: false };
+  const kinds = [];      // { selector, enter, leave, cur }
+  const movers = [];     // fn(x, y, inside), run on every pointer move and scroll
+  // enter/leave are called with the element and a { clientX, clientY } point
+  function track(selector, enter, leave) { kinds.push({ selector, enter, leave, cur: null }); }
+  function updateHover() {
+    const target = hover.inside ? document.elementFromPoint(hover.x, hover.y) : null;
+    const point = { clientX: hover.x, clientY: hover.y };
+    for (const k of kinds) {
+      const el = target ? target.closest(k.selector) : null;
+      if (el === k.cur) continue;
+      if (k.cur && k.leave) k.leave(k.cur, point);
+      k.cur = el;
+      if (el && k.enter) k.enter(el, point);
+    }
+    for (const fn of movers) fn(hover.x, hover.y, hover.inside);
+  }
+  if (fine) {
+    addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch') return;
+      hover.x = e.clientX; hover.y = e.clientY; hover.inside = true;
+      updateHover();
+    }, { passive: true });
+    document.addEventListener('pointerleave', () => { hover.inside = false; updateHover(); });
+    let queued = false;
+    addEventListener('scroll', () => {
+      if (queued || !hover.inside) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; updateHover(); });
+    }, { passive: true });
+  }
+
+  /* =========================================================
      GLYPH SCRAMBLE: text decodes itself into place
   ========================================================= */
   const GLYPHS = '!<>-_\\/[]{}=+*^?#@$%&01';
@@ -31,19 +68,15 @@ window.initFun = function () {
     })();
   }
 
-  // Labels decode once as they scroll in, and again whenever you hover them
-  const scrambleTargets = document.querySelectorAll(
-    '.section-head .label, .about-head .h6, .exp .when, .honour .meta .p6:first-child, .menu-links .h2, .hero-bottom > span'
-  );
+  // Labels decode once as they scroll in, and again whenever the cursor lands on them
+  const SCRAMBLE = '.section-head .label, .about-head .h6, .exp .when, .honour .meta .p6:first-child, .menu-links .h2, .hero-bottom > span';
   const seen = new IntersectionObserver(entries => entries.forEach(en => {
     if (!en.isIntersecting) return;
     seen.unobserve(en.target);
     scramble(en.target);
   }), { rootMargin: '0px 0px -15% 0px' });
-  scrambleTargets.forEach(el => {
-    if (!el.closest('.menu')) seen.observe(el);
-    if (fine) el.addEventListener('mouseenter', () => scramble(el));
-  });
+  document.querySelectorAll(SCRAMBLE).forEach(el => { if (!el.closest('.menu')) seen.observe(el); });
+  track(SCRAMBLE, el => scramble(el));
   // menu links decode each time the menu opens
   document.getElementById('menuToggle').addEventListener('click', () => {
     if (document.documentElement.classList.contains('menu-open')) {
@@ -63,21 +96,21 @@ window.initFun = function () {
       r: gsap.quickTo(c, 'rotation', { duration: .6, ease: 'power3' })
     }));
     let awake = false;
-    addEventListener('pointermove', e => {
+    movers.push((x, y, inside) => {
       const box = area.getBoundingClientRect();
-      const near = e.clientY > box.top - 120 && e.clientY < box.bottom + 120;
+      const near = inside && y > box.top - 120 && y < box.bottom + 120;
       if (!near && !awake) return;
       awake = near;
       for (const it of items) {
         const r = it.c.getBoundingClientRect();
         const lift = gsap.getProperty(it.c, 'y');
-        const dx = e.clientX - (r.left + r.width / 2);
-        const dy = e.clientY - (r.top + r.height / 2 - lift);
+        const dx = x - (r.left + r.width / 2);
+        const dy = y - (r.top + r.height / 2 - lift);
         const f = near ? Math.exp(-(dx * dx) / (2 * 110 * 110)) * Math.exp(-(dy * dy) / (2 * 300 * 300)) : 0;
         it.y(-f * r.height * .16);
         it.r(-f * Math.sign(dx) * 7);
       }
-    }, { passive: true });
+    });
     chars.forEach(c => {
       c.style.cursor = 'pointer';
       c.addEventListener('click', () => {
@@ -113,26 +146,23 @@ window.initFun = function () {
      DIRECTIONAL HOVER FILLS: news rows and skill cells fill with ink
      from the edge the cursor comes in from, and drain out the way it leaves
   ========================================================= */
-  if (fine) {
-    function nearestEdge(el, e, sidesToo) {
-      const r = el.getBoundingClientRect();
-      const d = { top: e.clientY - r.top, bottom: r.bottom - e.clientY };
-      if (sidesToo) { d.left = e.clientX - r.left; d.right = r.right - e.clientX; }
-      return Object.keys(d).reduce((a, b) => (d[a] < d[b] ? a : b));
-    }
-    document.querySelectorAll('.honour, .skill').forEach(el => {
-      const sidesToo = el.classList.contains('skill');
-      el.classList.add('fillable');
-      el.addEventListener('pointerenter', e => {
-        el.dataset.from = nearestEdge(el, e, sidesToo);
-        requestAnimationFrame(() => el.classList.add('is-hot'));
-      });
-      el.addEventListener('pointerleave', e => {
-        el.dataset.from = nearestEdge(el, e, sidesToo);
-        el.classList.remove('is-hot');
-      });
-    });
+  function nearestEdge(el, e, sidesToo) {
+    const r = el.getBoundingClientRect();
+    const d = { top: e.clientY - r.top, bottom: r.bottom - e.clientY };
+    if (sidesToo) { d.left = e.clientX - r.left; d.right = r.right - e.clientX; }
+    return Object.keys(d).reduce((a, b) => (d[a] < d[b] ? a : b));
   }
+  if (fine) document.querySelectorAll('.honour, .skill').forEach(el => el.classList.add('fillable'));
+  track('.honour, .skill', (el, e) => {
+    el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
+    requestAnimationFrame(() => { if (kinds.some(k => k.cur === el)) el.classList.add('is-hot'); });
+  }, (el, e) => {
+    el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
+    el.classList.remove('is-hot');
+  });
+
+  // Experience files turn ink while the cursor is on them
+  track('#experience .exp', el => el.classList.add('is-hot'), el => el.classList.remove('is-hot'));
 
   /* =========================================================
      SECTION INDICATOR: "04 / 08 · Experience", decoded on change
@@ -154,18 +184,16 @@ window.initFun = function () {
   }
 
   /* =========================================================
-     STATS: hover a number and it counts up again
+     STATS: land on a number and it counts up again
   ========================================================= */
-  if (fine && hasGsap && !reduceMotion) {
-    document.querySelectorAll('.stats .stat').forEach(stat => {
+  if (hasGsap && !reduceMotion) {
+    track('.stats .stat', stat => {
       const el = stat.querySelector('[data-counter]');
       if (!el) return;
-      stat.addEventListener('mouseenter', () => {
-        const end = parseFloat(el.dataset.counter);
-        const dec = parseInt(el.dataset.decimals || '0', 10);
-        const obj = { v: end >= 1000 ? end - 25 : 0 };
-        gsap.to(obj, { v: end, duration: .9, ease: 'power3.out', overwrite: true, onUpdate: () => { el.textContent = obj.v.toFixed(dec); } });
-      });
+      const end = parseFloat(el.dataset.counter);
+      const dec = parseInt(el.dataset.decimals || '0', 10);
+      const obj = { v: end >= 1000 ? end - 25 : 0 };
+      gsap.to(obj, { v: end, duration: .9, ease: 'power3.out', overwrite: true, onUpdate: () => { el.textContent = obj.v.toFixed(dec); } });
     });
   }
 };

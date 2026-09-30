@@ -45,8 +45,8 @@ window.initStyle = function () {
     addEventListener('pointerdown', () => root.classList.add('cursor-down'));
     addEventListener('pointerup', () => root.classList.remove('cursor-down'));
 
-    document.addEventListener('pointerover', e => {
-      const t = e.target;
+    // what the cursor is over; also re-checked when the page scrolls under a still cursor
+    function setTarget(t) {
       root.classList.toggle('cursor-on-dark', !!t.closest('.section.dark, .menu'));
       // buttons get pulled toward the pointer; other links get a labelled bubble
       const m = t.closest('.btn, .menu-toggle, .style-switch a, .brand');
@@ -57,7 +57,18 @@ window.initStyle = function () {
       root.classList.toggle('cursor-magnet', !!m);
       root.classList.toggle('cursor-link', !m && hot !== null);
       label.textContent = text || '';
-    });
+    }
+    document.addEventListener('pointerover', e => setTarget(e.target));
+    let scrollQueued = false;
+    addEventListener('scroll', () => {
+      if (scrollQueued || root.classList.contains('cursor-hidden')) return;
+      scrollQueued = true;
+      requestAnimationFrame(() => {
+        scrollQueued = false;
+        const t = document.elementFromPoint(x, y);
+        if (t) setTarget(t);
+      });
+    }, { passive: true });
 
     (function loop() {
       rx += (x - rx) * .2;

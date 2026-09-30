@@ -548,9 +548,14 @@ html.cursor-down .cursor-ring{ transform: scale(.8); }
 }
 #experience .exp:nth-child(2) .when{ --tab: 30%; }
 #experience .exp:nth-child(3) .when{ --tab: 60%; }
-#experience .exp:hover{ color: var(--sand); }
-#experience .exp:hover .muted{ color: var(--sand-70); }
-#experience .exp:hover::before, #experience .exp:hover .when{ background-color: var(--ink); border-color: var(--ink); }
+/* .is-hot is set by js/fun.js so it also follows the page scrolling under the cursor */
+#experience .exp.is-hot{ color: var(--sand); }
+#experience .exp.is-hot .muted{ color: var(--sand-70); }
+#experience .exp.is-hot::before, #experience .exp.is-hot .when{ background-color: var(--ink); border-color: var(--ink); }
+/* the last file closes the stack with a bottom edge */
+#experience .exp:last-child{ padding-bottom: clamp(24px, 2.6vw, 40px); }
+#experience .exp:last-child::before{ border-bottom: 1px solid var(--ink-10); border-radius: 8px; }
+#experience .exp.is-hot:last-child::before{ border-color: var(--ink); }
 #experience .exp .role{ grid-column: 1 / span 5; }
 #experience .exp .detail{ grid-column: 6 / span 7; }
 @media (max-width: 640px){
