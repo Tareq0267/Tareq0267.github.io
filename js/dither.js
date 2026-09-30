@@ -266,6 +266,35 @@
     ctx.globalAlpha = 1;
   }
 
+  // Bars that thicken downwards until they merge into solid ink, under a slow
+  // rolling skyline with a fainter ridge behind it. `phase` varies the wave shape.
+  function fadeBars(ctx, w, h, t, st, phase) {
+    const lift = (st.p - .5) * .12;
+    // the waves are measured across the band's width so they keep their shape on any screen
+    const detail = w < 90 ? .4 : 1;
+    // far ridge: short, thin bars
+    for (let x = 0; x < w; x++) {
+      const u = x / w;
+      const top = h * (.3 - lift + .14 * Math.sin(u * 3.4 + t * .12 + 2 + phase) + .05 * detail * Math.sin(u * 9.6 - t * .2 + phase * 2));
+      const g = ctx.createLinearGradient(0, top, 0, top + h * .22);
+      g.addColorStop(0, 'rgba(0,0,0,0)');
+      g.addColorStop(1, 'rgba(0,0,0,.2)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x, top, 1, h * .22);
+    }
+    // near slope: fades in from its skyline to solid at the bottom
+    for (let x = 0; x < w; x++) {
+      const u = x / w;
+      const top = h * (.42 - lift + .16 * Math.sin(u * 2.6 - t * .16 + phase * 1.7) + .06 * detail * Math.sin(u * 7.2 + t * .25 + phase));
+      const g = ctx.createLinearGradient(0, top, 0, h * .8);
+      g.addColorStop(0, 'rgba(0,0,0,.12)');
+      g.addColorStop(.55, 'rgba(0,0,0,.5)');
+      g.addColorStop(1, 'rgba(0,0,0,1)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x, top, 1, h - top);
+    }
+  }
+
   const scenes = {
     hero(ctx, w, h, t, st) {
       const portrait = h > w * 1.1;
@@ -324,33 +353,19 @@
       comets(ctx, w, h, st);
     },
 
-    // Light-to-dark transition: bars thicken downwards until they merge into solid
-    // ink, under a slow rolling skyline with a fainter ridge behind it
+    // Light-to-dark transition band
     fade(ctx, w, h, t, st) {
-      const lift = (st.p - .5) * .12;
-      // the waves are measured across the band's width so they keep their shape on any screen
-      const detail = w < 90 ? .4 : 1;
-      // far ridge: short, thin bars
-      for (let x = 0; x < w; x++) {
-        const u = x / w;
-        const top = h * (.3 - lift + .14 * Math.sin(u * 3.4 + t * .12 + 2) + .05 * detail * Math.sin(u * 9.6 - t * .2));
-        const g = ctx.createLinearGradient(0, top, 0, top + h * .22);
-        g.addColorStop(0, 'rgba(0,0,0,0)');
-        g.addColorStop(1, 'rgba(0,0,0,.2)');
-        ctx.fillStyle = g;
-        ctx.fillRect(x, top, 1, h * .22);
-      }
-      // near slope: fades in from its skyline to solid at the bottom
-      for (let x = 0; x < w; x++) {
-        const u = x / w;
-        const top = h * (.42 - lift + .16 * Math.sin(u * 2.6 - t * .16) + .06 * detail * Math.sin(u * 7.2 + t * .25));
-        const g = ctx.createLinearGradient(0, top, 0, h * .8);
-        g.addColorStop(0, 'rgba(0,0,0,.12)');
-        g.addColorStop(.55, 'rgba(0,0,0,.5)');
-        g.addColorStop(1, 'rgba(0,0,0,1)');
-        ctx.fillStyle = g;
-        ctx.fillRect(x, top, 1, h - top);
-      }
+      fadeBars(ctx, w, h, t, st, +(st.el.dataset.phase || 0));
+      birdBurst(ctx, w, h, st);
+    },
+
+    // The same transition upside down, for dark sections opening back into light
+    fadeUp(ctx, w, h, t, st) {
+      ctx.save();
+      ctx.translate(0, h);
+      ctx.scale(1, -1);
+      fadeBars(ctx, w, h, t, st, +(st.el.dataset.phase || 0));
+      ctx.restore();
       birdBurst(ctx, w, h, st);
     },
 
