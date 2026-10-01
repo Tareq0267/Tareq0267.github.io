@@ -261,7 +261,8 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 .hero-top .stat-b{ grid-column: 6 / span 2; }
 .hero-top .tagline{ grid-column: 9 / span 4; }
 .hero-stat .h4{ margin-bottom: 8px; }
-.hero-name{ width: 100%; overflow: hidden; }
+/* clip below and at the sides only, so a clicked letter can jump up above the box */
+.hero-name{ width: 100%; clip-path: inset(-60vh 0 0 0); }
 .fit{
   display: inline-block;
   white-space: nowrap;
@@ -392,7 +393,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   transition: padding-left .5s var(--ease);
 }
 .contact-links a:hover{ padding-left: 16px; }
-.contact-name{ margin-top: clamp(80px, 10vw, 160px); overflow: hidden; }
+.contact-name{ margin-top: clamp(80px, 10vw, 160px); clip-path: inset(-60vh 0 0 0); }
 .footer{
   display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px;
   padding-top: 20px; margin-top: 12px;
