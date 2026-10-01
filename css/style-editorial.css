@@ -548,10 +548,12 @@ html{ -webkit-tap-highlight-color: transparent; }
 /* touch screens: one gliding ink block (js/fun.js) instead of per-cell fills.
    The grid carries its own sand and runs edge to edge because its fade-in
    transform isolates it: the block can only blend against what is inside it. */
-.skills-grid.has-spot{
-  position: relative; background: var(--sand);
+.has-spot{
+  position: relative;
   margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter);
 }
+.skills-grid.has-spot{ background: var(--sand); }
+#honours .rows.has-spot{ background: var(--ink); }   /* dark section: the block shows sand */
 .skill-spot{
   position: absolute; top: 0; left: 0; width: 100%;
   background: #d4bc98; mix-blend-mode: difference;

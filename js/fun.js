@@ -232,14 +232,14 @@ window.initFun = function () {
        Scrolling down, ink rises from the bottom and the item you leave drains
        upwards; scrolling up, the reverse. */
     const SPOT = .4;
-    const items = [...document.querySelectorAll('.honour, #experience .exp')];
+    const items = [...document.querySelectorAll('#experience .exp')];
 
-    // Skills are short cells, so on/off fills hopped and snapped. Instead one ink block
-    // glides along the list and settles on the skill under the spotlight line; it
-    // blends by difference, so text it covers flips colour even mid-way across a cell.
-    const grid = document.querySelector('.skills-grid');
-    if (grid) {
-      const skills = [...grid.querySelectorAll('.skill')];
+    // News rows and skills: on/off fills hopped and snapped. Instead one block
+    // glides along the list and settles on the item under the spotlight line; it
+    // blends by difference, so text it covers flips colour even mid-way across an item.
+    function glideSpot(grid, cellSelector) {
+      if (!grid) return;
+      const cells = [...grid.querySelectorAll(cellSelector)];
       const block = document.createElement('div');
       block.className = 'skill-spot';
       block.setAttribute('aria-hidden', 'true');
@@ -250,7 +250,7 @@ window.initFun = function () {
       (function glide() {
         if (near) {
           const line = innerHeight * SPOT, g = grid.getBoundingClientRect();
-          const cell = skills.find(s => { const r = s.getBoundingClientRect(); return r.top <= line && r.bottom > line; });
+          const cell = cells.find(s => { const r = s.getBoundingClientRect(); return r.top <= line && r.bottom > line; });
           if (cell) {
             const r = cell.getBoundingClientRect();
             const tTop = r.top - g.top, tH = r.height;
@@ -266,6 +266,8 @@ window.initFun = function () {
         requestAnimationFrame(glide);
       })();
     }
+    glideSpot(document.querySelector('.skills-grid'), '.skill');
+    glideSpot(document.querySelector('#honours .rows'), '.honour');
     const lit = new Set();
     let lastY = scrollY, down = true, queued = false;
     function spotlight() {
