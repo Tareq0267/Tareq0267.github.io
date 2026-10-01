@@ -5,1582 +5,438 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tareq Adam | AI Developer & RoboCup Champion</title>
   <meta name="description" content="AI Developer, Computer Science (AI) Graduate from University of Malaya, and RoboCup Champion. Specializing in Machine Learning, Robotics, and Full-Stack Development.">
+  <meta name="theme-color" content="#a89474">
 
-  <!-- Fonts: the “vibe” set (Syne + Inter) -->
+  <script>
+    document.documentElement.classList.add('js');
+    // Easter egg: the theme flipped by popping the hero's moon is remembered
+    try { if (localStorage.getItem('site-inverted') === '1') document.documentElement.classList.add('inverted'); } catch (e) {}
+    // Style switcher: send returning visitors to the look they last picked
+    try {
+      if (localStorage.getItem('site-style') === 'classic') location.replace('classic.html' + location.hash);
+    } catch (e) {}
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Icons + Anime -->
-  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" media="print" onload="this.media='all'">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-
-  <!-- Three.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-  <style>
-    /* =========================================================
-       1) GLOBAL + TOKENS (Glass + Typography)
-    ========================================================= */
-    :root{
-      --text: #ffffff;
-      --muted: rgba(255,255,255,.72);
-
-      /* Glass “carding” recipe */
-      --glass-bg: rgba(255,255,255,.10);
-      --glass-bg-2: rgba(255,255,255,.06);
-      --glass-border: rgba(255,255,255,.22);
-      --glass-border-strong: rgba(255,255,255,.38);
-
-      --shadow: 0 18px 60px rgba(0,0,0,.35);
-      --shadow-soft: 0 8px 32px rgba(0,0,0,.18);
-
-      --radius-lg: 18px;
-      --radius-md: 14px;
-      --radius-sm: 12px;
-
-      /* Accent (used for UI highlights) */
-      --accent: #4fc3f7;
-      --accent-2: #29b6f6;
-    }
-
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body{
-      color: var(--text);
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      line-height: 1.6;
-      overflow-x: hidden;
-      cursor: none;          /* custom cursor (disabled on touch via media query below) */
-      background: #0a0e27;   /* fallback behind WebGL */
-    }
-
-    .container{ max-width:1200px; margin:0 auto; padding:0 20px; }
-
-    /* =========================================================
-       2) WEBGL BACKGROUND LAYER
-    ========================================================= */
-    #webGLApp{
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      display:block;
-    }
-
-    /* UI layers above */
-    .ui-layer{ position: relative; z-index: 10; }
-
-    /* =========================================================
-       3) NAV (Glassy)
-    ========================================================= */
-    .skip-link{
-      position:absolute; top:-40px; left:6px;
-      background: var(--accent);
-      color:#fff; padding:8px; text-decoration:none;
-      z-index: 1001; border-radius: 6px;
-    }
-    .skip-link:focus{ top: 6px; }
-
-    .nav{
-      position: fixed;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border-radius: var(--radius-md);
-      box-shadow: var(--shadow-soft);
-
-      padding: 10px 16px;
-    }
-    .nav .container{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 18px;
-    }
-    .logo{
-      font-family: Syne, sans-serif;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: #fff;
-      opacity: .95;
-      white-space: nowrap;
-    }
-    .nav-links{ list-style:none; display:flex; gap:22px; }
-    .nav-links a{
-      color: rgba(255,255,255,.85);
-      text-decoration:none;
-      font-weight:600;
-      font-size:.92rem;
-      transition: opacity .2s ease, transform .2s ease;
-      font-family: Syne, sans-serif;
-      letter-spacing:.02em;
-    }
-    .nav-links a:hover{
-      opacity: 1;
-      transform: translateY(-1px);
-    }
-
-    /* =========================================================
-       4) HERO (Typography + Glass container)
-    ========================================================= */
-    .hero{
-      min-height: 100vh;  /* overridden to 100svh on mobile */
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      position: relative;
-    }
-    .hero-content{
-      text-align:center;
-
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
-      border: 1px solid rgba(255,255,255,.18);
-      border-radius: var(--radius-lg);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      box-shadow: var(--shadow);
-
-      padding: 48px 24px;
-    }
-
-    .hero h1{
-      font-family: Syne, sans-serif;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.02;
-      font-size: clamp(2.6rem, 6vw, 5.2rem);
-      margin-bottom: .55rem;
-      color: #fff;
-    }
-    .hero .subtitle{
-      font-family: Syne, sans-serif;
-      font-weight: 600;
-      letter-spacing: .03em;
-      text-transform: uppercase;
-      font-size: .95rem;
-      color: rgba(255,255,255,.75);
-      margin-bottom: 1rem;
-    }
-    .hero .description{
-      color: rgba(255,255,255,.70);
-      max-width: 860px;
-      margin: 0 auto 1.75rem;
-      font-size: 1.02rem;
-    }
-
-    .cta-buttons{
-      display:flex;
-      gap: 12px;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin-top: 8px;
-    }
-
-    .btn{
-      padding: 12px 20px;
-      border-radius: 999px;
-      border: 1px solid var(--glass-border);
-      background: var(--glass-bg);
-      color: #fff;
-      text-decoration:none;
-      font-weight: 600;
-      display:inline-flex;
-      align-items:center;
-      gap: 10px;
-      font-family: Syne, sans-serif;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      font-size: .78rem;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      transition: transform .2s ease, border-color .2s ease, background .2s ease;
-    }
-    .btn:hover{
-      transform: translateY(-2px);
-      background: rgba(255,255,255,.16);
-      border-color: var(--glass-border-strong);
-    }
-    .btn-primary{
-      border-color: rgba(255,255,255,.35);
-      background: rgba(255,255,255,.18);
-    }
-    .btn-cv{
-      border-color: rgba(100,220,160,.45);
-      background: rgba(16,185,129,.15);
-      color: #6ee7b7;
-    }
-    .btn-cv:hover{
-      background: rgba(16,185,129,.28);
-      border-color: rgba(100,220,160,.75);
-      color: #a7f3d0;
-    }
-
-    /* =========================================================
-       5) SECTIONS + GLASS CARDS
-    ========================================================= */
-    section{ position: relative; }
-    .section{
-      padding: 92px 0;
-    }
-    .section.alt{
-      background: rgba(255,255,255,.03);
-      border-top: 1px solid rgba(255,255,255,.06);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-
-    .section-title{
-      font-family: Syne, sans-serif;
-      font-size: clamp(1.8rem, 3vw, 2.6rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      text-align:center;
-      margin-bottom: 2.5rem;
-      color: rgba(255,255,255,.92);
-    }
-    .section-title span{
-      color: rgba(255,255,255,.55);
-      font-weight: 700;
-    }
-
-    .glass-card{
-      background: var(--glass-bg-2);
-      border: 1px solid rgba(255,255,255,.16);
-      border-radius: var(--radius-lg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      box-shadow: 0 10px 34px rgba(0,0,0,.22);
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    @media (max-width: 600px) {
-      .glass-card {
-        width: 100%;
-        max-width: 420px;
-        margin: 0 auto 1.5rem auto;
-        border-radius: 16px;
-        left: unset;
-        right: unset;
-      }
-      .container {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-      }
-      body, html {
-        padding: 0;
-        margin: 0;
-        width: 100vw;
-        overflow-x: hidden;
-      }
-    }
-
-    .about-grid{
-      display:grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 32px;
-      align-items: start;
-    }
-    .about-text{
-      padding: 28px;
-    }
-    .about-text h3{
-      font-family: Syne, sans-serif;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: .75rem;
-      font-size: 1.35rem;
-    }
-    .about-text p{ color: rgba(255,255,255,.68); margin-bottom: 1rem; }
-
-    .stats{
-      display:grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      padding: 28px;
-    }
-    .stat{
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      padding: 18px;
-      text-align:center;
-      transition: transform .25s ease, border-color .25s ease, background .25s ease;
-    }
-    .stat:hover{
-      transform: translateY(-4px);
-      border-color: rgba(255,255,255,.25);
-      background: rgba(255,255,255,.09);
-    }
-    .stat-number{
-      font-family: Syne, sans-serif;
-      font-size: 1.8rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      font-variant-numeric: tabular-nums;
-      display: block;
-    }
-    .stat-label{ color: rgba(255,255,255,.65); font-size: .9rem; }
-
-    .experience-timeline{
-      max-width: 900px;
-      margin: 0 auto;
-      position: relative;
-    }
-    .experience-timeline::before{
-      content:'';
-      position:absolute;
-      left: 26px;
-      top: 0; bottom: 0;
-      width: 2px;
-      background: rgba(255,255,255,.14);
-    }
-    .experience-item{
-      position: relative;
-      padding-left: 70px;
-      margin-bottom: 22px;
-    }
-    .experience-item::before{
-      content:'';
-      position:absolute;
-      left: 18px;
-      top: 22px;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.85);
-      border: 3px solid rgba(10,14,39,.9);
-      box-shadow: 0 0 0 6px rgba(255,255,255,.06);
-    }
-    .experience-card{
-      padding: 22px;
-      transition: transform .25s ease, border-color .25s ease, background .25s ease;
-    }
-    .experience-card:hover{
-      transform: translateY(-6px);
-      background: rgba(255,255,255,.075);
-      border-color: rgba(255,255,255,.24);
-    }
-    .experience-date{
-      font-family: Syne, sans-serif;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      font-size: .72rem;
-      color: rgba(255,255,255,.70);
-      margin-bottom: 6px;
-    }
-    .experience-content h3{
-      font-family: Syne, sans-serif;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-    }
-    .experience-content .company{ color: rgba(255,255,255,.72); font-weight: 600; }
-    .experience-content .location{ color: rgba(255,255,255,.55); font-size:.92rem; margin-bottom: 10px; }
-    .experience-content .description{ color: rgba(255,255,255,.65); }
-
-    .skills-tags{
-      margin-top: 12px;
-      display:flex;
-      flex-wrap:wrap;
-      gap: 8px;
-    }
-    .skills-tags span{
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      padding: 6px 10px;
-      border-radius: 999px;
-      color: rgba(255,255,255,.78);
-      font-size: .75rem;
-      font-weight: 600;
-    }
-
-    .skills-grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 16px;
-      margin-top: 10px;
-    }
-    .skill-card{
-      padding: 24px;
-      transition: transform .25s ease, border-color .25s ease, background .25s ease;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-    .skill-card:hover{
-      transform: translateY(-8px);
-      border-color: rgba(255,255,255,.26);
-      background: rgba(255,255,255,.075);
-      box-shadow: 0 16px 40px rgba(0,0,0,.25);
-    }
-    .skill-icon{
-      font-size: 2.6rem;
-      margin-bottom: .85rem;
-      opacity: .9;
-    }
-    .skill-card h3{
-      font-family: Syne, sans-serif;
-      font-weight: 800;
-      margin-bottom: .6rem;
-    }
-    .skill-card p{ color: rgba(255,255,255,.65); font-size:.92rem; }
-
-    .projects-grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 16px;
-      margin-top: 10px;
-    }
-    .project-card{
-      overflow:hidden;
-      transition: transform .35s cubic-bezier(.175,.885,.32,1.275), border-color .25s ease, background .25s ease;
-      transform-style: preserve-3d;
-      will-change: transform;
-    }
-    .project-card:hover{
-      transform: translateY(-10px) rotateX(1.5deg);
-      border-color: rgba(255,255,255,.26);
-      background: rgba(255,255,255,.075);
-      box-shadow: 0 24px 60px rgba(0,0,0,.30);
-    }
-    .project-image{
-      height: 190px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size: 3rem;
-      background: rgba(255,255,255,.06);
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      position: relative;
-      overflow:hidden;
-    }
-    .project-image::before{
-      content:'';
-      position:absolute;
-      top:0; left:-120%;
-      width: 120%;
-      height:100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.10), transparent);
-      transition: left .6s ease;
-    }
-    .project-card:hover .project-image::before{ left: 120%; }
-    .project-content{ padding: 22px; }
-    .project-card h3{
-      font-family: Syne, sans-serif;
-      font-weight: 800;
-      margin-bottom: .65rem;
-    }
-    .project-card p{ color: rgba(255,255,255,.65); margin-bottom: 1.1rem; }
-    .project-links{ display:flex; gap: 14px; flex-wrap:wrap; }
-    .project-links a{
-      color: rgba(255,255,255,.85);
-      text-decoration:none;
-      font-weight: 700;
-      font-family: Syne, sans-serif;
-      font-size:.8rem;
-      letter-spacing:.05em;
-      text-transform: uppercase;
-      border-bottom: 1px solid rgba(255,255,255,.22);
-      padding-bottom: 2px;
-      transition: opacity .2s ease;
-      display:flex;
-      gap: 8px;
-      align-items:center;
-    }
-    .project-links a:hover{ opacity: 1; border-bottom-color: rgba(255,255,255,.45); }
-
-    .contact{
-      text-align:center;
-    }
-    .contact p{ color: rgba(255,255,255,.68); max-width: 820px; margin: 0 auto; }
-    .contact-info{
-      display:flex;
-      justify-content:center;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-top: 22px;
-    }
-    .contact-item{
-      padding: 14px 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      color: rgba(255,255,255,.78);
-      transition: transform .2s ease, background .2s ease, border-color .2s ease;
-    }
-    .contact-item:hover{
-      transform: translateY(-3px);
-      background: rgba(255,255,255,.09);
-      border-color: rgba(255,255,255,.24);
-    }
-    .contact-item a{ color: rgba(255,255,255,.88); text-decoration:none; }
-
-    /* =========================================================
-       7) CUSTOM CURSOR
-    ========================================================= */
-    .custom-cursor{
-      position: fixed;
-      width: 40px;
-      height: 40px;
-      border: 2px solid rgba(255,255,255,0);
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 2000;
-      transform: translate(-50%,-50%);
-      transition: width .18s ease, height .18s ease, border-width .18s ease;
-      background: transparent;
-      will-change: transform;
-    }
-    .custom-cursor::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      margin:auto;
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #fff;
-      opacity: .9;
-    }
-
-    /* Text scrambler dud */
-    .dud{ color: rgba(255,255,255,.45); }
-
-    /* =========================================================
-       MOBILE PERFORMANCE + LAYOUT FIXES (ADDED)
-    ========================================================= */
-
-    @media (max-width: 600px) {
-      /* Better viewport behavior on iOS Safari */
-      .hero h1 {
-        font-size: 2.2rem;
-        letter-spacing: 0.01em;
-        margin-bottom: 0.7rem;
-        /* Do not change color or gradient */
-        text-align: left;
-      }
-      .hero {
-        padding: 120px 0 56px;
-      }
-      .hero-content {
-        padding: 18px 6px;
-        background: none !important;
-        border: none !important;
-        box-shadow: none !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-      }
-      .hero .description{
-        font-size: .98rem;
-        line-height: 1.55;
-      }
-      .cta-buttons{ gap: 10px; }
-      .btn{
-        width: 100%;
-        justify-content: center;
-        padding: 12px 16px;
-      }
-
-      .section{ padding: 64px 0; }
-      .section-title{ margin-bottom: 1.6rem; }
-      .nav .container{ justify-content: center; }
-      .nav-links{ display:none; }
-
-      .about-grid{ grid-template-columns: 1fr; gap: 16px; }
-      .about-text{ padding: 18px; }
-      .stats{ padding: 18px; gap: 10px; }
-      .stat{ padding: 14px; }
-
-      .experience-timeline::before{ left: 14px; }
-      .experience-item{ padding-left: 44px; }
-      .experience-item::before{ left: 6px; top: 20px; }
-      .experience-card{ padding: 16px; }
-
-      .glass-card{
-        border-radius: 16px;
-        box-shadow: 0 10px 26px rgba(0,0,0,.20);
-      }
-
-      .projects-grid{ grid-template-columns: 1fr; }
-      .project-image{ height: 160px; }
-
-      .skills-grid{ grid-template-columns: 1fr; }
-
-      .contact-info{ gap: 10px; }
-      .contact-item{
-        width: 100%;
-        justify-content: center;
-      }
-    }
-
-    @media (max-width: 420px){
-      .hero h1{ font-size: 2.25rem; }
-      .section{ padding: 56px 0; }
-    }
-
-    /* =========================================================
-       8) SCROLL REVEAL
-    ========================================================= */
-    [data-reveal]{
-      opacity: 0;
-      transform: translateY(36px);
-      transition: opacity .75s cubic-bezier(.22,.61,.36,1),
-                  transform .75s cubic-bezier(.22,.61,.36,1);
-      transition-delay: var(--reveal-delay, 0ms);
-    }
-    [data-reveal].revealed{
-      opacity: 1;
-      transform: translateY(0);
-    }
-  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.15/dist/lenis.css">
+  <link rel="stylesheet" href="css/style-editorial.css">
 </head>
 
 <body>
   <a href="#main" class="skip-link">Skip to main content</a>
 
-  <div class="ui-layer">
-    <!-- Nav -->
-    <nav class="nav" role="navigation" aria-label="Main navigation">
-      <div class="container">
-        <ul class="nav-links">
-          <li><a href="#about" aria-label="About section">About</a></li>
-          <li><a href="#experience" aria-label="Experience section">Experience</a></li>
-          <li><a href="#skills" aria-label="Skills section">Skills</a></li>
-          <li><a href="#projects" aria-label="Projects section">Projects</a></li>
-          <li><a href="#contact" aria-label="Contact section">Contact</a></li>
-        </ul>
-      </div>
-    </nav>
+  <!-- Preloader -->
+  <div class="preloader" aria-hidden="true">
+    <div class="preloader-top">
+      <span class="p6">Tareq Adam · Portfolio</span>
+      <span class="p6 right">Loading the website</span>
+    </div>
+    <div class="preloader-mid">
+      <div class="h1 preloader-count"><span data-count>0</span>%</div>
+      <div class="preloader-bar"><i></i></div>
+    </div>
+    <div class="preloader-bottom">
+      <span class="p6">AI · Robotics · Web</span>
+      <span class="p6">Malaysia</span>
+    </div>
+  </div>
 
+  <!-- Header -->
+  <header class="header" id="header">
+    <a href="#main" class="brand p6" aria-label="Tareq Adam, back to top">
+      <span class="roll"><span>Tareq Adam</span><span>Back to top</span></span>
+    </a>
+    <button class="menu-toggle p6" id="menuToggle" aria-expanded="false" aria-controls="menu">
+      <span class="bars" aria-hidden="true"></span>
+      <span class="roll" data-menu-label><span>Menu</span><span>Menu</span></span>
+    </button>
+    <div class="header-right">
+    <nav class="style-switch p6" aria-label="Site style">
+      <a href="index.html" data-style="editorial" aria-current="true">Editorial</a>
+      <a href="classic.html" data-style="classic">Classic</a>
+    </nav>
+    <a href="MUHAMMAD_TAREQ_ADAM_BIN_ELLIAS_Resume.pdf" download class="btn cv p6" aria-label="Download CV">
+      <span class="roll"><span>Download CV</span><span>Download CV</span></span>
+      <span aria-hidden="true">↓</span>
+    </a>
+    </div>
+  </header>
+
+  <!-- Menu overlay -->
+  <nav class="menu" id="menu" aria-label="Main navigation">
+    <ul class="menu-links">
+      <li><a href="#about"><span class="p6">01</span><span class="h2">About</span></a></li>
+      <li><a href="#honours"><span class="p6">02</span><span class="h2">News</span></a></li>
+      <li><a href="#experience"><span class="p6">03</span><span class="h2">Experience</span></a></li>
+      <li><a href="#skills"><span class="p6">04</span><span class="h2">Skills</span></a></li>
+      <li><a href="#projects"><span class="p6">05</span><span class="h2">Projects</span></a></li>
+      <li><a href="#contact"><span class="p6">06</span><span class="h2">Contact</span></a></li>
+    </ul>
+    <div class="menu-foot">
+      <a class="p6" href="mailto:tareqadam2002@gmail.com">tareqadam2002@gmail.com</a>
+      <span class="p6 menu-role">AI Developer &amp; CS Graduate</span>
+      <nav class="style-switch p6" aria-label="Site style">
+        <a href="index.html" data-style="editorial" aria-current="true">Editorial</a>
+        <a href="classic.html" data-style="classic">Classic</a>
+      </nav>
+    </div>
+  </nav>
+
+  <main>
     <!-- Hero -->
-    <section class="hero" id="main">
-      <div class="container">
-        <div class="hero-content">
-          <h1 class="text">Tareq Adam</h1>
-          <p class="subtitle">AI Developer & CS Graduate</p>
-          <p class="description">
-            Passionate about Artificial Intelligence, Machine Learning, and Computer Vision.
-            Graduated with Bachelor's in Computer Science (AI) from University of Malaya with a CGPA of 3.71.
-            Experienced in full-stack development, robotics, and innovative AI solutions.
-          </p>
-          <div class="cta-buttons">
-            <a href="#projects" class="btn btn-primary"><i class="fas fa-code"></i> View Projects</a>
-            <a href="#contact" class="btn"><i class="fas fa-paper-plane"></i> Contact</a>
-            <a href="MUHAMMAD_TAREQ_ADAM_BIN_ELLIAS_Resume.pdf" download class="btn btn-cv"><i class="fas fa-file-arrow-down"></i> Download CV</a>
-          </div>
+    <section class="hero has-art" id="main" data-label="Intro">
+      <canvas class="art" data-dither="hero" data-lens data-cell="6" data-avoid=".hero .intro, .hero-stat .h4, .hero-stat .p6, .hero .tagline, .hero-bottom > *" aria-hidden="true"></canvas>
+      <div class="grid-12 hero-top">
+        <p class="p6 intro" data-fade>Portfolio<br><span class="muted">AI Developer &amp; CS Graduate</span></p>
+        <div class="hero-stat stat-b" data-fade>
+          <div class="h4">3.71</div>
+          <p class="p6 muted">CGPA<br>University of Malaya</p>
         </div>
+        <p class="h6 sentence tagline" data-fade>
+          Passionate about Artificial Intelligence, Machine Learning and Computer Vision. Building robots, vision systems and full-stack products.
+        </p>
+      </div>
+
+      <div>
+        <h1 class="hero-name h1"><span class="fit" data-hero-name>Tareq Adam</span></h1>
+        <div class="hero-bottom rule">
+          <span class="p6">Based in Malaysia</span>
+          <span class="p6 center">Full-stack developer · Intekma</span>
+          <a href="#about" class="p6 right"><span class="roll"><span>Scroll to explore ↓</span><span>Scroll to explore ↓</span></span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Prologue -->
+    <section class="section prologue wrap center has-art" data-label="Prologue">
+      <canvas class="art art-prologue" data-dither="prologue" data-cell="6" data-avoid=".prologue .label, .prologue .h5, .prologue .actions .btn" aria-hidden="true"></canvas>
+      <h2 class="p6 label">prologue</h2>
+      <p class="h5 sentence" data-split>
+        “I try to understand how things work, then try them in a different context to see if they can work there too. I just love making things.”
+      </p>
+      <div class="actions" data-fade>
+        <a href="#projects" class="btn p6"><span class="roll"><span>View projects</span><span>View projects</span></span></a>
+        <a href="#contact" class="btn ghost p6"><span class="roll"><span>Get in touch</span><span>Get in touch</span></span></a>
       </div>
     </section>
 
     <!-- About -->
-    <section class="section alt" id="about">
-      <div class="container">
-        <h2 class="section-title">About <span>Me</span></h2>
-        <div class="about-grid">
-          <div class="glass-card about-text">
-            <h3>AI Enthusiast & Full-Stack Developer</h3>
-            <p>
-              I'm a Computer Science (Artificial Intelligence) graduate from University of Malaya.
-              My passion lies in developing innovative AI solutions, from computer vision applications to NLP systems.
-            </p>
-            <p>
-              With experience as a Full-Stack Developer at Intekma Sdn Bhd, I've worked on Django-based applications and REST APIs.
-              Won 1st place in RoboCup Malaysia 2025 @Home category, 3rd place in RoboCup Asia-Pacific 2025 Humanoid Soccer, and 3rd place in the international ranking at RoboCup Beijing Masters 2026 with Team RobotEdge, showcasing expertise in autonomous robotics and AI.
-              I'm also actively involved in ROTU UM as a Young Officer and serve as Lead Guitarist for PEND8KAR POPBAND.
-            </p>
-          </div>
+    <section class="section wrap" id="about" data-label="About">
+      <div class="about-head">
+        <h2 class="h1" data-split>About</h2>
+        <p class="h6 italic">Muhammad Tareq Adam bin Ellias</p>
+      </div>
 
-          <div class="glass-card stats">
-            <div class="stat">
-              <div class="stat-number">3.71</div>
-              <div class="stat-label">CGPA</div>
-            </div>
-            <div class="stat">
-              <div class="stat-number">15+</div>
-              <div class="stat-label">Projects</div>
-            </div>
-            <div class="stat">
-              <div class="stat-number">3</div>
-              <div class="stat-label">Dean's List</div>
-            </div>
-            <div class="stat">
-              <div class="stat-number">2025</div>
-              <div class="stat-label">Graduate</div>
-            </div>
-          </div>
+      <div class="grid-12 about-cols">
+        <div class="about-col" data-fade>
+          <h3 class="h4">Background</h3>
+          <p class="p5">
+            I'm a Computer Science (Artificial Intelligence) graduate from University of Malaya.
+            My passion lies in developing innovative AI solutions, from computer vision applications to NLP systems.
+          </p>
+          <p class="p5">
+            With experience as a Full-Stack Developer at Intekma Sdn Bhd, I've worked on Django-based applications and REST APIs.
+          </p>
         </div>
+        <div class="about-col" data-fade>
+          <h3 class="h4">Beyond code</h3>
+          <p class="p5">
+            Won 1st place in RoboCup Malaysia 2025 @Home category, 3rd place in RoboCup Asia-Pacific 2025 Humanoid Soccer, and 3rd place in the international ranking at RoboCup Beijing Masters 2026 with Team RobotEdge.
+          </p>
+          <p class="p5">
+            I'm also actively involved in ROTU UM as a Young Officer and serve as Lead Guitarist for PEND8KAR POPBAND.
+          </p>
+        </div>
+      </div>
+
+      <div class="stats" data-stats>
+        <div class="stat"><div class="h2" data-counter="3.71" data-decimals="2">3.71</div><p class="p6 muted">CGPA</p></div>
+        <div class="stat"><div class="h2"><span data-counter="15">15</span>+</div><p class="p6 muted">Projects</p></div>
+        <div class="stat"><div class="h2" data-counter="3">3</div><p class="p6 muted">Dean's List</p></div>
+        <div class="stat"><div class="h2" data-counter="2025">2025</div><p class="p6 muted">Graduate</p></div>
       </div>
     </section>
 
+    <!-- Light-to-dark transition into the news section -->
+    <div class="fade-band" aria-hidden="true"><canvas class="art" data-dither="fade" data-phase="2.4" data-cell="9"></canvas></div>
+
+    <!-- Honours / News -->
+    <section class="section dark wrap" id="honours" data-theme="dark" data-label="News">
+      <div class="section-head center">
+        <h2 class="p6 label">news</h2>
+        <h3 class="h3" data-split>What’s been happening lately</h3>
+      </div>
+
+      <div class="art-band band-honours" aria-hidden="true"><canvas class="art" data-dither="moonrise" data-lens data-cell="6"></canvas></div>
+
+      <div class="rows">
+        <article class="row grid-12 honour" data-fade>
+          <div class="h1 place">3<sup>rd</sup></div>
+          <div class="body">
+            <span class="tag p6">Latest</span>
+            <h4 class="h5">RoboCup Beijing Masters 2026</h4>
+            <p class="p5 muted">
+              Achieved third place in the international ranking at RoboCup Beijing Masters 2026 with Team RobotEdge, representing Malaysia against top robotics teams from around the world.
+            </p>
+          </div>
+          <div class="meta">
+            <span class="p6">August 8 – 27, 2026</span>
+            <span class="p6 muted">Beijing, China</span>
+            <span class="p6 muted">International ranking</span>
+          </div>
+        </article>
+
+        <article class="row grid-12 honour" data-fade>
+          <div class="h1 place">3<sup>rd</sup></div>
+          <div class="body">
+            <h4 class="h5">RoboCup Asia-Pacific 2025</h4>
+            <p class="p5 muted">
+              Won third place in RoboCup Asia-Pacific 2025 Humanoid Soccer category, representing Malaysia as part of Team RobotEdge. Competed against top international teams in autonomous humanoid robot soccer.
+            </p>
+          </div>
+          <div class="meta">
+            <span class="p6">November 2025</span>
+            <span class="p6 muted">Abu Dhabi</span>
+            <span class="p6 muted">Humanoid Soccer</span>
+          </div>
+        </article>
+
+        <article class="row grid-12 honour" data-fade>
+          <div class="h1 place">1<sup>st</sup></div>
+          <div class="body">
+            <h4 class="h5">RoboCup Malaysia 2025</h4>
+            <p class="p5 muted">
+              Won first place in RoboCup Malaysia 2025 @Home category as part of the RobotEdge UM team. Developed autonomous service robots capable of performing complex household tasks, human-robot interaction, and navigation in real-world environments.
+            </p>
+          </div>
+          <div class="meta">
+            <span class="p6">August 2025</span>
+            <span class="p6 muted">Malaysia</span>
+            <span class="p6 muted">@Home</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Dark-to-light transition out of the news section -->
+    <div class="fade-band up" aria-hidden="true"><canvas class="art" data-dither="fadeUp" data-phase="4.1" data-cell="9"></canvas></div>
+
     <!-- Experience -->
-    <section class="section" id="experience">
-      <div class="container">
-        <h2 class="section-title">Work <span>Experience</span></h2>
+    <section class="section wrap" id="experience" data-label="Experience">
+      <div class="section-head center">
+        <h2 class="p6 label">experience</h2>
+        <h3 class="h3" data-split>Where I've worked</h3>
+      </div>
 
-        <div class="experience-timeline">
-          <div class="experience-item">
-            <div class="glass-card experience-card">
-              <div class="experience-date">August 8 - 27, 2026</div>
-              <div class="experience-content">
-                <h3><i class="fas fa-trophy"></i> RoboCup Beijing Masters 2026 - 3rd Place</h3>
-                <p class="company">Team RobotEdge · Competition</p>
-                <p class="location">Beijing, China · International Ranking</p>
-                <p class="description">
-                  Achieved third place in the international ranking at RoboCup Beijing Masters 2026 with Team RobotEdge, representing Malaysia against top robotics teams from around the world.
-                </p>
-                <div class="skills-tags">
-                  <span>Robotics</span><span>ROS</span><span>Computer Vision</span><span>ML</span>
-                  <span>Autonomous Systems</span><span>Python</span>
-                </div>
-              </div>
-            </div>
+      <div class="rows">
+        <article class="row grid-12 exp" data-fade>
+          <p class="p6 when">May 2025 – Present</p>
+          <div class="role">
+            <h4 class="h5">Full-stack Web Developer</h4>
+            <p class="p6 muted">Intekma Sdn. Bhd. · Full-time<br>Kota Damansara, Selangor · On-site</p>
           </div>
-
-          <div class="experience-item">
-            <div class="glass-card experience-card">
-              <div class="experience-date">November 2025</div>
-              <div class="experience-content">
-                <h3><i class="fas fa-trophy"></i> RoboCup Asia-Pacific 2025 - 3rd Place</h3>
-                <p class="company">Team RobotEdge · Competition</p>
-                <p class="location">Abu Dhabi · Humanoid Soccer Category</p>
-                <p class="description">
-                  Won third place in RoboCup Asia-Pacific 2025 Humanoid Soccer category, representing Malaysia as part of Team RobotEdge. Competed against top international teams in autonomous humanoid robot soccer.
-                </p>
-                <div class="skills-tags">
-                  <span>Robotics</span><span>ROS</span><span>Computer Vision</span><span>ML</span>
-                  <span>Humanoid</span><span>Motion Planning</span><span>Python</span>
-                </div>
-              </div>
-            </div>
+          <div class="detail">
+            <p class="p5">Develop the in-house web based app project and has experience working both in Front end and Back end.</p>
+            <p class="p6 muted tags">Django / DRF / REST / GitHub / PM</p>
           </div>
+        </article>
 
-          <div class="experience-item">
-            <div class="glass-card experience-card">
-              <div class="experience-date">August 2025</div>
-              <div class="experience-content">
-                <h3><i class="fas fa-trophy"></i> RoboCup Malaysia 2025 - 1st Place Winner</h3>
-                <p class="company">RobotEdge UM Team · Competition</p>
-                <p class="location">Malaysia · @Home Category</p>
-                <p class="description">
-                  Won first place in RoboCup Malaysia 2025 @Home category as part of the RobotEdge UM team. Developed autonomous service robots capable of performing complex household tasks, human-robot interaction, and navigation in real-world environments.
-                </p>
-                <div class="skills-tags">
-                  <span>Robotics</span><span>ROS</span><span>Computer Vision</span><span>ML</span>
-                  <span>Navigation</span><span>HRI</span><span>Python</span><span>Autonomous Systems</span>
-                </div>
-              </div>
-            </div>
+        <article class="row grid-12 exp" data-fade>
+          <p class="p6 when">Jan 2025 – May 2025</p>
+          <div class="role">
+            <h4 class="h5">Helper at Makerspace UM</h4>
+            <p class="p6 muted">University of Malaya · Part-time<br>WP. Kuala Lumpur · On-site</p>
           </div>
-
-          <div class="experience-item">
-            <div class="glass-card experience-card">
-              <div class="experience-date">May 2025 - Present</div>
-              <div class="experience-content">
-                <h3><i class="fas fa-briefcase"></i> Full-stack Web Developer</h3>
-                <p class="company">Intekma Sdn. Bhd. · Full-time</p>
-                <p class="location">Kota Damansara, Selangor, Malaysia · On-site</p>
-                <p class="description">
-                  Develop the in-house web based app project and has experience working both in Front end and Back end
-                </p>
-                <div class="skills-tags">
-                  <span>Django</span><span>DRF</span><span>REST</span><span>GitHub</span><span>PM</span>
-                </div>
-              </div>
-            </div>
+          <div class="detail">
+            <p class="p5">Assist and teach makerspace members to use tools and basic concepts in 3D-printing, laser engraving, electronics circuitry and basic coding concepts.</p>
+            <p class="p6 muted tags">3D Printing / Laser / Arduino / Raspberry Pi / CAD</p>
           </div>
+        </article>
 
-          <div class="experience-item">
-            <div class="glass-card experience-card">
-              <div class="experience-date">Jan 2025 - May 2025</div>
-              <div class="experience-content">
-                <h3><i class="fas fa-tools"></i> Helper at Makerspace UM</h3>
-                <p class="company">University of Malaya · Part-time</p>
-                <p class="location">WP. Kuala Lumpur, Malaysia · On-site</p>
-                <p class="description">
-                  Assist and teach makerspace members to use tools and basic concepts in 3D-printing, laser engraving, electronics circuitry and basic coding concepts.
-                </p>
-                <div class="skills-tags">
-                  <span>3D Printing</span><span>Laser</span><span>Arduino</span><span>Raspberry Pi</span><span>CAD</span>
-                </div>
-              </div>
-            </div>
+        <article class="row grid-12 exp" data-fade>
+          <p class="p6 when">Jun 2023 – Dec 2023</p>
+          <div class="role">
+            <h4 class="h5">Intern</h4>
+            <p class="p6 muted">Intekma Sdn. Bhd. · Internship<br>Kota Damansara, Selangor · On-site</p>
           </div>
-
-          <div class="experience-item">
-            <div class="glass-card experience-card">
-              <div class="experience-date">Jun 2023 - Dec 2023</div>
-              <div class="experience-content">
-                <h3><i class="fas fa-laptop-code"></i> Intern</h3>
-                <p class="company">Intekma Sdn. Bhd. · Internship</p>
-                <p class="location">Kota Damansara, Selangor, Malaysia · On-site</p>
-                <p class="description">
-                  Gained hands-on experience in web development and data analysis during a 7-month internship program.
-                </p>
-                <div class="skills-tags">
-                  <span>Web Dev</span><span>Web Design</span><span>Data Analysis</span>
-                </div>
-              </div>
-            </div>
+          <div class="detail">
+            <p class="p5">Gained hands-on experience in web development and data analysis during a 7-month internship program.</p>
+            <p class="p6 muted tags">Web Dev / Web Design / Data Analysis</p>
           </div>
-
-        </div>
+        </article>
       </div>
     </section>
 
     <!-- Skills -->
-    <section class="section alt" id="skills">
-      <div class="container">
-        <h2 class="section-title">Technical <span>Skills</span></h2>
+    <section class="section wrap" id="skills" data-label="Skills">
+      <div class="section-head center">
+        <h2 class="p6 label">toolkit</h2>
+        <h3 class="h3" data-split>Technical skills</h3>
+      </div>
 
-        <div class="skills-grid">
-          <div class="glass-card skill-card">
-            <i class="fas fa-brain skill-icon"></i>
-            <h3>Artificial Intelligence</h3>
-            <p>Machine Learning, Deep Learning, Computer Vision, NLP, TensorFlow</p>
-          </div>
-          <div class="glass-card skill-card">
-            <i class="fas fa-code skill-icon"></i>
-            <h3>Programming</h3>
-            <p>Python, Java, C, JavaScript, Django, REST APIs</p>
-          </div>
-          <div class="glass-card skill-card">
-            <i class="fas fa-globe skill-icon"></i>
-            <h3>Website Development</h3>
-            <p>Django, HTML, CSS, REST APIs, Full-Stack Development</p>
-          </div>
-          <div class="glass-card skill-card">
-            <i class="fas fa-eye skill-icon"></i>
-            <h3>Computer Vision</h3>
-            <p>OpenCV, Object Detection, YOLO, Image Processing, AR/VR</p>
-          </div>
-          <div class="glass-card skill-card">
-            <i class="fas fa-robot skill-icon"></i>
-            <h3>Robotics</h3>
-            <p>Autonomous Systems, Pick & Place, Inverse Kinematics</p>
-          </div>
-          <div class="glass-card skill-card">
-            <i class="fas fa-shield-alt skill-icon"></i>
-            <h3>Cybersecurity</h3>
-            <p>Penetration Testing, Kali Linux, CTF Competitions</p>
-          </div>
-          <div class="glass-card skill-card">
-            <i class="fas fa-chart-line skill-icon"></i>
-            <h3>Data Science</h3>
-            <p>R Programming, Statistical Modeling, Data Visualization</p>
-          </div>
-          <div class="glass-card skill-card">
-            <i class="fas fa-cube skill-icon"></i>
-            <h3>3D Printing & Fabrication</h3>
-            <p>3D Modeling, CAD Design, Additive Manufacturing, Laser Engraving</p>
-          </div>
-        </div>
+      <div class="skills-grid" data-fade>
+        <div class="skill"><span class="p6 muted">01</span><div><h4 class="h6">Artificial Intelligence</h4><p class="p6 muted">Machine Learning, Deep Learning, Computer Vision, NLP, TensorFlow</p></div></div>
+        <div class="skill"><span class="p6 muted">02</span><div><h4 class="h6">Programming</h4><p class="p6 muted">Python, Java, C, JavaScript, Django, REST APIs</p></div></div>
+        <div class="skill"><span class="p6 muted">03</span><div><h4 class="h6">Web Development</h4><p class="p6 muted">Django, HTML, CSS, REST APIs, Full-Stack Development</p></div></div>
+        <div class="skill"><span class="p6 muted">04</span><div><h4 class="h6">Computer Vision</h4><p class="p6 muted">OpenCV, Object Detection, YOLO, Image Processing, AR/VR</p></div></div>
+        <div class="skill"><span class="p6 muted">05</span><div><h4 class="h6">Robotics</h4><p class="p6 muted">Autonomous Systems, Pick &amp; Place, Inverse Kinematics</p></div></div>
+        <div class="skill"><span class="p6 muted">06</span><div><h4 class="h6">3D Printing &amp; Fabrication</h4><p class="p6 muted">3D Modeling, CAD Design, Additive Manufacturing, Laser Engraving</p></div></div>
       </div>
     </section>
 
     <!-- Projects -->
-    <section class="section" id="projects">
-      <div class="container">
-        <h2 class="section-title">Featured <span>Projects</span></h2>
+    <section class="section wrap" id="projects" data-label="Projects">
+      <div class="section-head center">
+        <h2 class="p6 label">selected work</h2>
+        <h3 class="h3" data-split>Featured projects</h3>
+      </div>
 
-        <div class="projects-grid">
-          <div class="glass-card project-card">
-            <div class="project-image"><i class="fas fa-robot"></i></div>
-            <div class="project-content">
-              <h3><i class="fas fa-trophy"></i> RoboCup @Home - Champion Robot</h3>
-              <p>First place winning autonomous service robot for RoboCup Malaysia 2025. Features navigation, object recognition, and human-robot interaction.</p>
-              <div class="project-links">
-                <a href="https://www.instagram.com/robocupmalaysia/p/DNOFP1iPjKx/" target="_blank" rel="noreferrer">
-                  <i class="fas fa-robot"></i> RobotEdge UM
-                </a>
-                <a href="https://www.instagram.com/robocupmalaysia/p/DNOFP1iPjKx/" target="_blank" rel="noreferrer">
-                  <i class="fas fa-trophy"></i> Winner
-                </a>
+      <div class="grid-12 projects-layout">
+        <div class="project-tabs">
+          <p class="p6 muted label">Projects</p>
+          <ul role="tablist" aria-label="Projects">
+            <li><button role="tab" id="tab-1" aria-controls="panel-1" aria-selected="true"><span class="p6">01</span><span class="h6">RoboCup Sim</span></button></li>
+            <li><button role="tab" id="tab-2" aria-controls="panel-2" aria-selected="false" tabindex="-1"><span class="p6">02</span><span class="h6">Project AWA</span></button></li>
+            <li><button role="tab" id="tab-3" aria-controls="panel-3" aria-selected="false" tabindex="-1"><span class="p6">03</span><span class="h6">Rumi to Jawi</span></button></li>
+            <li><button role="tab" id="tab-4" aria-controls="panel-4" aria-selected="false" tabindex="-1"><span class="p6">04</span><span class="h6">Avicenna</span></button></li>
+            <li><button role="tab" id="tab-5" aria-controls="panel-5" aria-selected="false" tabindex="-1"><span class="p6">05</span><span class="h6">30Juz</span></button></li>
+          </ul>
+        </div>
+
+        <div class="project-panels">
+          <div class="panel" role="tabpanel" id="panel-1" aria-labelledby="tab-1">
+            <div class="panel-card">
+              <div class="panel-top"><span class="p6">01 / 05</span><span class="p6 muted">Robotics · TypeScript</span></div>
+              <div class="panel-art" data-scene="pitch"><span class="art-flash h2" data-flash>Goal!</span><canvas class="art" data-dither="pitch" data-cell="5" aria-hidden="true"></canvas></div>
+              <div class="panel-body">
+                <h4 class="h3">RoboCup 2D Sim</h4>
+                <p class="p5 desc">A simple top-view 2D RoboCup simulator built with TypeScript and deployed on Vercel. Tune the parameters and simulate the robots' logic to understand how a Booster T1 thinks and moves in a standard RoboCup humanoid soccer game.</p>
+              </div>
+              <div>
+                <ul class="panel-feats p6"><li>Top-view 2D pitch</li><li>Parameter control</li><li>Robot decision logic</li><li>Booster T1 humanoid</li></ul>
+                <div class="panel-links">
+                  <a class="btn p6" href="https://robocup-sim.vercel.app/" target="_blank" rel="noreferrer"><span class="roll"><span>Open simulator</span><span>Open simulator</span></span><span class="arrow" aria-hidden="true">↗</span></a>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="glass-card project-card">
-            <div class="project-image"><i class="fas fa-hand-pointer"></i></div>
-            <div class="project-content">
-              <h3><i class="fas fa-hand-paper"></i> AR Mouse (Hand Detection)</h3>
-              <p>Computer vision-based virtual mouse control using hand tracking and gesture recognition for intuitive HCI.</p>
-              <div class="project-links">
-                <a href="#"><i class="fas fa-external-link-alt"></i> Demo</a>
+          <div class="panel" role="tabpanel" id="panel-2" aria-labelledby="tab-2" hidden>
+            <div class="panel-card">
+              <div class="panel-top"><span class="p6">02 / 05</span><span class="p6 muted">Education · Web</span></div>
+              <div class="panel-art" data-scene="planet"></div>
+              <div class="panel-body">
+                <h4 class="h3">Project AWA</h4>
+                <p class="p5 desc">Interactive solar system explorer for astronomy education and analysis.</p>
+              </div>
+              <div>
+                <ul class="panel-feats p6"><li>Solar system explorer</li><li>Astronomy education</li></ul>
+                <div class="panel-links">
+                  <a class="btn p6" href="awa.html"><span class="roll"><span>Explore</span><span>Explore</span></span><span class="arrow" aria-hidden="true">↗</span></a>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="glass-card project-card">
-            <div class="project-image"><i class="fa-solid fa-moon"></i></div>
-            <div class="project-content">
-              <h3><i class="fas fa-globe"></i> Project AWA</h3>
-              <p>Interactive solar system explorer for astronomy education and analysis.</p>
-              <div class="project-links">
-                <a href="awa.html"><i class="fas fa-external-link-alt"></i> Explore</a>
+          <div class="panel" role="tabpanel" id="panel-3" aria-labelledby="tab-3" hidden>
+            <div class="panel-card">
+              <div class="panel-top"><span class="p6">03 / 05</span><span class="p6 muted">Language · Web</span></div>
+              <div class="panel-art" data-scene="glyph"></div>
+              <div class="panel-body">
+                <h4 class="h3">Rumi to Jawi Translator</h4>
+                <p class="p5 desc">Smart Malay script converter with dictionary-based lookup and phonetic fallback capabilities.</p>
+              </div>
+              <div>
+                <ul class="panel-feats p6"><li>Dictionary lookup</li><li>Phonetic fallback</li></ul>
+                <div class="panel-links">
+                  <a class="btn p6" href="rumitojawi.html"><span class="roll"><span>Try now</span><span>Try now</span></span><span class="arrow" aria-hidden="true">↗</span></a>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="glass-card project-card">
-            <div class="project-image"><i class="fas fa-language"></i></div>
-            <div class="project-content">
-              <h3><i class="fas fa-language"></i> Rumi to Jawi Translator</h3>
-              <p>Smart Malay script converter with dictionary-based lookup and phonetic fallback capabilities.</p>
-              <div class="project-links">
-                <a href="rumitojawi.html"><i class="fas fa-external-link-alt"></i> Try Now</a>
+          <div class="panel" role="tabpanel" id="panel-4" aria-labelledby="tab-4" hidden>
+            <div class="panel-card">
+              <div class="panel-top"><span class="p6">04 / 05</span><span class="p6 muted">AI · Django</span></div>
+              <div class="panel-art" data-scene="ecg"><span class="art-readout p6" data-readout>72 BPM</span></div>
+              <div class="panel-body">
+                <h4 class="h3">Avicenna: AI Fitness Tracker</h4>
+                <p class="p5 desc">Django-based fitness tracker with AI-powered calorie detection. Tracks dietary intake, exercise, and weight management with a smart dashboard.</p>
+              </div>
+              <div>
+                <ul class="panel-feats p6"><li>AI calorie detection</li><li>Dietary intake</li><li>Exercise tracking</li><li>Smart dashboard</li></ul>
+                <div class="panel-links">
+                  <a class="btn p6" href="https://cybilcut.pythonanywhere.com/" target="_blank" rel="noreferrer"><span class="roll"><span>Live demo</span><span>Live demo</span></span><span class="arrow" aria-hidden="true">↗</span></a>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="glass-card project-card">
-            <div class="project-image"><i class="fas fa-heartbeat"></i></div>
-            <div class="project-content">
-              <h3><i class="fas fa-dumbbell"></i> Avicenna - AI Fitness Tracker</h3>
-              <p>Django-based fitness tracker with AI-powered calorie detection. Tracks dietary intake, exercise, and weight management with a smart dashboard.</p>
-              <div class="project-links">
-                <a href="https://cybilcut.pythonanywhere.com/" target="_blank" rel="noreferrer"><i class="fas fa-external-link-alt"></i> Live Demo</a>
+          <div class="panel" role="tabpanel" id="panel-5" aria-labelledby="tab-5" hidden>
+            <div class="panel-card">
+              <div class="panel-top"><span class="p6">05 / 05</span><span class="p6 muted">Web App · 2026</span></div>
+              <div class="panel-art" data-scene="book"><span class="art-readout p6" data-readout>Juz 1 / 30</span></div>
+              <div class="panel-body">
+                <h4 class="h3">30Juz: Ramadan Quran Tracker</h4>
+                <p class="p5 desc">Web app to help users complete the Quran during Ramadan 2026. Track daily progress through all 30 juz with a beautiful, focused interface.</p>
               </div>
-            </div>
-          </div>
-
-          <div class="glass-card project-card">
-            <div class="project-image"><i class="fas fa-book-quran"></i></div>
-            <div class="project-content">
-              <h3><i class="fas fa-moon"></i> 30Juz - Ramadan Quran Tracker</h3>
-              <p>Web app to help users complete the Quran during Ramadan 2026. Track daily progress through all 30 juz with a beautiful, focused interface.</p>
-              <div class="project-links">
-                <a href="https://30juz.vercel.app/" target="_blank" rel="noreferrer"><i class="fas fa-external-link-alt"></i> Try App</a>
-                <a href="https://www.threads.com/@req_dam56/post/DU5bWjIEli7" target="_blank" rel="noreferrer"><i class="fab fa-threads"></i> Launch Post</a>
+              <div>
+                <ul class="panel-feats p6"><li>Daily progress</li><li>All 30 juz</li></ul>
+                <div class="panel-links">
+                  <a class="btn p6" href="https://30juz.vercel.app/" target="_blank" rel="noreferrer"><span class="roll"><span>Try app</span><span>Try app</span></span><span class="arrow" aria-hidden="true">↗</span></a>
+                  <a class="btn ghost p6" href="https://www.threads.com/@req_dam56/post/DU5bWjIEli7" target="_blank" rel="noreferrer"><span class="roll"><span>Launch post</span><span>Launch post</span></span><span class="arrow" aria-hidden="true">↗</span></a>
+                </div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </section>
+
+    <!-- Light-to-dark transition into the contact section -->
+    <div class="fade-band" aria-hidden="true"><canvas class="art" data-dither="fade" data-cell="9"></canvas></div>
 
     <!-- Contact -->
-    <section class="section alt contact" id="contact">
-      <div class="container">
-        <h2 class="section-title">Get <span>In Touch</span></h2>
-        <p>I'm always open to discussing new opportunities, collaborations, or just having a chat about AI and technology.</p>
-
-        <div class="contact-info">
-          <div class="contact-item"><i class="fas fa-envelope"></i><a href="mailto:tareqadam2002@gmail.com">My Email</a></div>
-          <div class="contact-item">
-            <i class="fab fa-linkedin"></i>
-            <a href="https://www.linkedin.com/in/muhammad-tareq-adam-ellias-780274260/" target="_blank" rel="noreferrer">LinkedIn Profile</a>
-          </div>
-          <div class="contact-item">
-            <i class="fa-brands fa-threads"></i>
-            <a href="https://www.threads.com/@req_dam56" target="_blank" rel="noreferrer">Thread Profile</a>
-          </div>
-        </div>
+    <section class="section dark wrap contact" id="contact" data-theme="dark" data-label="Contact">
+      <div class="section-head center">
+        <h2 class="p6 label">contact</h2>
+        <h3 class="h3" data-split>Get in touch</h3>
       </div>
+      <p class="p5 center muted lead">I'm always open to discussing new opportunities, collaborations, or just having a chat about AI and technology.</p>
+
+      <ul class="contact-links rows">
+        <li class="row"><a href="mailto:tareqadam2002@gmail.com"><span class="h4">Email</span><span class="p6">tareqadam2002@gmail.com <span class="arrow" aria-hidden="true">↗</span></span></a></li>
+        <li class="row"><a href="https://www.linkedin.com/in/muhammad-tareq-adam-ellias-780274260/" target="_blank" rel="noreferrer"><span class="h4">LinkedIn</span><span class="p6">Profile <span class="arrow" aria-hidden="true">↗</span></span></a></li>
+        <li class="row"><a href="https://www.threads.com/@req_dam56" target="_blank" rel="noreferrer"><span class="h4">Threads</span><span class="p6">@req_dam56 <span class="arrow" aria-hidden="true">↗</span></span></a></li>
+        <li class="row"><a href="MUHAMMAD_TAREQ_ADAM_BIN_ELLIAS_Resume.pdf" download><span class="h4">Resume</span><span class="p6">Download PDF <span class="arrow" aria-hidden="true">↓</span></span></a></li>
+      </ul>
+
+      <div class="art-band band-contact" aria-hidden="true"><canvas class="art" data-dither="sunset" data-lens data-cell="6"></canvas></div>
+
+      <div class="contact-name h1" aria-hidden="true"><span class="fit">Tareq Adam</span></div>
+      <footer class="footer">
+        <span class="p6">© 2026 Tareq Adam</span>
+        <span class="p6 center muted">AI · Robotics · Web</span>
+        <a href="#main" class="p6 right"><span class="roll"><span>Back to top ↑</span><span>Back to top ↑</span></span></a>
+      </footer>
+      <p class="credit p6 muted center">Design inspired by <a href="https://sondaven.com/en" target="_blank" rel="noreferrer">Son Daven <span class="arrow" aria-hidden="true">↗</span></a></p>
     </section>
-  </div>
-
-  <!-- Custom cursor -->
-  <div class="custom-cursor" id="customCursor"></div>
-
-  <script>
-        // Make nav clickable on mobile to scroll to the next section
-        window.addEventListener('DOMContentLoaded', function() {
-          var nav = document.querySelector('.nav');
-          var sectionIds = ['about', 'experience', 'skills', 'projects', 'contact'];
-          function isMobile() {
-            return window.matchMedia('(max-width: 600px)').matches;
-          }
-          function getCurrentSectionIndex() {
-            var scrollY = window.scrollY || window.pageYOffset;
-            var buffer = window.innerHeight * 0.2;
-            for (var i = sectionIds.length - 1; i >= 0; i--) {
-              var el = document.getElementById(sectionIds[i]);
-              if (el) {
-                var rect = el.getBoundingClientRect();
-                var top = rect.top + scrollY;
-                if (scrollY + buffer >= top) {
-                  return i;
-                }
-              }
-            }
-            return -1;
-          }
-          function scrollToNextSection() {
-            var idx = getCurrentSectionIndex();
-            var nextIdx = Math.min(idx + 1, sectionIds.length - 1);
-            if (nextIdx > idx) {
-              var nextEl = document.getElementById(sectionIds[nextIdx]);
-              if (nextEl) nextEl.scrollIntoView({behavior: 'smooth'});
-            }
-          }
-          function attachNavHandler() {
-            if (!nav) return;
-            nav.style.cursor = isMobile() ? 'pointer' : '';
-            nav._nextSectionHandler = function(e) {
-              if (e.target.closest('a, ul, li')) return;
-              scrollToNextSection();
-            };
-            nav.removeEventListener('click', nav._nextSectionHandlerReal);
-            if (isMobile()) {
-              nav._nextSectionHandlerReal = nav._nextSectionHandler;
-              nav.addEventListener('click', nav._nextSectionHandlerReal);
-            } else {
-              nav._nextSectionHandlerReal = null;
-            }
-          }
-          attachNavHandler();
-          window.addEventListener('resize', attachNavHandler);
-        });
-    /* =========================================================
-       Mobile/touch detection (ADDED)
-    ========================================================= */
-    const isMobile = matchMedia("(max-width: 860px)").matches;
-    const isTouch = matchMedia("(hover: none)").matches;
-
-    /* =========================================================
-       COMPONENT #1: LIQUID GRADIENT BACKGROUND (Three.js + shader)
-    ========================================================= */
-    class TouchTexture {
-      constructor() {
-        this.size = 64;
-        this.width = this.height = this.size;
-        this.maxAge = 64;
-        this.radius = 0.15 * this.size;
-        this.speed = 1 / this.maxAge;
-        this.trail = [];
-        this.last = null;
-
-        this.canvas = document.createElement("canvas");
-        this.canvas.width = this.width;
-        this.canvas.height = this.height;
-        this.ctx = this.canvas.getContext("2d");
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, this.width, this.height);
-
-        this.texture = new THREE.Texture(this.canvas);
-      }
-
-      addTouch({ x, y }) {
-        let force = 0, vx = 0, vy = 0;
-        if (this.last) {
-          const dx = x - this.last.x;
-          const dy = y - this.last.y;
-          const dd = dx * dx + dy * dy;
-          const d = Math.sqrt(dd) || 1;
-          vx = dx / d;
-          vy = dy / d;
-          force = Math.min(dd * 20000, 2.0);
-        }
-        this.last = { x, y };
-        this.trail.push({ x, y, age: 0, force, vx, vy });
-      }
-
-      update() {
-        this.ctx.fillStyle = "black";
-        this.ctx.fillRect(0, 0, this.width, this.height);
-
-        for (let i = this.trail.length - 1; i >= 0; i--) {
-          const p = this.trail[i];
-          const f = p.force * this.speed * (1 - p.age / this.maxAge);
-          p.x += p.vx * f;
-          p.y += p.vy * f;
-          p.age++;
-          if (p.age > this.maxAge) this.trail.splice(i, 1);
-          else this.drawPoint(p);
-        }
-        this.texture.needsUpdate = true;
-      }
-
-      drawPoint(p) {
-        const pos = { x: p.x * this.width, y: (1 - p.y) * this.height };
-        const t = 1 - p.age / this.maxAge;
-        const intensity = t * p.force;
-
-        const offset = this.size * 5;
-        this.ctx.shadowOffsetX = offset;
-        this.ctx.shadowOffsetY = offset;
-        this.ctx.shadowBlur = this.radius;
-        this.ctx.shadowColor = `rgba(255,255,255,${0.2 * intensity})`;
-
-        this.ctx.beginPath();
-        this.ctx.fillStyle = "rgba(255,0,0,1)";
-        this.ctx.arc(pos.x - offset, pos.y - offset, this.radius, 0, Math.PI * 2);
-        this.ctx.fill();
-      }
-    }
-
-    class LiquidBgApp {
-      constructor() {
-        this.renderer = new THREE.WebGLRenderer({
-          antialias: true,
-          powerPreference: "high-performance",
-          alpha: false,
-          depth: false,
-          stencil: false,
-        });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-
-        // (ADDED) lower pixel ratio on mobile for smoothness
-        this.renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
-
-        document.body.appendChild(this.renderer.domElement);
-        this.renderer.domElement.id = "webGLApp";
-
-        this.camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
-        this.camera.position.z = 50;
-
-        this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color(0x0a0e27);
-
-        this.clock = new THREE.Clock();
-        this.touch = new TouchTexture();
-
-        this.uniforms = {
-          uTime: { value: 0 },
-          uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-          uTouchTexture: { value: this.touch.texture },
-
-          // More colors (ADDED / expanded)
-          uColorA: { value: new THREE.Vector3(0.10, 0.14, 0.36) },  // deep blue
-          uColorB: { value: new THREE.Vector3(0.039, 0.055, 0.153) },// navy base
-          uColorC: { value: new THREE.Vector3(0.08, 0.12, 0.30) },   // mid blue
-          uColorD: { value: new THREE.Vector3(0.10, 0.22, 0.36) },   // cyan mist
-          uColorE: { value: new THREE.Vector3(0.34, 0.16, 0.48) },   // violet energy
-
-          // (ADDED) reduce grain on mobile
-          uGrain: { value: isMobile ? 0.015 : 0.025 },
-          uSpeed: { value: 1.0 },
-        };
-
-        this.mesh = this.createFullscreenPlane();
-        this.scene.add(this.mesh);
-
-        this.bindEvents();
-        this.tick();
-      }
-
-      getViewSize() {
-        const fov = (this.camera.fov * Math.PI) / 180;
-        const height = Math.abs(this.camera.position.z * Math.tan(fov / 2) * 2);
-        return { width: height * this.camera.aspect, height };
-      }
-
-      createFullscreenPlane() {
-        const view = this.getViewSize();
-        const geo = new THREE.PlaneGeometry(view.width, view.height, 1, 1);
-
-        const mat = new THREE.ShaderMaterial({
-          uniforms: this.uniforms,
-          vertexShader: `
-            varying vec2 vUv;
-            void main(){
-              vUv = uv;
-              gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.);
-            }
-          `,
-          fragmentShader: `
-            uniform float uTime;
-            uniform vec2 uResolution;
-            uniform sampler2D uTouchTexture;
-
-            uniform vec3 uColorA;
-            uniform vec3 uColorB;
-            uniform vec3 uColorC;
-            uniform vec3 uColorD;
-            uniform vec3 uColorE;
-
-            uniform float uGrain;
-            uniform float uSpeed;
-            varying vec2 vUv;
-
-            float hash(vec2 p){
-              return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453);
-            }
-
-            void main(){
-              vec2 uv = vUv;
-
-              // touch distortion
-              vec4 touch = texture2D(uTouchTexture, uv);
-              float intensity = touch.b;
-              float vx = -(touch.r * 2.0 - 1.0);
-              float vy = -(touch.g * 2.0 - 1.0);
-              uv += vec2(vx, vy) * 0.75 * intensity;
-
-              // soft ripple
-              vec2 c = vec2(0.5);
-              float d = length(uv - c);
-              float ripple = sin(d * 22.0 - uTime * 3.0) * 0.03 * intensity;
-              uv += ripple;
-
-              // 5 animated centers (now uses more colors)
-              vec2 c1 = vec2(
-                0.5 + sin(uTime * uSpeed * 0.45) * 0.38,
-                0.5 + cos(uTime * uSpeed * 0.52) * 0.38
-              );
-              vec2 c2 = vec2(
-                0.5 + cos(uTime * uSpeed * 0.60) * 0.44,
-                0.5 + sin(uTime * uSpeed * 0.48) * 0.44
-              );
-              vec2 c3 = vec2(
-                0.5 + sin(uTime * uSpeed * 0.32) * 0.40,
-                0.5 + cos(uTime * uSpeed * 0.61) * 0.40
-              );
-              vec2 c4 = vec2(
-                0.5 + sin(uTime * uSpeed * 0.22 + 1.7) * 0.46,
-                0.5 + cos(uTime * uSpeed * 0.36 + 2.4) * 0.46
-              );
-              vec2 c5 = vec2(
-                0.5 + cos(uTime * uSpeed * 0.18 + 4.1) * 0.50,
-                0.5 + sin(uTime * uSpeed * 0.26 + 1.3) * 0.50
-              );
-
-              float i1 = 1.0 - smoothstep(0.0, 0.60, length(uv - c1));
-              float i2 = 1.0 - smoothstep(0.0, 0.60, length(uv - c2));
-              float i3 = 1.0 - smoothstep(0.0, 0.60, length(uv - c3));
-              float i4 = 1.0 - smoothstep(0.0, 0.65, length(uv - c4));
-              float i5 = 1.0 - smoothstep(0.0, 0.70, length(uv - c5));
-
-              vec3 col = vec3(0.0);
-
-              col += uColorA * i1 * 0.90;
-              col += uColorB * i2 * 1.10;
-              col += uColorC * i3 * 0.85;
-              col += uColorD * i4 * 0.65;
-              col += uColorE * i5 * 0.55;
-
-              // subtle saturation boost
-              float luma = dot(col, vec3(0.299, 0.587, 0.114));
-              col = mix(vec3(luma), col, 1.15);
-
-              // force deep navy base
-              vec3 base = vec3(0.039, 0.055, 0.153);
-              col = mix(base, col, max(length(col), 0.18));
-
-              // grain
-              float g = (hash(uv * uResolution * 0.25 + uTime) * 2.0 - 1.0) * uGrain;
-              col += g;
-
-              gl_FragColor = vec4(clamp(col, 0.0, 1.0), 1.0);
-            }
-          `,
-        });
-
-        return new THREE.Mesh(geo, mat);
-      }
-
-      bindEvents() {
-        window.addEventListener("mousemove", (e) => {
-          this.touch.addTouch({
-            x: e.clientX / window.innerWidth,
-            y: 1 - e.clientY / window.innerHeight,
-          });
-        });
-
-        window.addEventListener("touchmove", (ev) => {
-          const t = ev.touches[0];
-          if (!t) return;
-          this.touch.addTouch({
-            x: t.clientX / window.innerWidth,
-            y: 1 - t.clientY / window.innerHeight,
-          });
-        }, { passive: true });
-
-        window.addEventListener("resize", () => {
-          this.camera.aspect = window.innerWidth / window.innerHeight;
-          this.camera.updateProjectionMatrix();
-          this.renderer.setSize(window.innerWidth, window.innerHeight);
-          this.uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
-
-          // keep mobile pixel ratio on resize (ADDED)
-          this.renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
-
-          const view = this.getViewSize();
-          this.mesh.geometry.dispose();
-          this.mesh.geometry = new THREE.PlaneGeometry(view.width, view.height, 1, 1);
-        });
-      }
-
-      tick() {
-        const dt = Math.min(this.clock.getDelta(), 0.1);
-        this.uniforms.uTime.value += dt;
-        this.touch.update();
-        this.renderer.render(this.scene, this.camera);
-        requestAnimationFrame(() => this.tick());
-      }
-    }
-
-    const liquid = new LiquidBgApp();
-
-    /* =========================================================
-       COMPONENT #2: CUSTOM CURSOR (disabled on touch)
-    ========================================================= */
-    const cursor = document.getElementById("customCursor");
-
-    if (!isTouch) {
-      document.addEventListener("mousemove", (e) => {
-        cursor.style.left = e.clientX + "px";
-        cursor.style.top = e.clientY + "px";
-      });
-
-      const hoverTargets = [
-        ...document.querySelectorAll("a, button, .glass-card")
-      ];
-      hoverTargets.forEach(el => {
-        el.addEventListener("mouseenter", () => {
-          cursor.style.width = "52px";
-          cursor.style.height = "52px";
-          cursor.style.borderWidth = "3px";
-          cursor.style.borderColor = "rgba(255,255,255,.55)";
-        });
-        el.addEventListener("mouseleave", () => {
-          cursor.style.width = "40px";
-          cursor.style.height = "40px";
-          cursor.style.borderWidth = "2px";
-          cursor.style.borderColor = "rgba(255,255,255,0)";
-        });
-      });
-    }
-
-    /* =========================================================
-       KEEP YOUR NICE INTERACTIONS (lightweight versions)
-    ========================================================= */
-
-    // Smooth scroll
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        const target = document.querySelector(this.getAttribute('href'));
-        if (!target) return;
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth' });
-      });
-    });
-
-    // Hero entrance (fast)
-    window.addEventListener("load", () => {
-      const heroContent = document.querySelector(".hero-content");
-      if (heroContent) {
-        anime({
-          targets: heroContent,
-          translateY: [18, 0],
-          opacity: [0, 1],
-          duration: 900,
-          easing: "easeOutExpo",
-          delay: 80
-        });
-      }
-    });
-
-    // 3D tilt for cards (skills + projects) - DISABLED on mobile/touch (ADDED)
-    function addTilt(selector, strength = 12, hoverLift = -8) {
-      document.querySelectorAll(selector).forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-          const rect = card.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const cx = rect.width / 2;
-          const cy = rect.height / 2;
-          const rx = (y - cy) / strength;
-          const ry = (cx - x) / strength;
-          card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(${hoverLift}px)`;
-        });
-        card.addEventListener('mouseleave', () => {
-          card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
-        });
-      });
-    }
-
-    if (!isMobile && !isTouch) {
-      addTilt(".skill-card", 14, -8);
-      addTilt(".project-card", 18, -10);
-    }
-
-    /* =========================================================
-       FEATURE 1: SCROLL REVEAL (IntersectionObserver)
-    ========================================================= */
-    (function() {
-      // Section titles
-      document.querySelectorAll('.section-title').forEach(el => {
-        el.dataset.reveal = '1';
-      });
-      // About cards with stagger
-      document.querySelectorAll('.about-grid > .glass-card').forEach((el, i) => {
-        el.dataset.reveal = '1';
-        el.style.setProperty('--reveal-delay', (i * 130) + 'ms');
-      });
-      // Experience items with stagger
-      document.querySelectorAll('.experience-item').forEach((el, i) => {
-        el.dataset.reveal = '1';
-        el.style.setProperty('--reveal-delay', (i * 90) + 'ms');
-      });
-      // Skills + Projects grids as a whole
-      document.querySelectorAll('.skills-grid, .projects-grid').forEach(el => {
-        el.dataset.reveal = '1';
-      });
-      // Contact info
-      const contactInfo = document.querySelector('.contact-info');
-      if (contactInfo) contactInfo.dataset.reveal = '1';
-      // Contact text
-      const contactP = document.querySelector('.contact p');
-      if (contactP) contactP.dataset.reveal = '1';
-
-      const observer = new IntersectionObserver(entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('revealed');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-
-      document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
-    })();
-
-    /* =========================================================
-       FEATURE 2: ANIMATED STAT COUNTERS
-    ========================================================= */
-    (function() {
-      const statEls = document.querySelectorAll('.stat-number');
-      let triggered = false;
-
-      const stats = Array.from(statEls).map(el => {
-        const raw = el.textContent.trim();
-        const suffix = raw.replace(/[\d.]/g, '');
-        const value = parseFloat(raw);
-        const decimals = (raw.indexOf('.') >= 0)
-          ? raw.split('.')[1].replace(/\D/g,'').length
-          : 0;
-        // Pad initial to same digit count so layout never shifts
-        const intDigits = Math.floor(value).toString().length;
-        const initInt = '0'.repeat(intDigits);
-        el.textContent = decimals > 0
-          ? initInt + '.' + '0'.repeat(decimals)
-          : initInt + suffix;
-        return { el, value, suffix, decimals };
-      });
-
-      function runCounters() {
-        if (triggered) return;
-        triggered = true;
-        const duration = 600;
-        const start = performance.now();
-        function tick(now) {
-          const elapsed = now - start;
-          const t = Math.min(elapsed / duration, 1);
-          const ease = 1 - Math.pow(1 - t, 3); // easeOutCubic
-          stats.forEach(({ el, value, suffix, decimals }) => {
-            const cur = value * ease;
-            el.textContent = decimals > 0
-              ? cur.toFixed(decimals)
-              : Math.round(cur) + suffix;
-          });
-          if (t < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      }
-
-      const statsContainer = document.querySelector('.stats');
-      if (statsContainer) {
-        const obs = new IntersectionObserver(entries => {
-          if (entries[0].isIntersecting) { runCounters(); obs.disconnect(); }
-        }, { threshold: 0.4 });
-        obs.observe(statsContainer);
-      }
-    })();
-
-    /* =========================================================
-       FEATURE 3: TEXT SCRAMBLE — HERO NAME
-    ========================================================= */
-    (function() {
-      const CHARS = '!<>-_\\/[]{}=+*^?#@$%&';
-
-      function scramble(el, finalText, totalDuration) {
-        const frames = Math.ceil(totalDuration / 40);
-        let frame = 0;
-        const queue = finalText.split('').map(ch => ({
-          ch,
-          start: Math.floor(Math.random() * frames * 0.35),
-          end:   Math.floor(frames * 0.35) + Math.floor(Math.random() * frames * 0.65),
-          cur: '',
-        }));
-
-        function tick() {
-          let out = '';
-          let done = 0;
-          queue.forEach(item => {
-            if (frame >= item.end) {
-              out += item.ch === ' ' ? ' ' : item.ch;
-              done++;
-            } else if (frame >= item.start) {
-              if (!item.cur || Math.random() < 0.28) {
-                item.cur = item.ch === ' ' ? ' '
-                  : CHARS[Math.floor(Math.random() * CHARS.length)];
-              }
-              out += `<span class="dud">${item.cur}</span>`;
-            } else {
-              out += item.ch === ' ' ? ' '
-                : `<span class="dud">${CHARS[Math.floor(Math.random() * CHARS.length)]}</span>`;
-            }
-          });
-          el.innerHTML = out;
-          frame++;
-          if (done < queue.length) requestAnimationFrame(tick);
-          else el.textContent = finalText; // clean finish
-        }
-        tick();
-      }
-
-      window.addEventListener('load', () => {
-        const h1 = document.querySelector('.hero h1');
-        if (h1) {
-          const original = h1.textContent.trim();
-          setTimeout(() => scramble(h1, original, 1600), 350);
-        }
-      });
-    })();
-
-    /* =========================================================
-       FEATURE 4: MAGNETIC BUTTONS
-    ========================================================= */
-    if (!isTouch) {
-      document.querySelectorAll('.btn').forEach(btn => {
-        let raf;
-
-        btn.addEventListener('mouseenter', () => {
-          btn.style.transition = 'transform 0.08s ease, border-color .2s ease, background .2s ease';
-        });
-
-        btn.addEventListener('mousemove', e => {
-          cancelAnimationFrame(raf);
-          raf = requestAnimationFrame(() => {
-            const r = btn.getBoundingClientRect();
-            const dx = e.clientX - (r.left + r.width  / 2);
-            const dy = e.clientY - (r.top  + r.height / 2);
-            btn.style.transform = `translate(${dx * 0.32}px, ${dy * 0.32}px) translateY(-2px)`;
-          });
-        });
-
-        btn.addEventListener('mouseleave', () => {
-          cancelAnimationFrame(raf);
-          btn.style.transition = 'transform 0.5s cubic-bezier(.175,.885,.32,1.275), border-color .2s ease, background .2s ease';
-          btn.style.transform = 'translate(0,0)';
-          setTimeout(() => { btn.style.transition = ''; }, 500);
-        });
-      });
-    }
-  </script>
+  </main>
+
+  <canvas class="cursor-trail" data-dither="trail" data-cell="5" aria-hidden="true"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.15/dist/lenis.min.js"></script>
+  <script src="js/dither.js"></script>
+  <script src="js/style-editorial.js"></script>
+  <div class="indicator p6" aria-hidden="true"><span class="ind-num">01</span> / <span class="ind-total">08</span> · <span class="ind-name">Intro</span></div>
+
+  <script src="js/fun.js"></script>
+  <script src="js/site.js"></script>
 </body>
 </html>
