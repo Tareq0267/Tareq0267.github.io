@@ -310,6 +310,54 @@
     }
   }
 
+  /* ---------- hand-drawn doodles (js/doodles.js) ---------- */
+  const doodleImgs = {};
+  function doodle(name) {
+    if (!window.DOODLES || !DOODLES[name]) return null;
+    let im = doodleImgs[name];
+    if (!im) { im = doodleImgs[name] = new Image(); im.src = DOODLES[name]; }
+    return im.complete && im.naturalWidth ? im : null;
+  }
+  // draw a doodle centred on (x, y), `size` cells across its longer side
+  function drawDoodle(ctx, name, x, y, size, rot, sx = 1, sy = 1) {
+    const im = doodle(name);
+    if (!im) return;
+    const k = size / Math.max(im.naturalWidth, im.naturalHeight);
+    ctx.save();
+    ctx.imageSmoothingQuality = 'high';
+    ctx.translate(x, y);
+    ctx.rotate(rot);
+    ctx.scale(k * sx, k * sy);
+    ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
+    ctx.restore();
+  }
+  const PLANE_NOSE = .96;   // turns the drawn plane so its nose points right
+  // The plane glides across the top, the fish swims the other way along the
+  // bottom, and the heart drifts up the side with a little beat.
+  function prologueDoodles(ctx, w, h, t, small) {
+    const base = (small ? w * .24 : Math.min(w * .09, h * .26)) * .7;
+
+    const ps = base, span = w + ps * 2;
+    const px = (t * w * .045) % span - ps;
+    const u = px / w * TAU, amp = h * (small ? .03 : .06);
+    const py = h * (small ? .2 : .19) + Math.sin(u) * amp;
+    const climb = Math.atan(Math.cos(u) * amp * TAU / w);
+    drawDoodle(ctx, 'plane', px, py, ps, PLANE_NOSE + climb + Math.sin(t * 1.3) * .05);
+
+    const fs = base * 1.1, fspan = w + fs * 2;
+    const fx = w + fs - (t * w * .028 + fspan * .4) % fspan;
+    const fy = h * (small ? .78 : .8) + Math.sin(t * 1.4) * h * .02;
+    // drawn head-down; a quarter turn points the head left, the way it swims
+    drawDoodle(ctx, 'fish', fx, fy, fs, Math.PI / 2 + Math.sin(t * 5) * .12, 1 + Math.sin(t * 5 + 1) * .04);
+
+    const hs = base * .85, hspan = h + hs * 2;
+    const hy = h + hs - (t * h * .05 + hspan * .3) % hspan;
+    const hx = w * (small ? .8 : .7) + Math.sin(t * .8) * w * .015;
+    const beat = 1 + Math.pow(Math.max(0, Math.sin(t * 3.2)), 8) * .14;
+    // drawn with its point to the left; a quarter turn stands it upright
+    drawDoodle(ctx, 'heart', hx, hy, hs * beat, -Math.PI / 2 + Math.sin(t * .7) * .15);
+  }
+
   const scenes = {
     hero(ctx, w, h, t, st) {
       const portrait = h > w * 1.1;
@@ -373,6 +421,7 @@
         clouds(ctx, w, h, t * .6, 57, { count: 3, area: [.82 + drift, .2, .3, .7], size: .16, alpha: .9 });
         birds(ctx, w, h, t, 3, 4, [0, .08, 1, .12]);
       }
+      prologueDoodles(ctx, w, h, t, h > w * .9);
       birdBurst(ctx, w, h, st);
     },
 
