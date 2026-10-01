@@ -801,18 +801,36 @@
   const trail = [];
   const clicks = [];
   let clickId = 0;
-  window.addEventListener('pointermove', e => {
+  function movePointer(x, y) {
     const now = performance.now();
     if (pointer.inside && pointer.lastT) {
       const dt = Math.max(1, now - pointer.lastT) / 1000;
-      const v = Math.hypot(e.clientX - pointer.cx, e.clientY - pointer.cy) / dt;
+      const v = Math.hypot(x - pointer.cx, y - pointer.cy) / dt;
       pointer.speed = Math.max(pointer.speed, Math.min(v, 4000));
     }
     pointer.lastT = now;
-    pointer.x = e.clientX / innerWidth * 2 - 1;
-    pointer.y = e.clientY / innerHeight * 2 - 1;
-    pointer.cx = e.clientX; pointer.cy = e.clientY;
+    pointer.x = x / innerWidth * 2 - 1;
+    pointer.y = y / innerHeight * 2 - 1;
+    pointer.cx = x; pointer.cy = y;
     pointer.inside = true;
+  }
+  window.addEventListener('pointermove', e => { if (e.pointerType !== 'touch') movePointer(e.clientX, e.clientY); }, { passive: true });
+  // Touch: the finger acts as the pointer while it is down, including while it scrolls
+  // the page (touch events keep coming during a scroll; pointer events are cancelled).
+  // The scenes keep reacting for a moment after the finger lifts.
+  let touchUp = 0;
+  function onTouch(e) {
+    const t = e.touches[0];
+    if (!t) return;
+    clearTimeout(touchUp);
+    movePointer(t.clientX, t.clientY);
+  }
+  window.addEventListener('touchstart', e => { pointer.lastT = 0; onTouch(e); }, { passive: true });
+  window.addEventListener('touchmove', onTouch, { passive: true });
+  window.addEventListener('touchend', e => {
+    if (e.touches.length) return;
+    clearTimeout(touchUp);
+    touchUp = setTimeout(() => { pointer.inside = false; }, 700);
   }, { passive: true });
   window.addEventListener('pointerdown', e => {
     if (e.target.closest && e.target.closest('a, button')) return;
@@ -830,7 +848,8 @@
     const r = hero.canvas.getBoundingClientRect();
     const gx = (e.clientX - r.left) / hero.cell, gy = (e.clientY - r.top) / hero.cell;
     // generous target: the moon plus a few cells around it
-    if (Math.hypot(gx - H.moon.x, gy - H.moon.y) > H.moon.r + 3.5) return false;
+    const slack = e.pointerType === 'touch' ? 7 : 3.5;   // fingers get a bigger target
+    if (Math.hypot(gx - H.moon.x, gy - H.moon.y) > H.moon.r + slack) return false;
     H.pop = performance.now() / 1000;
     H.popAt = { x: H.moon.x, y: H.moon.y };
     document.dispatchEvent(new CustomEvent('moon:pop', {
@@ -838,10 +857,9 @@
     }));
     return true;
   }
-  document.addEventListener('pointerleave', () => { pointer.inside = false; });
+  document.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch') pointer.inside = false; });
   window.addEventListener('blur', () => { pointer.inside = false; });
   window.addEventListener('pointerdown', e => {
-    if (!finePointer) return;
     waves.push({ x: e.clientX, y: e.clientY, t0: performance.now() / 1000 });
     if (waves.length > 3) waves.shift();
   }, { passive: true });
@@ -1042,7 +1060,7 @@
 
   function init() {
     document.querySelectorAll('canvas[data-dither]').forEach(c => {
-      if (c.dataset.dither === 'trail' && (!finePointer || reduceMotion)) { c.remove(); return; }
+      if (c.dataset.dither === 'trail' && reduceMotion) { c.remove(); return; }
       try { instances.push(c.__dither = new Dither(c)); }
       catch (err) { c.style.display = 'none'; }
     });

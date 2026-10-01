@@ -4,7 +4,6 @@
    Called by js/site.js after js/style-editorial.js. */
 window.initFun = function () {
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const hasGsap = typeof gsap !== 'undefined';
   const hasSplit = typeof SplitText !== 'undefined';
 
@@ -30,13 +29,27 @@ window.initFun = function () {
     }
     for (const fn of movers) fn(hover.x, hover.y, hover.inside);
   }
-  if (fine) {
-    addEventListener('pointermove', e => {
-      if (e.pointerType === 'touch') return;
-      hover.x = e.clientX; hover.y = e.clientY; hover.inside = true;
-      updateHover();
-    }, { passive: true });
-    document.addEventListener('pointerleave', () => { hover.inside = false; updateHover(); });
+  addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch') return;
+    hover.x = e.clientX; hover.y = e.clientY; hover.inside = true;
+    updateHover();
+  }, { passive: true });
+  document.addEventListener('pointerleave', e => {
+    if (e.pointerType === 'touch') return;
+    hover.inside = false; updateHover();
+  });
+  // Touch: whatever is under the finger lights up, during taps and scrolls alike.
+  // When the finger lifts the last thing touched stays lit until the next touch.
+  function onTouch(e) {
+    const t = e.touches[0];
+    if (!t) return;
+    hover.x = t.clientX; hover.y = t.clientY; hover.inside = true;
+    updateHover();
+  }
+  addEventListener('touchstart', onTouch, { passive: true });
+  addEventListener('touchmove', onTouch, { passive: true });
+  addEventListener('touchend', e => { if (!e.touches.length) hover.inside = false; }, { passive: true });
+  {
     let queued = false;
     addEventListener('scroll', () => {
       if (queued || !hover.inside) return;
@@ -136,7 +149,7 @@ window.initFun = function () {
      click a letter and it jumps and flips
   ========================================================= */
   function playfulLetters(chars, area) {
-    if (!fine || reduceMotion || !hasGsap || !chars.length) return;
+    if (reduceMotion || !hasGsap || !chars.length) return;
     const items = chars.map(c => ({
       c,
       y: gsap.quickTo(c, 'y', { duration: .6, ease: 'power3' }),
@@ -180,7 +193,7 @@ window.initFun = function () {
   });
 
   // Footer name
-  if (hasSplit && fine && !reduceMotion) {
+  if (hasSplit && !reduceMotion) {
     const footerName = document.querySelector('.contact-name .fit');
     if (footerName) {
       const split = SplitText.create(footerName, { type: 'chars' });
@@ -199,7 +212,7 @@ window.initFun = function () {
     if (sidesToo) { d.left = e.clientX - r.left; d.right = r.right - e.clientX; }
     return Object.keys(d).reduce((a, b) => (d[a] < d[b] ? a : b));
   }
-  if (fine) document.querySelectorAll('.honour, .skill').forEach(el => el.classList.add('fillable'));
+  document.querySelectorAll('.honour, .skill').forEach(el => el.classList.add('fillable'));
   track('.honour, .skill', (el, e) => {
     el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
     requestAnimationFrame(() => { if (kinds.some(k => k.cur === el)) el.classList.add('is-hot'); });
