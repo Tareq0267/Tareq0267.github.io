@@ -436,7 +436,11 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .header .brand .p6{ display: none; }
   .header .cv .roll{ display: none; }
   .header .cv{ padding: 12px 14px; }
-  .hero-top .intro, .hero-top .tagline{ grid-column: 1 / -1; }
+  /* phones: portfolio line and CGPA side by side; the tagline is dropped
+     (the prologue says the same thing just below) */
+  .hero-top .intro{ grid-column: 1 / span 7; }
+  .hero-top .stat-b{ grid-column: 8 / -1; text-align: right; }
+  .hero-top .tagline{ display: none; }
   .hero-bottom, .footer{ grid-template-columns: 1fr 1fr; }
   .hero-bottom > :nth-child(2), .footer > :nth-child(2){ display: none; }
   .about-col, .about-col:nth-child(1){ grid-column: 1 / -1; }
