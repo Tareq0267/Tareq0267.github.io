@@ -213,16 +213,84 @@ window.initFun = function () {
     return Object.keys(d).reduce((a, b) => (d[a] < d[b] ? a : b));
   }
   document.querySelectorAll('.honour, .skill').forEach(el => el.classList.add('fillable'));
-  track('.honour, .skill', (el, e) => {
-    el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
-    requestAnimationFrame(() => { if (kinds.some(k => k.cur === el)) el.classList.add('is-hot'); });
-  }, (el, e) => {
-    el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
-    el.classList.remove('is-hot');
-  });
+  const touchUI = matchMedia('(hover: none)').matches;
 
-  // Experience files turn ink while the cursor is on them
-  track('#experience .exp', el => el.classList.add('is-hot'), el => el.classList.remove('is-hot'));
+  if (!touchUI) {
+    track('.honour, .skill', (el, e) => {
+      el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
+      requestAnimationFrame(() => { if (kinds.some(k => k.cur === el)) el.classList.add('is-hot'); });
+    }, (el, e) => {
+      el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
+      el.classList.remove('is-hot');
+    });
+
+    // Experience files turn ink while the cursor is on them
+    track('#experience .exp', el => el.classList.add('is-hot'), el => el.classList.remove('is-hot'));
+  } else {
+    /* On phones there is no hover: a spotlight line 40% down the screen lights
+       whichever news row, experience file or skill it crosses as you scroll.
+       Scrolling down, ink rises from the bottom and the item you leave drains
+       upwards; scrolling up, the reverse. */
+    const SPOT = .4;
+    const items = [...document.querySelectorAll('.honour, #experience .exp')];
+
+    // Skills are short cells, so on/off fills hopped and snapped. Instead one ink block
+    // glides along the list and settles on the skill under the spotlight line; it
+    // blends by difference, so text it covers flips colour even mid-way across a cell.
+    const grid = document.querySelector('.skills-grid');
+    if (grid) {
+      const skills = [...grid.querySelectorAll('.skill')];
+      const block = document.createElement('div');
+      block.className = 'skill-spot';
+      block.setAttribute('aria-hidden', 'true');
+      grid.appendChild(block);
+      grid.classList.add('has-spot');
+      let top = 0, height = 0, alpha = 0, near = false;
+      new IntersectionObserver(([en]) => { near = en.isIntersecting; }, { rootMargin: '50% 0px' }).observe(grid);
+      (function glide() {
+        if (near) {
+          const line = innerHeight * SPOT, g = grid.getBoundingClientRect();
+          const cell = skills.find(s => { const r = s.getBoundingClientRect(); return r.top <= line && r.bottom > line; });
+          if (cell) {
+            const r = cell.getBoundingClientRect();
+            const tTop = r.top - g.top, tH = r.height;
+            if (alpha < .02) { top = tTop; height = tH; }   // appear in place, don't fly in from afar
+            top += (tTop - top) * .16;
+            height += (tH - height) * .16;
+          }
+          alpha += ((cell ? 1 : 0) - alpha) * .14;
+          block.style.transform = `translateY(${top}px)`;
+          block.style.height = height + 'px';
+          block.style.opacity = alpha.toFixed(3);
+        }
+        requestAnimationFrame(glide);
+      })();
+    }
+    const lit = new Set();
+    let lastY = scrollY, down = true, queued = false;
+    function spotlight() {
+      queued = false;
+      if (scrollY !== lastY) { down = scrollY > lastY; lastY = scrollY; }
+      const line = innerHeight * SPOT;
+      for (const el of items) {
+        const r = el.getBoundingClientRect();
+        const on = r.top <= line && r.bottom > line;
+        if (on === lit.has(el)) continue;
+        if (on) {
+          lit.add(el);
+          el.dataset.from = down ? 'bottom' : 'top';
+          requestAnimationFrame(() => { if (lit.has(el)) el.classList.add('is-hot'); });
+        } else {
+          lit.delete(el);
+          el.dataset.from = down ? 'top' : 'bottom';
+          el.classList.remove('is-hot');
+        }
+      }
+    }
+    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(spotlight); } }, { passive: true });
+    addEventListener('resize', spotlight);
+    spotlight();
+  }
 
   /* =========================================================
      SECTION INDICATOR: "04 / 08 · Experience", decoded on change

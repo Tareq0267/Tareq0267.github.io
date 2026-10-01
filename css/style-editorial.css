@@ -449,6 +449,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .exp .role, .exp .detail{ grid-column: 1 / -1; }
   .skills-grid{ grid-template-columns: 1fr; }
   .skill, .skill:nth-child(even){ padding-left: 0; border-left: 0; min-height: 0; padding-bottom: 28px; }
+  /* one column: let the ink fill run edge to edge so the text isn't flush against it */
   .panel-feats{ grid-template-columns: 1fr; }
   .header .style-switch{ display: none; }
   .menu .style-switch{ display: flex; }
@@ -543,6 +544,19 @@ html{ -webkit-tap-highlight-color: transparent; }
   pointer-events: none;
 }
 .skill.fillable::before{ inset: 0; }
+
+/* touch screens: one gliding ink block (js/fun.js) instead of per-cell fills.
+   The grid carries its own sand and runs edge to edge because its fade-in
+   transform isolates it: the block can only blend against what is inside it. */
+.skills-grid.has-spot{
+  position: relative; background: var(--sand);
+  margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter);
+}
+.skill-spot{
+  position: absolute; top: 0; left: 0; width: 100%;
+  background: #d4bc98; mix-blend-mode: difference;
+  pointer-events: none; opacity: 0; will-change: transform, height;
+}
 .fillable[data-from="bottom"]::before{ transform-origin: bottom; }
 .fillable[data-from="left"]::before{ transform: scaleX(0); transform-origin: left; }
 .fillable[data-from="right"]::before{ transform: scaleX(0); transform-origin: right; }

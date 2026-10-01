@@ -335,7 +335,7 @@
   // The plane glides across the top, the fish swims the other way along the
   // bottom, and the heart drifts up the side with a little beat.
   function prologueDoodles(ctx, w, h, t, small) {
-    const base = (small ? w * .24 : Math.min(w * .09, h * .26)) * .7;
+    const base = (small ? w * .24 : Math.min(w * .09, h * .26)) * .49;
 
     const ps = base, span = w + ps * 2;
     const px = (t * w * .045) % span - ps;
