@@ -860,6 +860,7 @@
   document.addEventListener('pointerleave', e => { if (e.pointerType !== 'touch') pointer.inside = false; });
   window.addEventListener('blur', () => { pointer.inside = false; });
   window.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch') return;
     waves.push({ x: e.clientX, y: e.clientY, t0: performance.now() / 1000 });
     if (waves.length > 3) waves.shift();
   }, { passive: true });
@@ -885,7 +886,12 @@
   };
 
   /* ---------- renderer ---------- */
+  // All scenes share ONE hidden WebGL canvas. Each scene is drawn into it and then
+  // copied onto its own plain 2D canvas. Phones only allow a handful of WebGL
+  // contexts and drop the oldest when there are more, so one per scene broke there.
   const instances = [];
+  const coarse = !finePointer;
+  const GL = { canvas: document.createElement('canvas'), gl: null, u: {}, tex: null, lost: false };
 
   function compile(gl, type, src) {
     const s = gl.createShader(type);
@@ -894,9 +900,44 @@
     return s;
   }
 
+  // (Re)build the program and buffers; called at start and after a lost context comes back
+  function buildGL() {
+    const gl = GL.gl;
+    const prog = gl.createProgram();
+    gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, VERT));
+    gl.attachShader(prog, compile(gl, gl.FRAGMENT_SHADER, FRAG));
+    gl.linkProgram(prog);
+    gl.useProgram(prog);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'a_pos');
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    ['u_res', 'u_grid', 'u_ink', 'u_lens', 'u_wave'].forEach(n => { GL.u[n] = gl.getUniformLocation(prog, n); });
+    GL.tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, GL.tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+    gl.enable(gl.SCISSOR_TEST);
+  }
+
+  function setupGL() {
+    GL.gl = GL.canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: false });
+    if (!GL.gl) return false;
+    GL.canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); GL.lost = true; });
+    GL.canvas.addEventListener('webglcontextrestored', () => { GL.lost = false; buildGL(); });
+    buildGL();
+    return true;
+  }
+
   class Dither {
     constructor(canvas) {
       this.canvas = canvas;
+      this.out = canvas.getContext('2d');
       this.cell = parseFloat(canvas.dataset.cell || '6');
       this.scene = canvas.dataset.dither;
       this.lens = finePointer && 'lens' in canvas.dataset;
@@ -904,29 +945,6 @@
       this.lensR = 0;
       this.idle = false;
       this.visible = false;
-      const gl = canvas.getContext('webgl', { alpha: true, premultipliedAlpha: true, antialias: false, preserveDrawingBuffer: false });
-      if (!gl) throw new Error('no webgl');
-      this.gl = gl;
-      const prog = gl.createProgram();
-      gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, VERT));
-      gl.attachShader(prog, compile(gl, gl.FRAGMENT_SHADER, FRAG));
-      gl.linkProgram(prog);
-      gl.useProgram(prog);
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]), gl.STATIC_DRAW);
-      const loc = gl.getAttribLocation(prog, 'a_pos');
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-      this.u = {};
-      ['u_res', 'u_grid', 'u_ink', 'u_lens', 'u_wave'].forEach(n => { this.u[n] = gl.getUniformLocation(prog, n); });
-      this.tex = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, this.tex);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
 
       this.src = document.createElement('canvas');
       this.ctx = this.src.getContext('2d', { willReadFrequently: false });
@@ -939,9 +957,10 @@
     resize() {
       const r = this.canvas.getBoundingClientRect();
       if (!r.width || !r.height) return;
-      this.dpr = Math.min(window.devicePixelRatio || 1, 2);
-      this.canvas.width = Math.round(r.width * this.dpr);
-      this.canvas.height = Math.round(r.height * this.dpr);
+      // phones get fewer pixels: the bars are coarse anyway and it saves a lot of memory
+      this.dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.5 : 2);
+      const w = Math.round(r.width * this.dpr), h = Math.round(r.height * this.dpr);
+      if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; }
       this.cols = Math.max(1, Math.ceil(r.width / this.cell));
       this.rows = Math.max(1, Math.ceil(r.height / this.cell));
       this.src.width = this.cols;
@@ -985,7 +1004,7 @@
       const draw = scenes[this.scene];
       this.lastT = t;
       lightInk = this.ink[0] * .299 + this.ink[1] * .587 + this.ink[2] * .114 > .4;
-      if (!draw || !this.cols) return;
+      if (!draw || !this.cols || GL.lost) return;
       const r = this.canvas.getBoundingClientRect();
       const vh = window.innerHeight;
       const st = {
@@ -1000,14 +1019,19 @@
           .map(c => ({ x: (c.x - r.left) / this.cell, y: (c.y - r.top) / this.cell, age: Math.max(0, now - c.t0), id: c.id }))
       };
       this.lastNow = now;
-      const { ctx, gl } = this;
+      const { ctx } = this;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, this.cols, this.rows);
       const result = draw(ctx, this.cols, this.rows, t, st);
       if (this.avoid.length) this.cutOut(r);
-      // nothing new to show: skip the GPU work after clearing once
-      if (result === 'idle' && this.idle) return;
-      this.idle = result === 'idle';
+      // nothing to show: clear once and hide the canvas so it costs nothing
+      // (matters for the full-screen trail, whose blending is expensive on phones)
+      if (result === 'idle') {
+        if (!this.idle) { this.out.clearRect(0, 0, this.canvas.width, this.canvas.height); this.canvas.style.visibility = 'hidden'; }
+        this.idle = true;
+        return;
+      }
+      if (this.idle) { this.canvas.style.visibility = ''; this.idle = false; }
 
       // lens eases in while the pointer is over this canvas
       const over = this.lens && !api.suppressLens && !document.documentElement.classList.contains('menu-open') && this.hovered(r);
@@ -1024,17 +1048,25 @@
         break;
       }
 
-      gl.viewport(0, 0, this.canvas.width, this.canvas.height);
+      // draw into the bottom-left corner of the shared canvas, growing it if needed
+      const W = this.canvas.width, H = this.canvas.height, gl = GL.gl, G = GL.canvas;
+      if (G.width < W || G.height < H) { G.width = Math.max(G.width, W); G.height = Math.max(G.height, H); }
+      gl.viewport(0, 0, W, H);
+      gl.scissor(0, 0, W, H);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.bindTexture(gl.TEXTURE_2D, this.tex);
+      gl.bindTexture(gl.TEXTURE_2D, GL.tex);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.src);
-      gl.uniform2f(this.u.u_res, this.canvas.width, this.canvas.height);
-      gl.uniform2f(this.u.u_grid, this.cols, this.rows);
-      gl.uniform3f(this.u.u_ink, this.ink[0], this.ink[1], this.ink[2]);
-      gl.uniform3f(this.u.u_lens, (pointer.cx - r.left) * this.dpr, (pointer.cy - r.top) * this.dpr, this.lensR * this.dpr);
-      gl.uniform4f(this.u.u_wave, wave[0], wave[1], wave[2], wave[3]);
+      gl.uniform2f(GL.u.u_res, W, H);
+      gl.uniform2f(GL.u.u_grid, this.cols, this.rows);
+      gl.uniform3f(GL.u.u_ink, this.ink[0], this.ink[1], this.ink[2]);
+      gl.uniform3f(GL.u.u_lens, (pointer.cx - r.left) * this.dpr, (pointer.cy - r.top) * this.dpr, this.lensR * this.dpr);
+      gl.uniform4f(GL.u.u_wave, wave[0], wave[1], wave[2], wave[3]);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      // copy the result onto this scene's own canvas
+      this.out.clearRect(0, 0, W, H);
+      this.out.drawImage(G, 0, G.height - H, W, H, 0, 0, W, H);
     }
   }
 
@@ -1059,10 +1091,11 @@
   }
 
   function init() {
+    let ok = false;
+    try { ok = setupGL(); } catch (err) { ok = false; }
     document.querySelectorAll('canvas[data-dither]').forEach(c => {
-      if (c.dataset.dither === 'trail' && reduceMotion) { c.remove(); return; }
-      try { instances.push(c.__dither = new Dither(c)); }
-      catch (err) { c.style.display = 'none'; }
+      if (!ok || (c.dataset.dither === 'trail' && reduceMotion)) { c.style.display = 'none'; return; }
+      instances.push(c.__dither = new Dither(c));
     });
     if (reduceMotion) { instances.forEach(i => i.render(6, 0)); return; }
     const start = performance.now();

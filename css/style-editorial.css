@@ -519,6 +519,17 @@ html.inverted body::after{ filter: invert(1); mix-blend-mode: screen; }
 }
 
 /* =========================================================
+   TOUCH: no grey tap flash, and no long-press text selection or callout on the
+   playful parts (it fought the finger effects). A finger on a project animation
+   plays with it instead of scrolling the page.
+========================================================= */
+html{ -webkit-tap-highlight-color: transparent; }
+.hero, .panel-art, .fillable, #experience .exp, .stats, .contact-name, .art-band, .fade-band, .prologue{
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+.panel-art{ touch-action: none; }
+
+/* =========================================================
    16) PLAYFUL EXTRAS (js/fun.js)
 ========================================================= */
 /* directional hover fills for rows and skill cells */

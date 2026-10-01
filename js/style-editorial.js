@@ -223,6 +223,8 @@ window.initStyle = function () {
   }
 
   gsap.registerPlugin(ScrollTrigger);
+  // phones resize the viewport as the address bar shows and hides; don't recalculate everything for that
+  ScrollTrigger.config({ ignoreMobileResize: true });
   const hasSplit = typeof SplitText !== 'undefined';
   if (hasSplit) gsap.registerPlugin(SplitText);
 
