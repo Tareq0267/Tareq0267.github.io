@@ -415,3 +415,7 @@ html.mosaic-open .header{ visibility: hidden; }
   .polaroid{ --pw: min(34vh, 200px); }
   .reel-note{ min-height: 0; }
 }
+
+/* holding a moon in the hero */
+html.moon-dragging, html.moon-dragging *{ -webkit-user-select: none; user-select: none; }
+html.moon-dragging .cursor-ring{ transform: scale(.7); }

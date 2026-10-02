@@ -46,7 +46,8 @@
     return heartImg && heartImg.complete && heartImg.naturalWidth ? heartImg : null;
   }
   const starField = (() => { const r = rng(27); return Array.from({ length: 70 }, () => [r(), r(), r() * TAU, .4 + r() * .6]); })();
-  const binary = { t: 0, spin: 1 };
+  // drag: the moon being held; off: how far each moon is pulled from its orbit (cells)
+  const binary = { t: 0, spin: 1, drag: null, geom: null, front: 'A', off: { A: { x: 0, y: 0, vx: 0, vy: 0 }, B: { x: 0, y: 0, vx: 0, vy: 0 } } };
 
   function ball(ctx, x, y, r, b) {
     const g = ctx.createRadialGradient(x - r * .4, y - r * .45, r * .05, x, y, r * 1.02);
@@ -65,8 +66,8 @@
       ctx.fillStyle = `rgba(0,0,0,${(.25 + .35 * (.5 + .5 * Math.sin(t * 1.3 + ph))) * s})`;
       ctx.fillRect(Math.floor(sx * w), Math.floor(y), 1, 1);
     }
-    // moving the pointer quickly spins them faster
-    binary.spin += (1 + Math.min(3, st.speed / 600) - binary.spin) * .05;
+    // moving the pointer quickly spins them faster; holding one slows the orbit right down
+    binary.spin += ((binary.drag ? .15 : 1 + Math.min(3, st.speed / 600)) - binary.spin) * .05;
     binary.t += st.dt * binary.spin;
     const out = clamp((st.p - .5) * 2, 0, 1);
     const cx = w * (portrait ? .55 : .6) + st.mx * 3;
@@ -79,7 +80,34 @@
       const ox = Math.cos(a) * orbit * k, oy = Math.sin(a) * orbit * k * squash;
       return [cx + ox * Math.cos(tilt) - oy * Math.sin(tilt), cy + ox * Math.sin(tilt) + oy * Math.cos(tilt)];
     };
-    const A = pos(-.42), B = pos(.58);
+    const base = { A: pos(-.42), B: pos(.58) };
+    binary.geom = { left: st.left, top: st.top, cell: st.cell, base, size: { A: R, B: r } };
+
+    // The held moon follows the pointer and its partner leans after it. Let go and
+    // both ease back to the orbit with one small overshoot.
+    const G = binary, held = G.drag && G.drag.id;
+    for (const id of ['A', 'B']) {
+      const o = G.off[id];
+      if (id === held) {
+        const tx = (G.drag.x - st.left) / st.cell - G.drag.gx - base[id][0];
+        const ty = (G.drag.y - st.top) / st.cell - G.drag.gy - base[id][1];
+        // remember the hand's speed so a flick carries on after release
+        o.vx = clamp(tx - o.x, -5, 5) * .5; o.vy = clamp(ty - o.y, -5, 5) * .5;
+        o.x = tx; o.y = ty;
+      } else {
+        const lead = held ? G.off[held] : null;
+        const tx = lead ? lead.x * .22 : 0, ty = lead ? lead.y * .22 : 0;
+        // gentle spring: one small overshoot, then it settles
+        o.vx = (o.vx + (tx - o.x) * .08) * .72;
+        o.vy = (o.vy + (ty - o.y) * .08) * .72;
+        o.x += o.vx; o.y += o.vy;
+        if (Math.abs(o.x) + Math.abs(o.y) + Math.abs(o.vx) + Math.abs(o.vy) < .02) o.x = o.y = o.vx = o.vy = 0;
+      }
+    }
+    const A = [base.A[0] + G.off.A.x, base.A[1] + G.off.A.y];
+    const B = [base.B[0] + G.off.B.x, base.B[1] + G.off.B.y];
+    // where they balance: the heart sits here
+    const hx = A[0] + (B[0] - A[0]) * .42, hy = A[1] + (B[1] - A[1]) * .42;
 
     // the shared orbit, dotted
     ctx.save();
@@ -91,19 +119,30 @@
     }
     ctx.restore();
 
-    // the heart sits where they balance, beating
+    // pulled apart, a dotted tether shows they still belong together
+    const gap = Math.hypot(B[0] - A[0], B[1] - A[1]);
+    const rest = Math.hypot(base.B[0] - base.A[0], base.B[1] - base.A[1]);
+    const stretch = clamp((gap - rest) / (R * 2), 0, 1);
+    if (stretch > .02) {
+      ctx.fillStyle = `rgba(0,0,0,${.25 + stretch * .5})`;
+      const n = Math.floor(gap / 2.5);
+      for (let i = 1; i < n; i++) ctx.fillRect(A[0] + (B[0] - A[0]) * i / n, A[1] + (B[1] - A[1]) * i / n, 1, 1);
+    }
+
+    // the heart sits where they balance, beating (faster while they are apart)
     const im = heart();
-    const beat = 1 + Math.pow(Math.max(0, Math.sin(t * 3.2)), 8) * .18;
+    const beat = 1 + Math.pow(Math.max(0, Math.sin(t * (3.2 + stretch * 4))), 8) * (.18 + stretch * .2);
     const drawHeart = () => {
       if (!im) return;
       const size = R * .62 * beat, k = size / Math.max(im.naturalWidth, im.naturalHeight);
       ctx.save();
-      ctx.translate(cx, cy); ctx.rotate(-Math.PI / 2 + Math.sin(t * .7) * .12); ctx.scale(k, k);
+      ctx.translate(hx, hy); ctx.rotate(-Math.PI / 2 + Math.sin(t * .7) * .12); ctx.scale(k, k);
       ctx.drawImage(im, -im.naturalWidth / 2, -im.naturalHeight / 2);
       ctx.restore();
     };
     // whichever moon is nearer the viewer is drawn last
-    const front = Math.sin(a) > 0 ? 'B' : 'A';
+    const front = held || (Math.sin(a) > 0 ? 'B' : 'A');
+    G.front = front;
     const drawA = () => {
       ball(ctx, A[0], A[1], R, [200, 112, 22]);
       // soft bands
@@ -122,6 +161,57 @@
     if (front === 'A') { drawB(); drawHeart(); drawA(); } else { drawA(); drawHeart(); drawB(); }
   }
   if (window.Dither) Dither.scenes.binary = binaryScene;
+
+  // Grabbing a moon: hit-test against where they were last drawn, front one first
+  (function dragMoons() {
+    const hero = $('.hero'), root = document.documentElement;
+    if (!hero || reduceMotion) return;
+    function hit(x, y) {
+      const g = binary.geom;
+      if (!g) return null;
+      const cx = (x - g.left) / g.cell, cy = (y - g.top) / g.cell;
+      const order = binary.front === 'A' ? ['A', 'B'] : ['B', 'A'];
+      for (const id of order) {
+        const o = binary.off[id];
+        const px = g.base[id][0] + o.x, py = g.base[id][1] + o.y;
+        if (Math.hypot(cx - px, cy - py) < g.size[id] + 4) return { id, gx: cx - px, gy: cy - py };
+      }
+      return null;
+    }
+    // a finger on a moon drags it instead of scrolling the page
+    hero.addEventListener('touchstart', e => {
+      const t = e.touches[0];
+      if (e.touches.length === 1 && hit(t.clientX, t.clientY)) e.preventDefault();
+    }, { passive: false });
+    hero.addEventListener('pointerdown', e => {
+      if (e.button > 0 || e.target.closest('a, button')) return;
+      const h = hit(e.clientX, e.clientY);
+      if (!h) return;
+      binary.drag = { ...h, x: e.clientX, y: e.clientY, pointer: e.pointerId };
+      hero.setPointerCapture(e.pointerId);
+      root.classList.add('moon-dragging');
+    });
+    let hinting = false;
+    const label = () => $('.cursor-label');
+    hero.addEventListener('pointermove', e => {
+      const d = binary.drag;
+      if (d && d.pointer === e.pointerId) { d.x = e.clientX; d.y = e.clientY; return; }
+      // desktop: the cursor offers "Drag" over a moon
+      if (e.pointerType !== 'mouse' || !label()) return;
+      const over = !!hit(e.clientX, e.clientY);
+      if (over === hinting) return;
+      hinting = over;
+      root.classList.toggle('cursor-link', over);
+      label().textContent = over ? 'Drag' : '';
+    });
+    const release = e => {
+      if (!binary.drag || binary.drag.pointer !== e.pointerId) return;
+      binary.drag = null;
+      root.classList.remove('moon-dragging');
+    };
+    hero.addEventListener('pointerup', release);
+    hero.addEventListener('pointercancel', release);
+  })();
 
   /* =========================================================
      DATES + COUNTER
