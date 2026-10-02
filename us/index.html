@@ -73,7 +73,7 @@
       <li><a href="#reel"><span class="p6">03</span><span class="h2">The reel</span></a></li>
       <li><a href="#letters"><span class="p6">04</span><span class="h2">Letters</span></a></li>
       <li><a href="#lists"><span class="p6">05</span><span class="h2">Lists</span></a></li>
-      <li><a href="#song"><span class="p6">06</span><span class="h2">Our song</span></a></li>
+      <li><a href="#song"><span class="p6">06</span><span class="h2">Our songs</span></a></li>
     </ul>
     <div class="menu-foot">
       <span class="p6">Adam &amp; Alvy</span>
@@ -193,20 +193,27 @@
 
     <div class="fade-band" aria-hidden="true"><canvas class="art" data-dither="fade" data-cell="9"></canvas></div>
 
-    <!-- Our song -->
+    <!-- Songs that remind me of us -->
     <section class="section dark wrap contact" id="song" data-theme="dark">
       <div class="section-head center">
-        <h2 class="p6 label">our song</h2>
-        <h3 class="h3" data-split data-song-title></h3>
+        <h2 class="p6 label">our songs</h2>
+        <h3 class="h3" data-split>Songs that remind me of us</h3>
       </div>
 
-      <div class="player">
-        <button class="vinyl" id="vinylBtn" aria-pressed="false" aria-label="Play our song">
-          <span class="vinyl-disc" aria-hidden="true"><span class="vinyl-label hand">A ♡ A</span></span>
-          <span class="vinyl-arm" aria-hidden="true"></span>
-        </button>
-        <p class="p6 muted center" data-song-artist></p>
-        <p class="hand center player-hint" data-player-hint>tap the record</p>
+      <div class="grid-12 songs">
+        <div class="player">
+          <button class="vinyl" id="vinylBtn" aria-pressed="false" aria-label="Play">
+            <span class="vinyl-disc" aria-hidden="true"><span class="vinyl-label hand">A ♡ A</span></span>
+            <span class="vinyl-arm" aria-hidden="true"></span>
+          </button>
+          <div class="now">
+            <p class="p6 muted" data-now-label>Up next</p>
+            <p class="h5" data-now-title></p>
+            <p class="p6 muted" data-now-artist></p>
+          </div>
+          <p class="hand player-hint" data-player-hint>tap the record</p>
+        </div>
+        <ol class="tracks" data-tracks></ol>
       </div>
 
       <div class="art-band band-contact" aria-hidden="true"><canvas class="art" data-dither="sunset" data-lens data-cell="6"></canvas></div>

@@ -391,6 +391,32 @@ html.mosaic-open .header{ visibility: hidden; }
 @keyframes spin{ to{ rotate: 360deg; } }
 .player-hint{ font-size: 24px; color: var(--sand-70); }
 
+/* songs that remind me of us: the record on the left, the tracklist beside it */
+.songs{ align-items: start; row-gap: 48px; margin-bottom: clamp(32px, 4vw, 64px); }
+.songs .player{ grid-column: 1 / span 5; justify-items: start; margin: 0; position: sticky; top: calc(var(--header-h) + 24px); }
+.now{ display: grid; gap: 6px; }
+.now .h5{ max-width: 12em; }
+.tracks{ grid-column: 7 / span 6; border-top: 1px solid var(--sand-10); }
+.tracks li{ border-bottom: 1px solid var(--sand-10); }
+.track{
+  display: grid; grid-template-columns: 2.6em minmax(0, 1fr) auto; column-gap: 16px; row-gap: 4px;
+  align-items: baseline; width: 100%; padding: 18px 0; text-align: left;
+  transition: padding-left .5s var(--ease), color .3s;
+}
+.track:hover, .track:focus-visible{ padding-left: 12px; }
+.track-name{ display: grid; gap: 4px; }
+.track-name .h6{ text-transform: none; }
+.track-note{ grid-column: 2; grid-row: 2; font-size: 22px; line-height: 1.2; color: var(--sand-70); }
+.track-state{ grid-column: 3; grid-row: 1; white-space: nowrap; }
+.track.current .h6{ font-style: italic; }
+.track.playing .track-state::before{ content: "♥ "; }
+.track.missing{ opacity: .5; }
+@media (max-width: 991px){
+  .songs .player{ grid-column: 1 / -1; justify-items: center; text-align: center; position: static; }
+  .now .h5{ max-width: none; }
+  .tracks{ grid-column: 1 / -1; }
+}
+
 /* =========================================================
    13) RESPONSIVE
 ========================================================= */

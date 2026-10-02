@@ -509,7 +509,7 @@
       dragging = true;
       crank.setPointerCapture(e.pointerId);
       lastAngle = angle(e);
-      sound.unlock();
+      sound.wake();
     });
     crank.addEventListener('pointermove', e => {
       if (!dragging) return;
@@ -532,15 +532,82 @@
   }
 
   /* =========================================================
-     SOUND: the song (and the vinyl crackle) play while the reel moves,
-     or steadily from the record at the bottom of the page
+     SOUND: the current song (and the vinyl crackle) play while the reel
+     moves, or straight through from the record in "Songs that remind me of us"
   ========================================================= */
   const sound = (() => {
     const btn = $('#soundBtn'), vinylBtn = $('#vinylBtn'), hint = $('[data-player-hint]');
-    const song = new Audio(D.song.src), crackle = new Audio(D.song.crackle);
-    song.loop = crackle.loop = true;
+    const tracks = D.songs || [];
+    const song = new Audio(), crackle = new Audio(D.crackle);
+    crackle.loop = true;
     song.preload = 'auto';
-    let enabled = false, steady = false, vol = 0, unlocked = false;
+    let enabled = false, steady = false, vol = 0, unlocked = false, cur = -1;
+    const playable = i => !!(tracks[i] && tracks[i].src && !tracks[i].missing);
+
+    /* ---- the tracklist ---- */
+    const list = $('[data-tracks]');
+    const rows = tracks.map((t, i) => {
+      const li = el('li');
+      li.dataset.fade = '';
+      const row = el(t.src ? 'button' : 'a', 'track');
+      if (t.src) row.type = 'button';
+      else if (t.link) { row.href = t.link; row.target = '_blank'; row.rel = 'noreferrer'; }
+      const name = el('span', 'track-name');
+      name.append(el('span', 'h6', t.title), el('span', 'p6 muted', t.artist || ''));
+      row.append(el('span', 'p6 muted track-num', pad(i + 1)), name, el('span', 'hand track-note', t.note || ''),
+        el('span', 'p6 track-state', t.src ? 'Play' : t.link ? 'Listen ↗' : ''));
+      if (t.src) row.addEventListener('click', () => {
+        if (i === cur && steady) setSteady(false);
+        else { setTrack(i); setSteady(true); }
+      });
+      li.append(row);
+      list.append(li);
+      return row;
+    });
+
+    function paint() {
+      const t = tracks[cur] || tracks[0] || {};
+      $('[data-now-label]').textContent = steady ? 'Now playing' : 'Up next';
+      $('[data-now-title]').textContent = t.title || '';
+      $('[data-now-artist]').textContent = t.artist || '';
+      rows.forEach((r, i) => {
+        const on = i === cur && steady;
+        r.classList.toggle('current', i === cur);
+        r.classList.toggle('playing', on);
+        r.classList.toggle('missing', !!tracks[i].missing);
+        if (tracks[i].src) r.querySelector('.track-state').textContent = tracks[i].missing ? 'No file' : on ? 'Pause' : 'Play';
+        if (i === cur) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current');
+      });
+      vinylBtn.setAttribute('aria-pressed', String(steady));
+      vinylBtn.setAttribute('aria-label', `${steady ? 'Pause' : 'Play'} ${t.title || ''}`.trim());
+      if (tracks[cur] && tracks[cur].missing) hint.textContent = `song not found: add us/${tracks[cur].src}`;
+      else hint.textContent = steady ? 'playing for us ♡' : 'tap the record';
+    }
+
+    function setTrack(i) {
+      if (i === cur || !tracks[i]) return;
+      cur = i;
+      if (tracks[i].src) { song.src = tracks[i].src; song.load(); }
+      paint();
+    }
+    // say so plainly if a song file isn't there, instead of silently doing nothing
+    song.addEventListener('error', () => {
+      if (!tracks[cur] || !song.getAttribute('src')) return;
+      tracks[cur].missing = true;
+      if (steady) setSteady(false);
+      paint();
+    });
+    // from the record the playlist plays on; under the reel the song just loops
+    song.addEventListener('ended', () => {
+      if (steady) {
+        for (let k = 1; k <= tracks.length; k++) {
+          const n = (cur + k) % tracks.length;
+          if (playable(n)) { setTrack(n); song.play().catch(() => {}); return; }
+        }
+      }
+      song.currentTime = 0;
+      if (vol > .01) song.play().catch(() => {});
+    });
 
     function unlock() {
       if (unlocked) return;
@@ -560,24 +627,26 @@
       btn.setAttribute('aria-pressed', String(on));
       $$('[data-sound-label]', btn).forEach(s => s.textContent = on ? 'Sound on' : 'Sound off');
       if (on) unlock();
-      if (!on) setSteady(false);
-      if (!on) setVol(0);
+      if (!on) { setSteady(false); setVol(0); }
     }
     function setSteady(on) {
+      if (on && !playable(cur)) { paint(); return; }
       steady = on;
-      vinylBtn.setAttribute('aria-pressed', String(on));
-      vinylBtn.setAttribute('aria-label', on ? 'Pause our song' : 'Play our song');
-      hint.textContent = on ? 'playing for us ♡' : 'tap the record';
       if (on) { if (!enabled) setEnabled(true); setVol(1); }
+      else if (vol > .01) setVol(0);
+      paint();
     }
     btn.addEventListener('click', () => setEnabled(!enabled));
     vinylBtn.addEventListener('click', () => setSteady(!steady));
+    setTrack(0);
 
     return {
       unlock,
+      // grabbing the crank turns the sound on, like the Valentine page
+      wake() { if (!enabled) setEnabled(true); },
       // called every frame with how fast the reel is moving
       drive(speed) {
-        if (!enabled || steady) return;
+        if (!enabled || steady || !playable(cur)) return;
         const target = clamp(speed / 6, 0, 1);
         const next = vol + (target - vol) * (target > vol ? .25 : .05);
         if (Math.abs(next - vol) > .002 || (next < .01 && vol >= .01)) setVol(next < .01 ? 0 : next);
@@ -725,12 +794,6 @@
   }
   renderCountdowns();
   setInterval(renderCountdowns, 60 * 1000);
-
-  /* =========================================================
-     SONG TEXT
-  ========================================================= */
-  $('[data-song-title]').textContent = D.song.title;
-  $('[data-song-artist]').textContent = D.song.artist;
 
   /* =========================================================
      START (behind the soft gate when one is set)

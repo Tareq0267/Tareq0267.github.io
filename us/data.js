@@ -154,5 +154,14 @@ window.US = {
     // { label: 'Next date', date: '2026-10-10' },
   ],
 
-  song: { title: 'Semua Aku Dirayakan', artist: 'Nadin Amizah', src: '../song.mp3', crackle: '../vinyl.mp3' },
+  // Songs that remind me of us. The first one also plays while the reel moves.
+  // src: an mp3 in us/songs/. A song with no file but a `link` (Spotify, YouTube)
+  // opens the link instead. `note` is the handwritten line beside it.
+  songs: [
+    { title: 'Semua Aku Dirayakan', artist: 'Nadin Amizah', src: 'songs/semua-aku-dirayakan.mp3', note: 'our song ♡' },
+    // { title: '', artist: '', src: 'songs/....mp3', note: '' },
+    // { title: '', artist: '', link: 'https://open.spotify.com/track/...', note: '' },
+  ],
+  // the record crackle layered under whatever is playing
+  crackle: '../vinyl.mp3',
 };
