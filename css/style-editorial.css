@@ -328,6 +328,44 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 .photo-view[aria-pressed="true"] .photo-ring{ display: none; }
 .about-photo figcaption{ margin-top: 12px; }
 
+/* the robot waves hello: hover (desktop) or tap to reveal (any device) */
+.robot-hello{
+  /* sits up and to the left of the robot's head, the line pointing down at it */
+  position: absolute; left: 19%; top: 26.5%; z-index: 3;
+  display: flex; flex-direction: column; align-items: flex-end;
+  pointer-events: none; color: var(--ink);
+  opacity: 0; transform: scale(.4) rotate(-8deg); transform-origin: 100% 100%;
+  transition: opacity .25s, transform .55s cubic-bezier(.34, 1.7, .55, 1);
+}
+.robot-hello-text{
+  display: block;
+  font: 600 clamp(26px, 2.6vw, 40px)/1 'Caveat', 'Comic Sans MS', cursive;
+  /* sand outline so it stays readable over the dark parts of the photo */
+  text-shadow: 0 0 2px var(--sand), 0 0 4px var(--sand), 0 0 8px var(--sand);
+  rotate: -14deg;
+}
+.robot-hello-tick{
+  display: block; width: clamp(22px, 2.2vw, 32px); height: auto;
+  margin: -2px -2px 0 0;
+}
+.robot-hello-tick path{
+  fill: none; stroke: currentColor; stroke-width: 2.5; stroke-linecap: round;
+  stroke-dasharray: 40; stroke-dashoffset: 40;
+  transition: stroke-dashoffset .4s .2s var(--ease);
+}
+.photo-view[aria-pressed="true"] .robot-hello{ opacity: 1; transform: none; }
+.photo-view[aria-pressed="true"] .robot-hello-tick path{ stroke-dashoffset: 0; }
+.photo-view[aria-pressed="true"] .robot-hello-text{ animation: hello-wave 1.6s .5s ease-in-out infinite; }
+@media (hover: hover) and (pointer: fine){
+  .photo-view:hover .robot-hello{ opacity: 1; transform: none; }
+  .photo-view:hover .robot-hello-tick path{ stroke-dashoffset: 0; }
+  .photo-view:hover .robot-hello-text{ animation: hello-wave 1.6s .5s ease-in-out infinite; }
+}
+@keyframes hello-wave{
+  0%, 100%{ rotate: -14deg; }
+  50%{ rotate: -6deg; }
+}
+
 .stats{
   display: grid; grid-template-columns: repeat(4, 1fr);
   margin-top: clamp(64px, 8vw, 136px);
