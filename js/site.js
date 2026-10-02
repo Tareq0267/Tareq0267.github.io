@@ -16,6 +16,21 @@
   });
 
   /* =========================================================
+     ABOUT PORTRAIT: click or tap switches between dithered and the real photo
+  ========================================================= */
+  document.querySelectorAll('.about-photo .photo-view').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.setAttribute('aria-pressed', String(btn.getAttribute('aria-pressed') !== 'true'));
+    });
+    // the peek circle follows the cursor
+    btn.addEventListener('pointermove', e => {
+      const r = btn.getBoundingClientRect();
+      btn.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      btn.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+  });
+
+  /* =========================================================
      PROJECT TABS
   ========================================================= */
   const tabs = [...document.querySelectorAll('[role="tab"]')];

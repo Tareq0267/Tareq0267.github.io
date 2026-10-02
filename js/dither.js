@@ -367,19 +367,25 @@
   // are inverted first so their dark backgrounds don't turn into solid ink.
   function photo(ctx, w, h, t, st) {
     const el = st.el;
-    // pages opened straight from disk can't hand image pixels to WebGL; show the plain image there
-    if (location.protocol === 'file:') { el.style.display = 'none'; return 'idle'; }
-    const src = el.dataset.img;
+    // "photo:name" uses the small embedded copy in js/doodles.js, which works everywhere;
+    // a plain file path can't be read back from disk (file://), so show the plain image there
+    let src = el.dataset.img;
+    if (src.startsWith('photo:')) src = (window.PHOTOS || {})[src.slice(6)];
+    else if (location.protocol === 'file:') { el.style.display = 'none'; return 'idle'; }
+    if (!src) return;
     let im = photoImgs[src];
     if (!im) { im = photoImgs[src] = new Image(); im.src = src; }
     if (!im.complete || !im.naturalWidth) return;
-    const k = Math.max(w / im.naturalWidth, h / im.naturalHeight) * 1.1;
+    // data-static: fill the canvas exactly and hold still; otherwise drift slowly
+    const still = 'static' in el.dataset;
+    const k = Math.max(w / im.naturalWidth, h / im.naturalHeight) * (still ? 1 : 1.1);
     const dw = im.naturalWidth * k, dh = im.naturalHeight * k;
-    const ox = (w - dw) / 2 + Math.sin(t * .13) * (dw - w) / 2;
-    const oy = (h - dh) / 2 + Math.cos(t * .11) * (dh - h) / 2;
+    const ox = (w - dw) / 2 + (still ? 0 : Math.sin(t * .13) * (dw - w) / 2);
+    const oy = (h - dh) / 2 + (still ? 0 : Math.cos(t * .11) * (dh - h) / 2);
     ctx.imageSmoothingQuality = 'high';
     // screenshots are mostly flat UI: push the contrast so text and shapes survive the bars
-    if ('filter' in ctx) ctx.filter = 'grayscale(1) contrast(1.35)';
+    // data-filter lets a photo tune its own tones (e.g. lift a dark portrait)
+    if ('filter' in ctx) ctx.filter = el.dataset.filter || 'grayscale(1) contrast(1.35)';
     ctx.drawImage(im, ox, oy, dw, dh);
     if ('filter' in ctx) ctx.filter = 'none';
     // dark screenshots are inverted; so is everything when the theme is flipped (light ink)

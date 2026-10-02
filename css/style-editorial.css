@@ -290,6 +290,44 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 .about-col .h4{ margin-bottom: 20px; }
 .about-col p + p{ margin-top: 14px; }
 
+/* cut-out portrait in the empty left columns: dithered like the art; hover (desktop)
+   or a click/tap (pins it, any device) shows the real photo */
+.about-photo{ grid-column: 1 / span 3; grid-row: 1; margin: 0; align-self: start; }
+/* Desktop: the cursor becomes a circle that shows the real photo inside it, the
+   rest stays dithered. A click or tap (any device) shows the whole real photo. */
+@property --peek{ syntax: '<length>'; inherits: true; initial-value: 0px; }
+.photo-view{
+  --peek: 0px; --mx: 50%; --my: 40%;
+  position: relative; display: block; width: 100%; aspect-ratio: 720 / 1112;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  transition: --peek .45s var(--ease);
+}
+.photo-view img{
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block;
+  -webkit-mask-image: radial-gradient(circle var(--peek) at var(--mx) var(--my), #000 calc(100% - 1px), transparent 100%);
+          mask-image: radial-gradient(circle var(--peek) at var(--mx) var(--my), #000 calc(100% - 1px), transparent 100%);
+}
+.photo-view .art{
+  -webkit-mask-image: radial-gradient(circle var(--peek) at var(--mx) var(--my), transparent calc(100% - 1px), #000 100%);
+          mask-image: radial-gradient(circle var(--peek) at var(--mx) var(--my), transparent calc(100% - 1px), #000 100%);
+  transition: opacity .5s var(--ease);
+}
+.photo-ring{
+  position: absolute; left: var(--mx); top: var(--my); z-index: 2;
+  width: calc(var(--peek) * 2); height: calc(var(--peek) * 2);
+  translate: -50% -50%; border: 1px solid var(--ink); border-radius: 50%;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine){
+  .photo-view:hover{ --peek: clamp(56px, 6vw, 84px); }
+  /* the photo's own circle replaces the cursor ring here */
+  html:has(.photo-view:hover) .cursor-ring{ opacity: 0; }
+}
+.photo-view[aria-pressed="true"] img{ -webkit-mask-image: none; mask-image: none; }
+.photo-view[aria-pressed="true"] .art{ opacity: 0; }
+.photo-view[aria-pressed="true"] .photo-ring{ display: none; }
+.about-photo figcaption{ margin-top: 12px; }
+
 .stats{
   display: grid; grid-template-columns: repeat(4, 1fr);
   margin-top: clamp(64px, 8vw, 136px);
@@ -438,6 +476,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .hero-top .tagline{ grid-column: 7 / span 6; }
   .hero-top .stat-b{ grid-column: 1 / span 6; }
   .about-col, .about-col:nth-child(1){ grid-column: span 6; }
+  .about-photo{ grid-column: 1 / span 5; grid-row: auto; }
   .honour .place{ grid-column: 1 / span 2; }
   .honour .body{ grid-column: 3 / span 10; }
   .honour .meta{ grid-column: 3 / span 10; grid-template-columns: repeat(3, auto); justify-content: start; gap: 4px 24px; }
@@ -472,6 +511,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .hero-bottom, .footer{ grid-template-columns: 1fr 1fr; }
   .hero-bottom > :nth-child(2), .footer > :nth-child(2){ display: none; }
   .about-col, .about-col:nth-child(1){ grid-column: 1 / -1; }
+  .about-photo{ grid-column: 1 / -1; max-width: 320px; }
   .stats{ grid-template-columns: 1fr 1fr; }
   .stats .stat:nth-child(3){ padding-left: 0; border-left: 0; }
   .stats .stat{ padding-bottom: 24px; }
