@@ -440,7 +440,6 @@
     // Light-to-dark transition band
     fade(ctx, w, h, t, st) {
       fadeBars(ctx, w, h, t, st, +(st.el.dataset.phase || 0));
-      birdBurst(ctx, w, h, st);
     },
 
     // The same transition upside down, for dark sections opening back into light
@@ -450,7 +449,6 @@
       ctx.scale(1, -1);
       fadeBars(ctx, w, h, t, st, +(st.el.dataset.phase || 0));
       ctx.restore();
-      birdBurst(ctx, w, h, st);
     },
 
     sunset(ctx, w, h, t, st) {
@@ -1088,9 +1086,10 @@
       if (this.lensR < .5) this.lensR = 0;
       this.hover = over;
 
-      // newest click wave that is still alive
+      // newest click wave that is still alive (the plain transition bands don't react to clicks)
       let wave = [0, 0, 0, 0];
-      for (let i = waves.length - 1; i >= 0; i--) {
+      const clickable = this.scene !== 'fade' && this.scene !== 'fadeUp';
+      for (let i = clickable ? waves.length - 1 : -1; i >= 0; i--) {
         const age = now - waves[i].t0;
         if (age > WAVE_LIFE) continue;
         wave = [(waves[i].x - r.left) * this.dpr, (waves[i].y - r.top) * this.dpr, age * WAVE_SPEED * this.dpr, 1 - age / WAVE_LIFE];
