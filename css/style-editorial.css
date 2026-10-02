@@ -467,6 +467,26 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   column-gap: clamp(20px, 2.4vw, 36px); row-gap: 20px; align-items: end;
 }
 .panel-body.has-shot > .h3, .panel-body.has-shot > .desc{ grid-column: 1; }
+/* Rumi to Jawi: a live mini translator in the panel's window frame */
+.try-jawi{
+  grid-column: 2; grid-row: 1 / span 2; align-self: end;
+  border: 1px solid var(--ink); border-radius: 6px; overflow: hidden; background: var(--sand);
+}
+.try-field{ display: grid; gap: 6px; padding: 12px 14px; }
+.try-field + .try-field{ border-top: 1px solid var(--ink-10); }
+.try-input{
+  width: 100%; padding: 6px 0; border: 0; border-bottom: 1px solid var(--ink-10);
+  background: transparent; color: var(--ink); text-transform: none; letter-spacing: .02em;
+  outline: none; border-radius: 0;
+}
+.try-input:focus{ border-bottom-color: var(--ink); }
+.try-output{
+  display: block; min-height: 1.6em; text-align: right;
+  font: 500 clamp(24px, 2.2vw, 32px)/1.5 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+  overflow-wrap: anywhere;
+}
+.try-jawi.loading .try-output{ opacity: .45; }
+
 .panel-shot{
   grid-column: 2; grid-row: 1 / span 2; align-self: end;
   margin: 0; border: 1px solid var(--ink); border-radius: 6px; overflow: hidden;
@@ -570,7 +590,7 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   /* one column: let the ink fill run edge to edge so the text isn't flush against it */
   .panel-feats{ grid-template-columns: 1fr; }
   .panel-body.has-shot{ grid-template-columns: 1fr; }
-  .panel-shot{ grid-column: 1; grid-row: auto; }
+  .panel-shot, .try-jawi{ grid-column: 1; grid-row: auto; }
   .header .style-switch{ display: none; }
   .menu .style-switch{ display: flex; }
   .menu-role{ display: none; }

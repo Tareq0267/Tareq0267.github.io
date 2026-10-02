@@ -31,6 +31,41 @@
   });
 
   /* =========================================================
+     RUMI TO JAWI "TRY IT HERE": the 1.6 MB dictionary (js/rumitojawi.js) only
+     loads when someone opens the panel or types; until then letters are
+     transliterated with a simple built-in letter map.
+  ========================================================= */
+  const tryBox = document.querySelector('.try-jawi');
+  if (tryBox) {
+    const input = tryBox.querySelector('.try-input');
+    const output = tryBox.querySelector('.try-output');
+    const letters = { a: 'ا', b: 'ب', c: 'چ', d: 'د', e: 'ي', f: 'ف', g: 'ڬ', h: 'ه', i: 'ي', j: 'ج', k: 'ك', l: 'ل', m: 'م', n: 'ن',
+      o: 'و', p: 'ڤ', q: 'ق', r: 'ر', s: 'س', t: 'ت', u: 'و', v: 'ۏ', w: 'و', x: 'كس', y: 'ي', z: 'ز' };
+    const rough = text => text.toLowerCase().replace(/ng/g, 'ڠ').replace(/ny/g, 'ڽ').replace(/sy/g, 'ش')
+      .replace(/kh/g, 'خ').replace(/[a-z]/g, ch => letters[ch] || ch);
+    let state = 'idle';   // idle -> loading -> ready
+    function render() {
+      const text = input.value;
+      output.textContent = state === 'ready' && window.translateRumiToJawi ? window.translateRumiToJawi(text) : rough(text);
+    }
+    function loadDictionary() {
+      if (state !== 'idle') return;
+      state = 'loading';
+      tryBox.classList.add('loading');
+      const s = document.createElement('script');
+      s.src = 'js/rumitojawi.js';
+      s.onload = () => { state = 'ready'; tryBox.classList.remove('loading'); render(); };
+      s.onerror = () => { state = 'idle'; tryBox.classList.remove('loading'); };
+      document.body.appendChild(s);
+    }
+    input.addEventListener('input', () => { loadDictionary(); render(); });
+    input.addEventListener('focus', loadDictionary);
+    const tab = document.querySelector('[aria-controls="' + tryBox.closest('.panel').id + '"]');
+    if (tab) tab.addEventListener('click', loadDictionary);
+    render();
+  }
+
+  /* =========================================================
      PROJECT TABS
   ========================================================= */
   const tabs = [...document.querySelectorAll('[role="tab"]')];
