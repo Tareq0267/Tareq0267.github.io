@@ -56,7 +56,9 @@
       float lum = dot(s.rgb, vec3(0.299, 0.587, 0.114));
       float dark = clamp((1.0 - lum) * 1.08 - 0.04, 0.0, 1.0) * s.a;
       float x = abs(fract(frag.x / cellPx.x) - 0.5);
-      if (x > dark * 0.5) discard;
+      // half a device pixel of slack: cells aren't a whole number of pixels wide, and
+      // without it solid areas show stripes of thin gaps where the two drift out of step
+      if (dark < 0.02 || x > dark * 0.5 + 0.5 / cellPx.x) discard;
       gl_FragColor = vec4(u_ink, 1.0);
     }
   `;
@@ -358,7 +360,48 @@
     drawDoodle(ctx, 'heart', hx, hy, hs * beat, -Math.PI / 2 + Math.sin(t * .7) * .15);
   }
 
+  /* ---------- photos (project screenshots) ---------- */
+  const photoImgs = {};
+  // Draws a picture filling the canvas with a slow drift, so it reads through the
+  // same line-bar dither as the art. data-tone="dark" marks dark screenshots: they
+  // are inverted first so their dark backgrounds don't turn into solid ink.
+  function photo(ctx, w, h, t, st) {
+    const el = st.el;
+    // "photo:name" uses the small embedded copy in js/doodles.js, which works everywhere;
+    // a plain file path can't be read back from disk (file://), so show the plain image there
+    let src = el.dataset.img;
+    if (src.startsWith('photo:')) src = (window.PHOTOS || {})[src.slice(6)];
+    else if (location.protocol === 'file:') { el.style.display = 'none'; return 'idle'; }
+    if (!src) return;
+    let im = photoImgs[src];
+    if (!im) { im = photoImgs[src] = new Image(); im.src = src; }
+    if (!im.complete || !im.naturalWidth) return;
+    // data-static: fill the canvas exactly and hold still; otherwise drift slowly
+    const still = 'static' in el.dataset;
+    const k = Math.max(w / im.naturalWidth, h / im.naturalHeight) * (still ? 1 : 1.1);
+    const dw = im.naturalWidth * k, dh = im.naturalHeight * k;
+    const ox = (w - dw) / 2 + (still ? 0 : Math.sin(t * .13) * (dw - w) / 2);
+    const oy = (h - dh) / 2 + (still ? 0 : Math.cos(t * .11) * (dh - h) / 2);
+    ctx.imageSmoothingQuality = 'high';
+    // screenshots are mostly flat UI: push the contrast so text and shapes survive the bars
+    // data-filter lets a photo tune its own tones (e.g. lift a dark portrait)
+    if ('filter' in ctx) ctx.filter = el.dataset.filter || 'grayscale(1) contrast(1.35)';
+    ctx.drawImage(im, ox, oy, dw, dh);
+    if ('filter' in ctx) ctx.filter = 'none';
+    // dark screenshots are inverted; so is everything when the theme is flipped (light ink)
+    if ((el.dataset.tone === 'dark') !== lightInk) {
+      ctx.globalCompositeOperation = 'difference';
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, w, h);
+    }
+    // lift the tones a little so the bars stay airy
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(255,255,255,.06)';
+    ctx.fillRect(0, 0, w, h);
+  }
+
   const scenes = {
+    photo,
     hero(ctx, w, h, t, st) {
       const portrait = h > w * 1.1;
       const out = clamp((st.p - .5) * 2, 0, 1);
