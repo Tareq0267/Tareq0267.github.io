@@ -329,6 +329,14 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 .about-photo figcaption{ margin-top: 12px; }
 
 /* the robot waves hello: hover (desktop) or tap to reveal (any device) */
+/* full-size layer masked like the photo, so on hover the hello only shows inside
+   the peek circle; a tap/click (whole photo shown) lifts the mask */
+.robot-hello-mask{
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  -webkit-mask-image: radial-gradient(circle var(--peek) at var(--mx) var(--my), #000 calc(100% - 1px), transparent 100%);
+          mask-image: radial-gradient(circle var(--peek) at var(--mx) var(--my), #000 calc(100% - 1px), transparent 100%);
+}
+.photo-view[aria-pressed="true"] .robot-hello-mask{ -webkit-mask-image: none; mask-image: none; }
 .robot-hello{
   /* sits up and to the left of the robot's head, the line pointing down at it */
   position: absolute; left: 19%; top: 26.5%; z-index: 3;
