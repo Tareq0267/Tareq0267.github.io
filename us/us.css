@@ -1,0 +1,417 @@
+/* Adam & Alvy: built on the portfolio's editorial system (../css/style-editorial.css).
+   Only the palette changes (sand and ink become dusty rose and wine), plus the
+   pieces this page adds: polaroids, the reel and crank, envelopes, lists, the record. */
+
+/* =========================================================
+   1) PALETTE
+   The negative-blend effects (cursor trail, spot fills) paint with rose + wine
+   added together, so difference blending swaps one for the other exactly.
+========================================================= */
+:root{
+  --sand: #c39a94;
+  --ink: #3b1e26;
+  --ink-70: rgba(59,30,38,.72);
+  --ink-10: rgba(59,30,38,.14);
+  --sand-70: rgba(195,154,148,.75);
+  --sand-10: rgba(195,154,148,.2);
+  --negative: #feb8ba;
+  --paper: #fffaf6;
+  --paper-ink: #4a2530;
+  --font-hand: "Caveat", "Comic Sans MS", cursive;
+}
+.cursor-trail, .indicator{ color: var(--negative); }
+.skill-spot, .theme-wipe{ background: var(--negative); }
+
+.hand{ font-family: var(--font-hand); font-weight: 500; text-transform: none; letter-spacing: 0; }
+.amp{ font-style: italic; text-transform: none; letter-spacing: -.02em; padding-inline: .02em; }
+
+/* =========================================================
+   2) HEADER: sound toggle with a tiny equaliser
+========================================================= */
+.sound{ padding: 12px 16px; gap: 10px; }
+.sound .eq{ display: inline-flex; align-items: flex-end; gap: 2px; height: 10px; }
+.sound .eq i{ width: 2px; height: 3px; background: currentColor; transition: height .3s; }
+.sound[aria-pressed="true"] .eq i{ animation: eq .9s ease-in-out infinite; }
+.sound[aria-pressed="true"] .eq i:nth-child(2){ animation-delay: -.3s; }
+.sound[aria-pressed="true"] .eq i:nth-child(3){ animation-delay: -.6s; }
+.sound.quiet .eq i{ animation-play-state: paused; }
+@keyframes eq{ 0%, 100%{ height: 3px; } 50%{ height: 10px; } }
+
+/* =========================================================
+   3) HERO
+========================================================= */
+.together{ font-variant-numeric: tabular-nums; }
+[data-clock]{ font-variant-numeric: tabular-nums; }
+
+/* =========================================================
+   4) SOFT GATE
+========================================================= */
+.gate{
+  position: fixed; inset: 0; z-index: 600;
+  display: grid; place-items: center; padding: var(--gutter);
+  background: var(--sand);
+}
+.gate[hidden]{ display: none; }
+.gate-card{ display: grid; gap: 20px; width: min(100%, 420px); text-align: center; justify-items: center; }
+.gate-input{
+  width: 100%; padding: 10px 0; text-align: center;
+  border: 0; border-bottom: 1px solid var(--ink); border-radius: 0;
+  background: transparent; color: var(--ink); text-transform: none; letter-spacing: .02em;
+  outline: none;
+}
+.gate-wrong{ min-height: 1.4em; font-size: 22px; }
+.gate.shake .gate-card{ animation: gate-shake .45s ease; }
+@keyframes gate-shake{ 20%, 60%{ translate: -8px 0; } 40%, 80%{ translate: 8px 0; } }
+
+/* =========================================================
+   5) OUR STORY (rows in the style of the portfolio's news)
+========================================================= */
+.moment{ padding-block: clamp(24px, 3vw, 44px); align-items: start; row-gap: 12px; }
+.moment .when{ grid-column: 1 / span 3; }
+.moment .body{ grid-column: 4 / span 6; }
+.moment .body .h5{ margin-bottom: 14px; }
+.moment .body p.p5{ max-width: 44em; }
+.moment .meta{ grid-column: 10 / span 3; display: grid; gap: 4px; justify-items: start; }
+.moment .meta a{ border-bottom: 1px solid currentColor; }
+.moment .num{ display: block; margin-bottom: 8px; }
+
+/* =========================================================
+   5b) DATE MEMOS: one card per date, the next one printed in ink
+========================================================= */
+.next-date{ margin-top: 10px; }
+.memos{
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: clamp(20px, 2.4vw, 36px); align-items: start;
+}
+.memo{
+  --swatch: var(--ink);
+  border: 1px solid var(--ink-10); border-top: 6px solid var(--swatch);
+  padding: 20px clamp(18px, 2vw, 28px) 28px;
+  display: grid; gap: 22px;
+}
+.memo.upcoming{ background: var(--ink); color: var(--sand); border-color: var(--ink); border-top-color: var(--swatch); box-shadow: inset 0 6px 0 var(--sand-10); }
+.memo.upcoming .muted{ color: var(--sand-70); }
+.memo-top{ display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.memo-top .tag{ margin: 0; white-space: nowrap; }
+.memo.upcoming .memo-top .tag{ background: var(--sand); color: var(--ink); border-color: var(--sand); }
+.memo-head .h3{ line-height: .9; }
+.memo-names{ font-size: 24px; margin-top: 6px; }
+.memo-facts{ display: grid; gap: 0; margin: 0; border-top: 1px solid var(--ink-10); }
+.memo-facts > div{ display: grid; grid-template-columns: 6.5em 1fr; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--ink-10); align-items: baseline; }
+.memo-facts dd{ margin: 0; text-transform: none; letter-spacing: .02em; font-size: 15px; }
+.memo.upcoming .memo-facts, .memo.upcoming .memo-facts > div{ border-color: var(--sand-10); }
+.swatch{
+  display: inline-block; width: .9em; height: .9em; margin-right: 8px; vertical-align: -.1em;
+  border-radius: 50%; background: var(--swatch); box-shadow: 0 0 0 1px currentColor;
+}
+.memo-block > .p6{ margin-bottom: 10px; }
+.memo-agenda{ counter-reset: stop; display: grid; gap: 12px; }
+.memo-agenda > li{ counter-increment: stop; display: grid; grid-template-columns: 2.2em 1fr; }
+.memo-agenda > li::before{ content: counter(stop, decimal-leading-zero); grid-row: span 2; font: 400 var(--p6)/2.2 var(--font-body); letter-spacing: .08em; opacity: .7; }
+.memo-agenda .h6{ text-transform: none; }
+.memo-agenda ul{ margin-top: 4px; text-transform: none; letter-spacing: .02em; font-size: 14px; }
+.memo-agenda ul li::before{ content: "·  "; }
+.memo-note{ font-size: 26px; line-height: 1.15; }
+.checks.small label{ padding: 10px 0; }
+.checks.small .text{ font-size: 15px; }
+.memo.upcoming .checks, .memo.upcoming .checks li{ border-color: var(--sand-10); }
+.memo.upcoming .checks .box{ border-color: var(--sand); }
+.memo.upcoming .checks .box::after{ color: var(--ink); }
+.memo.upcoming .checks input:checked + .box{ background: var(--sand); }
+.memo.upcoming .checks input:checked ~ .text{ color: var(--sand-70); }
+
+/* =========================================================
+   6) THE REEL
+   The section is pinned while the page scroll slides the track sideways.
+   Without GSAP (or with reduced motion) it is a plain horizontal scroller.
+========================================================= */
+.reel{ position: relative; }
+.reel-pin{
+  height: 100vh; height: 100svh;
+  display: grid; grid-template-rows: auto auto 1fr auto;
+  padding-top: calc(var(--header-h) + 8px);
+  overflow: hidden;
+}
+.reel-head{ display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-block: 12px; border-bottom: 1px solid var(--ink-10); margin-inline: var(--gutter); padding-inline: 0; }
+.reel-note{ min-height: calc(2 * 1.15em + 24px); padding-block: 14px 0; }
+.reel-note .hand{
+  font-size: clamp(24px, 2.6vw, 38px); line-height: 1.15; max-width: 26em;
+  color: var(--ink);
+}
+.reel-note .hand::after{ content: "|"; margin-left: 2px; animation: caret .8s step-end infinite; }
+@keyframes caret{ 50%{ opacity: 0; } }
+
+.reel-window{ position: relative; overflow: hidden; touch-action: pan-y; }
+.reel-track{
+  position: absolute; left: 0; top: 50%;
+  display: flex; align-items: center;
+  gap: clamp(28px, 4vw, 64px);
+  padding-inline: 50vw;
+  transform: translateY(-50%);
+  will-change: transform;
+}
+.no-pin .reel-pin{ height: auto; min-height: 0; }
+.no-pin .reel-window{ overflow-x: auto; height: clamp(360px, 60vh, 560px); }
+.no-pin .reel-track{ padding-inline: var(--gutter); }
+.no-pin .crank{ display: none; }
+
+.reel-foot{
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px;
+  padding-block: 12px calc(16px + env(safe-area-inset-bottom));
+}
+
+/* chapter title cards sit between the photos */
+.chapter-card{
+  flex: none; width: clamp(150px, 16vw, 230px);
+  display: grid; gap: 10px; align-content: center;
+  border-left: 1px solid var(--ink); padding-left: 18px;
+}
+.chapter-card .h4{ line-height: .95; }
+
+/* =========================================================
+   7) POLAROIDS (shared by the reel and the opened letters)
+========================================================= */
+.polaroid{
+  --pw: clamp(160px, 19vw, 250px);
+  flex: none; width: var(--pw);
+  perspective: 900px;
+  padding: 0; border: 0; background: none; text-align: center;
+  transition: scale .5s var(--ease), opacity .5s var(--ease);
+}
+.reel .polaroid{ scale: .9; opacity: .55; }
+.reel .polaroid.near{ scale: 1; opacity: 1; }
+.pol-inner{
+  position: relative; display: block;
+  transform-style: preserve-3d;
+  transition: transform .9s cubic-bezier(.3, 1.3, .4, 1);
+  rotate: var(--rot, 0deg); translate: 0 var(--dy, 0px);
+}
+.polaroid.flipped .pol-inner{ transform: rotateY(180deg); }
+.pol-front, .pol-back{
+  display: block;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(59,30,38,.15), 0 14px 30px rgba(59,30,38,.22);
+}
+.pol-front{ background: var(--paper); padding: 7% 7% 0; }
+.pol-img{ position: relative; display: block; aspect-ratio: 1; overflow: hidden; background: #ead6d2; }
+.pol-img img{ width: 100%; height: 100%; object-fit: cover; display: block; -webkit-user-drag: none; filter: sepia(.08) saturate(1.05) contrast(1.03); }
+.pol-img.missing::before{
+  content: "📷"; position: absolute; inset: 0; display: grid; place-items: center; font-size: 28px; opacity: .5;
+}
+.pol-cap{
+  display: block; padding: 6px 4px 12px;
+  font: 700 clamp(18px, 1.6vw, 24px)/1.2 var(--font-hand); color: var(--paper-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pol-back{
+  position: absolute; inset: 0;
+  transform: rotateY(180deg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 14%;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 25px, rgba(59,30,38,.08) 25px 26px),
+    var(--paper);
+  font: 500 clamp(18px, 1.6vw, 23px)/1.15 var(--font-hand); color: var(--paper-ink);
+}
+.pol-back small{ font-size: .7em; opacity: .55; }
+
+/* the blank ones at the end of the reel */
+.polaroid.future .pol-img{
+  display: grid; place-items: center; padding: 12%;
+  background: repeating-linear-gradient(45deg, transparent 0 8px, rgba(59,30,38,.05) 8px 9px), #f6ebe7;
+  font: 700 clamp(20px, 1.8vw, 26px)/1.1 var(--font-hand); color: var(--paper-ink);
+}
+
+/* =========================================================
+   8) CRANK (from the Valentine page, redrawn in hairlines)
+========================================================= */
+.crank{
+  position: relative; justify-self: center;
+  width: 64px; height: 64px; margin-top: 26px;
+  border: 1px solid var(--ink); border-radius: 50%;
+  background: radial-gradient(circle, var(--ink) 0 3px, transparent 3.5px);
+  touch-action: none; cursor: grab;
+}
+.crank:active{ cursor: grabbing; }
+.crank-handle{
+  position: absolute; left: 50%; bottom: 50%;
+  width: 1px; height: 54px; background: var(--ink);
+  transform-origin: 50% 100%;
+}
+.crank-handle::after{
+  content: ""; position: absolute; top: -7px; left: -7px;
+  width: 14px; height: 14px; border-radius: 50%; background: var(--ink);
+}
+
+/* =========================================================
+   9) LETTERS: envelopes on the dark section
+========================================================= */
+.band-letters{ margin-bottom: clamp(32px, 4vw, 64px); }
+.envelopes{
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: clamp(20px, 2.4vw, 36px);
+}
+.envelope{
+  position: relative; display: block; width: 100%;
+  aspect-ratio: 1.55;
+  border: 1px solid var(--sand); border-radius: 4px;
+  overflow: hidden; text-align: left;
+  transition: background-color .4s, color .4s, translate .45s var(--ease);
+}
+/* the flap: two hairlines meeting in the middle */
+.envelope::before{
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 58%;
+  background:
+    linear-gradient(to top right, transparent calc(50% - .6px), var(--sand) calc(50% - .6px), var(--sand) calc(50% + .6px), transparent calc(50% + .6px)) left / 50% 100% no-repeat,
+    linear-gradient(to top left, transparent calc(50% - .6px), var(--sand) calc(50% - .6px), var(--sand) calc(50% + .6px), transparent calc(50% + .6px)) right / 50% 100% no-repeat;
+  transition: opacity .4s;
+}
+.envelope .env-meta{ position: absolute; left: 18px; right: 18px; bottom: 16px; display: grid; gap: 6px; }
+.envelope .env-num{ position: absolute; top: 14px; left: 18px; }
+.envelope .env-to{ position: absolute; top: 14px; right: 18px; }
+.envelope .seal{
+  position: absolute; left: 50%; top: 58%; translate: -50% -50%;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--sand); color: var(--ink);
+  font: 700 18px/1 var(--font-hand);
+  transition: scale .45s var(--ease);
+}
+.envelope:hover, .envelope:focus-visible{ background: var(--sand); color: var(--ink); translate: 0 -4px; }
+.envelope:hover::before, .envelope:focus-visible::before{ opacity: .35; }
+.envelope:hover .seal, .envelope:focus-visible .seal{ background: var(--ink); color: var(--sand); scale: 1.1; }
+.envelope.sealed{ border-style: dashed; cursor: default; }
+.envelope.sealed:hover{ background: transparent; color: inherit; translate: none; }
+.envelope.sealed:hover::before{ opacity: 1; }
+.envelope.sealed:hover .seal{ background: var(--sand); color: var(--ink); scale: 1; }
+.envelope.sealed .hand{ font-size: 20px; }
+
+/* =========================================================
+   10) AN OPENED LETTER (the Valentine celebration layout)
+========================================================= */
+.mosaic{
+  position: fixed; inset: 0; z-index: 320;
+  background: var(--ink);
+  overflow: hidden;
+}
+.mosaic[hidden]{ display: none; }
+.mosaic-photos{ position: absolute; inset: 0; }
+.mosaic-photos .polaroid{ position: absolute; left: 0; top: 0; --pw: var(--mw, 90px); }
+.mosaic-photos .pol-cap{ font-size: 13px; padding-bottom: 6px; }
+.paper{
+  position: absolute; left: 50%; top: 50%; translate: -50% -50%;
+  width: min(440px, calc(100vw - 48px)); max-height: calc(100svh - 48px);
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: 56px 28px 32px;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 31px, rgba(59,30,38,.09) 31px 32px),
+    var(--paper);
+  background-attachment: local;
+  color: var(--paper-ink);
+  border-radius: 3px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.4);
+}
+.paper-close{ position: absolute; top: 16px; right: 18px; color: var(--paper-ink); }
+.paper-date{ font-size: 20px; opacity: .7; text-align: right; }
+.paper-title{ margin: 4px 0 12px; color: var(--paper-ink); }
+.paper-body p{ font-size: 23px; line-height: 32px; text-indent: 1.2em; }
+.paper-body p + p{ margin-top: 0; }
+.paper-sign{ margin-top: 24px; text-align: right; font-size: 24px; line-height: 1.2; }
+.paper-sign b{ display: block; font-size: 1.4em; }
+.paper-link{ display: inline-block; margin-top: 20px; border-bottom: 1px solid currentColor; color: var(--paper-ink); }
+html.mosaic-open{ overflow: hidden; }
+html.mosaic-open .header{ visibility: hidden; }
+
+/* =========================================================
+   11) LISTS + COUNTDOWNS
+========================================================= */
+.lists{ row-gap: 56px; }
+.list{ grid-column: span 6; }
+.list-head{ display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 20px; }
+.checks{ border-top: 1px solid var(--ink-10); }
+.checks li{ border-bottom: 1px solid var(--ink-10); }
+.checks label{
+  display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start;
+  padding: 16px 0; cursor: pointer;
+}
+.checks input{ position: absolute; opacity: 0; pointer-events: none; }
+.checks .box{
+  width: 18px; height: 18px; margin-top: 3px;
+  border: 1px solid var(--ink); border-radius: 50%;
+  display: grid; place-items: center;
+  transition: background-color .3s;
+}
+.checks .box::after{ content: "♥"; font-size: 10px; line-height: 1; color: var(--sand); opacity: 0; transition: opacity .3s; }
+.checks input:checked + .box{ background: var(--ink); }
+.checks input:checked + .box::after{ opacity: 1; }
+.checks input:checked ~ .text{ color: var(--ink-70); text-decoration: line-through; text-decoration-thickness: 1px; }
+.checks input:focus-visible + .box{ outline: 1px solid var(--ink); outline-offset: 3px; }
+.checks .text{ font-size: 16px; line-height: 1.5; }
+
+.countdowns{
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  margin-top: clamp(64px, 8vw, 136px);
+}
+.countdown{ padding: 24px var(--gutter) 0 0; border-top: 1px solid var(--ink-10); }
+.countdown + .countdown{ padding-left: var(--gutter); border-left: 1px solid var(--ink-10); }
+.countdown .h2{ margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+.countdown .h2 small{ font-size: .35em; letter-spacing: 0; margin-left: .15em; }
+
+/* =========================================================
+   12) OUR SONG: a record that spins while it plays
+========================================================= */
+.player{ display: grid; justify-items: center; gap: 16px; margin-bottom: clamp(32px, 4vw, 64px); }
+.vinyl{ position: relative; width: clamp(200px, 26vw, 320px); aspect-ratio: 1; padding: 0; }
+.vinyl-disc{
+  position: absolute; inset: 0; border-radius: 50%;
+  background:
+    radial-gradient(circle, var(--sand) 0 2.5%, transparent 2.6%),
+    repeating-radial-gradient(circle, #1c0e12 0 2px, #2a141a 2px 4px);
+  box-shadow: 0 0 0 1px var(--sand-10), 0 20px 50px rgba(0,0,0,.35);
+  display: grid; place-items: center;
+  animation: spin 3.2s linear infinite; animation-play-state: paused;
+}
+.vinyl-label{
+  width: 34%; aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--sand); color: var(--ink);
+  font-size: clamp(18px, 2vw, 26px); font-weight: 700;
+}
+.vinyl-arm{
+  position: absolute; top: -4%; right: -6%;
+  width: 4px; height: 58%; background: var(--sand); border-radius: 2px;
+  transform-origin: 50% 0; rotate: -26deg;
+  transition: rotate .8s var(--ease);
+}
+.vinyl-arm::before{ content: ""; position: absolute; top: -7px; left: -6px; width: 16px; height: 16px; border-radius: 50%; background: var(--sand); }
+.vinyl-arm::after{ content: ""; position: absolute; bottom: -4px; left: -4px; width: 12px; height: 14px; border-radius: 2px; background: var(--sand); }
+.vinyl[aria-pressed="true"] .vinyl-disc{ animation-play-state: running; }
+.vinyl[aria-pressed="true"] .vinyl-arm{ rotate: 2deg; }
+@keyframes spin{ to{ rotate: 360deg; } }
+.player-hint{ font-size: 24px; color: var(--sand-70); }
+
+/* =========================================================
+   13) RESPONSIVE
+========================================================= */
+@media (max-width: 991px){
+  .moment .when{ grid-column: 1 / -1; }
+  .moment .body{ grid-column: 1 / span 8; }
+  .moment .meta{ grid-column: 9 / span 4; }
+  .list{ grid-column: 1 / -1; }
+}
+@media (max-width: 640px){
+  .moment .body, .moment .meta{ grid-column: 1 / -1; }
+  .moment .meta{ grid-template-columns: repeat(2, auto); justify-content: start; gap: 4px 20px; }
+  .header .sound .roll{ display: none; }
+  .polaroid{ --pw: min(58vw, 230px); }
+  .reel-foot{ grid-template-columns: 1fr auto 1fr; }
+  .reel-foot > p:first-child{ font-size: 10px; }
+  .countdown, .countdown + .countdown{ padding-left: 0; border-left: 0; padding-bottom: 24px; }
+  .paper{ padding: 52px 20px 28px; }
+  .paper-body p{ font-size: 21px; }
+}
+@media (max-height: 560px){
+  .polaroid{ --pw: min(34vh, 200px); }
+  .reel-note{ min-height: 0; }
+}
