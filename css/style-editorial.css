@@ -375,6 +375,34 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 .panel-body{ padding: clamp(24px, 3vw, 48px) 24px; display: flex; flex-direction: column; justify-content: flex-end; gap: 20px; }
 .panel-body .h3{ max-width: 11em; }
 .panel-body p.desc{ max-width: 36em; }
+
+/* project screenshot shown as a small browser window beside the text: dithered by
+   default, the real screenshot underneath shows through on hover (or a tap on touch) */
+.panel-body.has-shot{
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr);
+  column-gap: clamp(20px, 2.4vw, 36px); row-gap: 20px; align-items: end;
+}
+.panel-body.has-shot > .h3, .panel-body.has-shot > .desc{ grid-column: 1; }
+.panel-shot{
+  grid-column: 2; grid-row: 1 / span 2; align-self: end;
+  margin: 0; border: 1px solid var(--ink); border-radius: 6px; overflow: hidden;
+  background: var(--sand);
+  rotate: -1.2deg;
+  transition: rotate .5s var(--ease), scale .5s var(--ease);
+  cursor: pointer;
+}
+.shot-bar{ display: flex; align-items: center; gap: 5px; padding: 7px 10px; border-bottom: 1px solid var(--ink); font-size: 9px; }
+.shot-bar i{ width: 7px; height: 7px; border: 1px solid currentColor; border-radius: 50%; }
+.shot-bar span{ margin-left: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.shot-view{ position: relative; aspect-ratio: 16 / 10; }
+.shot-view img{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.shot-view .art{ background: var(--sand); transition: opacity .45s var(--ease); }
+.panel-shot.reveal .art{ opacity: 0; }
+.panel-shot.reveal{ rotate: 0deg; scale: 1.02; }
+@media (hover: hover){
+  .panel-shot:hover .art{ opacity: 0; }
+  .panel-shot:hover{ rotate: 0deg; scale: 1.02; }
+}
 .panel-feats{ display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--ink-10); }
 .panel-feats li{ padding: 14px 24px; border-bottom: 1px solid var(--ink-10); }
 .panel-feats li:nth-child(odd){ border-right: 1px solid var(--ink-10); }
@@ -455,6 +483,8 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .skill, .skill:nth-child(even){ padding-left: 0; border-left: 0; min-height: 0; padding-bottom: 28px; }
   /* one column: let the ink fill run edge to edge so the text isn't flush against it */
   .panel-feats{ grid-template-columns: 1fr; }
+  .panel-body.has-shot{ grid-template-columns: 1fr; }
+  .panel-shot{ grid-column: 1; grid-row: auto; }
   .header .style-switch{ display: none; }
   .menu .style-switch{ display: flex; }
   .menu-role{ display: none; }

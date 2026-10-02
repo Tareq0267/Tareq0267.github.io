@@ -6,6 +6,16 @@
   }));
 
   /* =========================================================
+     PROJECT SCREENSHOTS: a tap shows the real screenshot (hover does it on desktop)
+  ========================================================= */
+  document.querySelectorAll('.panel-shot').forEach(fig => {
+    fig.addEventListener('click', () => {
+      if (matchMedia('(hover: hover)').matches) return;
+      fig.classList.toggle('reveal');
+    });
+  });
+
+  /* =========================================================
      PROJECT TABS
   ========================================================= */
   const tabs = [...document.querySelectorAll('[role="tab"]')];
