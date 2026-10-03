@@ -76,6 +76,61 @@
 .moment .num{ display: block; margin-bottom: 8px; }
 
 /* =========================================================
+   5a) HER FILM: the sweetest thing anyone has ever made for me
+========================================================= */
+.film .section-head .h2{ max-width: 13em; margin-inline: auto; }
+.screen{ max-width: 1100px; margin: 0 auto; }
+.screen-meta{
+  display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--sand-10); margin-bottom: 18px;
+}
+.screen-frame{
+  position: relative; aspect-ratio: 848 / 478;
+  border: 1px solid var(--sand); border-radius: 6px; overflow: hidden;
+  background: #120a0d;
+  box-shadow: 0 0 0 10px var(--ink), 0 0 0 11px var(--sand-10), 0 40px 120px rgba(0,0,0,.45);
+}
+.screen-video{ position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: contain; background: #120a0d; }
+.screen-play{
+  position: absolute; inset: 0; z-index: 1;
+  display: grid; place-content: center; justify-items: center; gap: 14px;
+  background: linear-gradient(to top, rgba(18,10,13,.82), rgba(18,10,13,.25));
+  color: var(--sand); text-align: center;
+  transition: background-color .4s;
+}
+.screen-play[hidden]{ display: none; }
+.screen-play .hand{ font-size: 24px; color: var(--sand-70); }
+.screen-play-ring{
+  width: clamp(72px, 8vw, 104px); aspect-ratio: 1; border-radius: 50%;
+  border: 1px solid var(--sand); display: grid; place-items: center;
+  transition: scale .5s var(--ease), background-color .4s;
+  animation: film-pulse 2.4s ease-in-out infinite;
+}
+.screen-play-tri{ width: 0; height: 0; margin-left: 6px; border-style: solid; border-width: 13px 0 13px 22px; border-color: transparent transparent transparent var(--sand); transition: border-color .4s; }
+.screen-play:hover .screen-play-ring, .screen-play:focus-visible .screen-play-ring{ scale: 1.08; background: var(--sand); }
+.screen-play:hover .screen-play-tri, .screen-play:focus-visible .screen-play-tri{ border-left-color: var(--ink); }
+@keyframes film-pulse{ 0%, 100%{ box-shadow: 0 0 0 0 var(--sand-10); } 50%{ box-shadow: 0 0 0 18px transparent; } }
+.screen figcaption{ margin-top: 18px; }
+
+.film-quote{ max-width: 30em; margin: clamp(72px, 9vw, 150px) auto 0; text-align: center; }
+.film-quote .h4{ text-transform: none; line-height: 1.08; }
+.film-quote footer{ margin-top: 22px; font-size: clamp(24px, 2.4vw, 32px); color: var(--sand-70); }
+.film-tribute{
+  max-width: 34em; margin: clamp(64px, 8vw, 120px) auto 0;
+  padding-top: 40px; border-top: 1px solid var(--sand-10);
+}
+.film-tribute-body p{ font-size: clamp(23px, 2vw, 28px); line-height: 1.35; }
+.film-tribute-body p + p{ margin-top: 14px; }
+.film-sign{ margin-top: 28px; text-align: right; font-size: 24px; color: var(--sand-70); }
+.film-sign b{ display: block; font-size: 1.5em; color: var(--sand); }
+@media (max-width: 640px){
+  .screen-meta{ grid-template-columns: 1fr 1fr; }
+  .screen-meta > .center{ display: none; }
+  .screen-frame{ box-shadow: 0 0 0 6px var(--ink), 0 0 0 7px var(--sand-10), 0 24px 60px rgba(0,0,0,.4); }
+  .screen-play .h5{ font-size: 22px; }
+}
+
+/* =========================================================
    5b) DATE MEMOS: one card per date, the next one printed in ink
 ========================================================= */
 .next-date{ margin-top: 10px; }
@@ -160,11 +215,39 @@
   padding-block: 12px calc(16px + env(safe-area-inset-bottom));
 }
 
+/* the clothesline: an SVG string behind everything, every card hanging from a pin */
+.reel-track{ align-items: flex-start; padding-top: 36px; }
+.reel-line{ position: absolute; left: 0; top: 0; z-index: 0; overflow: visible; pointer-events: none; }
+.reel-line path{ fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-linecap: round; opacity: .75; }
+.reel .polaroid, .reel .chapter-card{ position: relative; z-index: 1; }
+/* hung from the top: the drop moves the whole card (pin included), the tilt swings the photo from the pin */
+.reel .polaroid{ translate: 0 var(--dy, 0px); transform-origin: 50% 0; }
+.reel .pol-inner{ translate: none; transform-origin: 50% 0; }
+.pin{
+  position: absolute; left: 50%; top: -20px; z-index: 3;
+  width: 11px; height: 32px; margin-left: -5.5px;
+  border-radius: 3px 3px 2px 2px;
+  background: linear-gradient(90deg, #a5774d, #dcb184 42%, #c99a69 62%, #976a43);
+  box-shadow: 0 2px 3px rgba(59,30,38,.35);
+  rotate: var(--pin-tilt, 0deg);
+  pointer-events: none;
+}
+.pin::before{   /* the split between the two wooden halves */
+  content: ""; position: absolute; left: 50%; top: 2px; bottom: 3px; width: 1px; margin-left: -.5px;
+  background: rgba(72, 44, 26, .45);
+}
+.pin::after{    /* the little metal spring */
+  content: ""; position: absolute; left: -2px; right: -2px; top: 10px; height: 5px; border-radius: 2px;
+  background: linear-gradient(#f1ede8, #a19b94);
+  box-shadow: 0 1px 1px rgba(0,0,0,.25);
+}
+.chapter-card .pin{ left: 0; margin-left: -5.5px; }
+
 /* chapter title cards sit between the photos */
 .chapter-card{
   flex: none; width: clamp(150px, 16vw, 230px);
   display: grid; gap: 10px; align-content: center;
-  border-left: 1px solid var(--ink); padding-left: 18px;
+  border-left: 1px solid var(--ink); padding-left: 18px; padding-top: 14px;
 }
 .chapter-card .h4{ line-height: .95; }
 
@@ -215,6 +298,24 @@
   font: 500 clamp(18px, 1.6vw, 23px)/1.15 var(--font-hand); color: var(--paper-ink);
 }
 .pol-back small{ font-size: .7em; opacity: .55; }
+
+/* favourites stand a little taller in the reel */
+.polaroid.favourite{ --pw: clamp(200px, 24vw, 310px); }
+.reel .polaroid.favourite .pol-front{ box-shadow: 0 0 0 2px var(--ink), 0 14px 30px rgba(59,30,38,.25); }
+
+/* little pinned photos: beside a story moment, along the bottom of a date memo */
+.mini-pol{
+  display: inline-block; width: 92px; padding: 5px 5px 16px;
+  background: var(--paper); border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(59,30,38,.15), 0 8px 18px rgba(59,30,38,.2);
+  rotate: var(--tilt, -3deg);
+  transition: rotate .4s var(--ease), scale .4s var(--ease);
+}
+.mini-pol img{ display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.mini-pol:hover{ rotate: 0deg; scale: 1.06; }
+.moment .meta .mini-pol{ margin-bottom: 14px; }
+.memo-photos{ display: flex; gap: 14px; padding-top: 6px; }
+.memo-photos .mini-pol{ width: calc((100% - 28px) / 3); max-width: 120px; }
 
 /* the blank ones at the end of the reel */
 .polaroid.future .pol-img{
@@ -445,3 +546,18 @@ html.mosaic-open .header{ visibility: hidden; }
 /* holding a moon in the hero */
 html.moon-dragging, html.moon-dragging *{ -webkit-user-select: none; user-select: none; }
 html.moon-dragging .cursor-ring{ transform: scale(.7); }
+
+/* =========================================================
+   14) PHONES: bigger tap areas and room for the letter's photos
+========================================================= */
+@media (pointer: coarse){
+  /* the small text links get a taller invisible tap area; the negative margin keeps the layout as it was */
+  .moment .meta a, .hero-bottom a, .footer a, .header .brand, .paper-link{
+    display: inline-block; padding-block: 12px; margin-block: -12px;
+  }
+  .paper-close{ top: 2px; right: 2px; padding: 14px 16px; }
+}
+@media (max-width: 640px){
+  /* a shorter sheet of paper leaves a strip above and below for the scattered photos */
+  .paper{ max-height: calc(100svh - 190px); }
+}

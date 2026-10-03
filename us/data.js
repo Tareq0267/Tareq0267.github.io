@@ -19,20 +19,43 @@ window.US = {
 
   prologue: 'Somewhere along the way you became my favourite part of every day.',
 
+  // The film Alvy made for our first date. The heart of this site: it gets its
+  // own section, right after the prologue. `tribute` is Adam's words under it.
+  film: {
+    src: 'video/our-first-date.mp4', poster: 'video/our-first-date.jpg',
+    title: 'Our First Date', by: 'Alvy', date: '26 September 2026', edition: 'Brown Formal Edition', length: '1:18',
+    quote: 'I’m looking forward to the day when I don’t have to introduce you as someone I’m getting to know, but as my partner.',
+    after: 'and the very next day, I asked you to be exactly that ♡',
+    // TODO Adam: a draft in your voice. Rewrite it in your own words.
+    tribute: [
+      'You made this for our first date. A whole film, from you, about us.',
+      'Nobody has ever made anything like this for me. Every slide, every word, every little flower: you put your whole heart into it.',
+      'It is genuinely the sweetest thing anyone has ever made for me, and it made me love you so, so, so much.',
+    ],
+    sign: 'thank you, sayang. forever grateful,',
+  },
+
   // Our story, oldest first. `when` is free text so a fuzzy date is fine.
+  // `photo` (optional) shows as a small polaroid beside the moment.
   story: [
     { when: 'The beginning', title: 'Your very first thread post', place: 'Threads',
       text: 'I stumbled onto it, and ever since then all I have wanted is to be yours.' },
-    { when: 'Somewhere in between', title: 'The Ottoman Empire debate', place: 'Our longest argument',
-      text: 'A whole fight over the right title for the Ottoman Empire. Only you could turn a history debate into one of my favourite memories.' },
     { when: '21 September 2026', title: 'The first I love you', place: 'You said it first',
       text: 'You said it first. I have been saying it back ever since.' },
-    { when: '26 September 2026', title: 'Our first date', place: 'Four Seasons Steamboat, Tanjung Malim', link: '#dates', linkText: 'The memo',
-      text: 'Your first ever date, and the first of thousands. Steamboat, a gift exchange and a very careful unboxing, all in brown.' },
+    { when: '26 September 2026', title: 'Our first date', place: 'Four Seasons, Tanjung Malim',
+      photo: 'photos/2026-09-26-first-date/31.jpg',
+      links: [{ href: '#film', text: 'Her film' }, { href: '#dates', text: 'The memo' }],
+      text: 'Your first date ever, and the first of thousands. Malatang at Four Seasons, a Grab to Guardian, flowers from me, and then Mama and Baba sent you home: the first time you met them.' },
     { when: '27 September 2026', title: 'The letter', place: 'be_mine.html', tag: 'You said yes', link: '../be_mine.html', linkText: 'Open it',
       text: 'An envelope, a capybara, and one very important question. You said yes.' },
-    { when: '29 September 2026', title: 'The surprise date', place: 'Safa Restaurant', link: '#dates', linkText: 'The memo',
-      text: 'I turned up after your work with Mam and Baba. So proud I akhirnya get to belanja you makan heehheehe.' },
+    { when: '29 September 2026', title: 'The surprise dinner', place: 'Safa Restaurant', link: '#dates', linkText: 'The memo',
+      photo: 'photos/2026-09-29-second-date/14.jpg',
+      text: 'A surprise dinner with Mama and Baba to celebrate my gaji naik. So proud I akhirnya got to belanja you makan heehheehe. They gave you two kuali to masak with, and we held hands for the first time.' },
+    { when: '2 October 2026', title: 'My kawan baik di Tanjung Malim', place: 'According to Mama',
+      text: 'Mama called you my "kawan baik di Tanjung Malim" heehee. A very, very good friend indeed.' },
+    { when: '3 October 2026', title: 'Nenek called you cute', place: 'Nenek approved ♡',
+      photo: 'photos/2026-10/01.jpg',
+      text: 'Nenek saw your photo from class and said you are comel. She is right, of course. Now it is official.' },
     { when: '4 October 2026', title: 'Our third date', place: 'KL Sentral to Surian, by MRT', link: '#dates', linkText: 'The memo',
       text: 'All in black, formal. Brunch, photos, a movie and bowling.' },
   ],
@@ -40,14 +63,15 @@ window.US = {
   // Date memos, oldest first. Every field is optional. `theme.color` is the swatch.
   // agenda: a list of stops; a stop can have `items` under it.
   // checklist ticks are remembered on the device; `done: true` ticks one by default.
+  // photos: a few polaroids pinned to the bottom of the memo.
   dates: [
     {
       title: 'First date', date: '2026-09-26', emoji: '🤎',
       theme: { name: 'Brown, formal', color: '#6b4632' },
-      place: 'Four Seasons Steamboat, Tanjung Malim',
+      place: 'Four Seasons, Tanjung Malim',
       agendaLabel: 'Aktiviti',
       agenda: [
-        { text: 'Makan' },
+        { text: 'Makan malatang' },
         { text: 'Gift exchange 🎁' },
         { text: 'Gift unboxing 🎀' },
       ],
@@ -57,13 +81,16 @@ window.US = {
         { text: 'Gift masing-masing', done: true },
         { text: 'DIY bag', done: true },
       ],
+      note: 'and then: a Grab to Guardian, flowers for you, and Mama and Baba sending you home. the first time you met them ♡',
+      photos: ['photos/2026-09-26-first-date/26.jpg', 'photos/2026-09-26-first-date/33.jpg', 'photos/2026-09-26-first-date/22.jpg'],
     },
     {
       title: 'Second date', date: '2026-09-29', emoji: '🤍',
       theme: { name: 'Surprise', color: '#f4ece6' },
       place: 'Safa Restaurant',
-      type: 'Surprise date, after your work',
-      note: 'I came with Mam and Baba. So proud I akhirnya get to belanja you makan heehheehe.',
+      type: 'Surprise dinner for my gaji naik',
+      note: 'I came with Mama and Baba. So proud I akhirnya got to belanja you makan heehheehe. They gave you two kuali to masak with, and we held hands for the first time ♡',
+      photos: ['photos/2026-09-29-second-date/10.jpg', 'photos/2026-09-29-second-date/14.jpg', 'photos/2026-09-29-second-date/21.jpg'],
     },
     {
       title: 'Third date', date: '2026-10-04', emoji: '🖤',
@@ -88,24 +115,69 @@ window.US = {
   ],
 
   // The Reel: chapters of polaroids, oldest first. Each photo: src, caption (under
-  // the photo), note (on the back, tap to flip). The note above the reel types
-  // itself out while you move through that chapter.
+  // the photo), note (on the back, tap to flip), favourite: true (shown bigger).
+  // The note above the reel types itself out while you move through that chapter.
   chapters: [
     {
-      title: 'September 2026',
-      note: 'the month everything started: the first I love you, the first date, and your yes.',
+      title: 'Before the dates',
+      note: 'before the dates: the very first picture you ever sent me, and you, being proud-worthy as always.',
       photos: [
-        { src: '../be_mine/1.jpeg', caption: 'us ♡',              note: 'the day i’ll remember forever' },
-        { src: '../be_mine/2.jpeg', caption: 'my favourite',      note: 'the day you nicknamed me "suami idaman" AHAHAHAH' },
-        { src: '../be_mine/3.jpeg', caption: 'that smile tho',    note: 'this one lives rent-free in my head' },
-        { src: '../be_mine/4.jpeg', caption: 'more of these pls', note: 'let’s make a hundred more of these' },
-        { src: '../be_mine/5.jpeg', caption: 'us again ♡',        note: 'my favourite seat is always the one next to you' },
-        { src: '../be_mine/6.jpeg', caption: 'pretty, as always', note: 'how is one person this pretty?' },
-        { src: '../be_mine/7.jpeg', caption: 'so proud of you',   note: 'look at you up there, I’ll always be proud of you' },
-        { src: '../be_mine/8.jpeg', caption: 'my cutie ♡',        note: 'this face lives rent-free in my head' },
+        { src: 'photos/before/39.jpg', caption: 'the first pic of me',  note: 'the very first picture of me you ever sent me hehe' },
+        { src: '../be_mine/2.jpeg',    caption: 'my favourite',         note: 'the day you nicknamed me "suami idaman" AHAHAHAH' },
+        { src: '../be_mine/3.jpeg',    caption: 'that smile tho',       note: 'this one lives rent-free in my head' },
+        { src: '../be_mine/8.jpeg',    caption: 'my cutie ♡',           note: 'my favourite face in the whole world' },
+        { src: '../be_mine/7.jpeg',    caption: 'so proud of you',      note: 'look at you up there, i’ll always be proud of you' },
+        { src: 'photos/before/02.jpg', caption: 'penat, still cute',    note: 'you look so penat here, and still the prettiest one in the photo' },
+        { src: 'photos/before/03.jpg', caption: 'me at the symposium', note: 'me at the symposium hehehe' },
+        { src: 'photos/before/23.jpg', caption: 'segak, apparently',    note: 'your favourite photo of me, the one you said i look segak in eheheh' },
       ],
     },
-    // Next: { title: 'October 2026', note: '...', photos: [ ... ] },
+    {
+      title: 'First date · 26 September',
+      note: 'our first date: malatang at Four Seasons, a Grab to Guardian, my flowers, and meeting Mama and Baba for the first time.',
+      photos: [
+        { src: 'photos/2026-09-26-first-date/40.jpg', caption: 'otw ♡',               note: 'otw to our first date ehhehhehe' },
+        { src: 'photos/2026-09-26-first-date/26.jpg', caption: 'before the date',     note: 'taken before our date, and you look stunning' },
+        { src: 'photos/2026-09-26-first-date/32.jpg', caption: 'malatang at 4 seasons', note: 'our first date, over malatang at Four Seasons' },
+        { src: 'photos/2026-09-26-first-date/33.jpg', caption: 'feat. capybara',      note: 'malatang at Four Seasons, featuring the capybara in my bag' },
+        { src: 'photos/2026-09-26-first-date/34.jpg', caption: 'you & malatang',      note: 'malatang at Four Seasons' },
+        { src: 'photos/2026-09-26-first-date/35.jpg', caption: 'gorgeous',            note: 'you look gorgeous here. and sayang, you deleted the candid one before this 😤' },
+        { src: 'photos/2026-09-26-first-date/38.jpg', caption: 'alololololo',         note: 'alololololo omelnya dia, ayunya dia ♡' },
+        { src: 'photos/2026-09-26-first-date/29.jpg', caption: 'grab to guardian',    note: 'in the Grab to Guardian' },
+        { src: 'photos/2026-09-26-first-date/30.jpg', caption: 'still in the grab',   note: 'in the Grab to Guardian' },
+        { src: 'photos/2026-09-26-first-date/31.jpg', caption: 'forever',             note: 'in the Grab to Guardian. you were so stunningly gorgeous, i wanted to be with you forever the moment i took this', favourite: true },
+        { src: 'photos/2026-09-26-first-date/27.jpg', caption: 'in Baba’s car',       note: 'in Baba’s car, on the way to send you home. the first time you met Mama and Baba' },
+        { src: 'photos/2026-09-26-first-date/22.jpg', caption: 'my flowers ♡',        note: 'right after our first date, with the flowers i gave you' },
+        { src: 'photos/2026-09-26-first-date/25.jpg', caption: 'you + flowers',       note: 'right after our first date, with the flowers i gave you' },
+        { src: 'photos/2026-09-26-first-date/28.jpg', caption: 'posted ♡',            note: 'you posted these right after our first date, with my flowers' },
+      ],
+    },
+    {
+      title: 'Second date · 29 September',
+      note: 'a surprise dinner for my gaji naik: Mama and Baba, two kuali for you, and the first time we held hands.',
+      photos: [
+        { src: 'photos/2026-09-29-second-date/04.jpg', caption: 'waiting',              note: 'so gorgeous here, waiting for Mama and Baba' },
+        { src: 'photos/2026-09-29-second-date/05.jpg', caption: 'still waiting',        note: 'so gorgeous here, waiting for Mama and Baba' },
+        { src: 'photos/2026-09-29-second-date/10.jpg', caption: 'the love of my life',  note: 'the most gorgeous woman to have ever existed. literally the love of my life', favourite: true },
+        { src: 'photos/2026-09-29-second-date/08.jpg', caption: 'by Mama',              note: 'Mama took this photo of us' },
+        { src: 'photos/2026-09-29-second-date/11.jpg', caption: 'by Mama, again',       note: 'Mama took this one too' },
+        { src: 'photos/2026-09-29-second-date/17.jpg', caption: 'and again ♡',          note: 'Mama could not stop taking photos of us' },
+        { src: 'photos/2026-09-29-second-date/14.jpg', caption: 'my whole family',      note: 'my whole family and the love of my life, at one table' },
+        { src: 'photos/2026-09-29-second-date/07.jpg', caption: 'with me hehe',         note: 'hehehe, with me' },
+        { src: 'photos/2026-09-29-second-date/06.jpg', caption: 'after the date',       note: 'gorgeous, after the date' },
+        { src: 'photos/2026-09-29-second-date/16.jpg', caption: 'outside your house',   note: 'right outside your house, sebelum kena jerit HAHAHAHAHA' },
+        { src: 'photos/2026-09-29-second-date/20.jpg', caption: 'cute',                 note: 'outside your house sebelum kena jerit, and you look so cute' },
+        { src: 'photos/2026-09-29-second-date/21.jpg', caption: 'omel',                 note: 'omel, right outside your house, sebelum kena jerit HAHAHAHAHA' },
+      ],
+    },
+    {
+      title: 'October 2026',
+      note: 'after the dates: you at class, cantik meletops, in the photo that made Nenek say comel.',
+      photos: [
+        { src: 'photos/2026-10/01.jpg', caption: 'cantik meletops', note: 'you at class, gorgeous. this is the photo Nenek saw when she said you are comel ♡' },
+      ],
+    },
+    // Next: { title: 'Third date · 4 October', note: '...', photos: [ ... ] },
   ],
   // Blank polaroids at the end of the reel. New photos push them further along.
   yetToBeMade: 5,
@@ -140,11 +212,14 @@ window.US = {
 
   // Things to do together. A starter list: edit freely.
   bucket: [
-    { text: 'settle the Ottoman Empire title debate once and for all' },
-    { text: 'see the Hagia Sophia together' },
     { text: 'a hundred more photos like the ones in the reel' },
     { text: 'malatang, again and again' },
     { text: 'our first trip, just the two of us' },
+    { text: 'build our own zoo together, with real live capybaras 🍊' },
+    { text: 'open a sanctuary for stray dogs' },
+    { text: 'let you do my makeup, full glam, no complaints 💄' },
+    { text: 'the great waxing competition after our wedding: cabut bulu, whoever says sakit first kalah hahahaha' },
+    { text: 'twins. she wants twins, so we are getting twins 👶👶' },
   ],
 
   // Countdowns on top of the automatic ones (next monthiversary, next anniversary,
@@ -154,14 +229,17 @@ window.US = {
     // { label: 'Next date', date: '2026-10-10' },
   ],
 
-  // Songs that remind me of us. The first one also plays while the reel moves.
+  // Songs that remind me of us, played from the record. The one marked `reel: true`
+  // is the crank's music box: it plays while the reel moves.
   // src: an mp3 in us/songs/. A song with no file but a `link` (Spotify, YouTube)
   // opens the link instead. `note` is the handwritten line beside it.
   songs: [
-    { title: 'Semua Aku Dirayakan', artist: 'Nadin Amizah', src: 'songs/semua-aku-dirayakan.mp3', note: 'our song ♡' },
+    { title: 'Stuck with U', artist: 'Ariana Grande & Justin Bieber', src: 'songs/stuck-with-u.mp3', note: 'our song ♡' },
+    { title: 'Kota Ini Tak Sama Tanpamu', artist: 'Nadhif Basalamah', src: 'songs/kota-ini-tak-sama-tanpamu.mp3', note: '' },
+    { title: 'Semua Aku Dirayakan', artist: 'Nadin Amizah', src: 'songs/semua-aku-dirayakan.mp3', note: '', reel: true },
     // { title: '', artist: '', src: 'songs/....mp3', note: '' },
     // { title: '', artist: '', link: 'https://open.spotify.com/track/...', note: '' },
   ],
   // the record crackle layered under whatever is playing
-  crackle: '../vinyl.mp3',
+  crackle: 'songs/vinyl.mp3',
 };

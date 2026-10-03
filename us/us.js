@@ -248,14 +248,57 @@
     body.append(el('h4', 'h5', m.title), el('p', 'p5 muted', m.text));
     const meta = el('div', 'meta');
     if (m.place) meta.append(el('span', 'p6 muted', m.place));
-    if (m.link) {
-      const a = el('a', 'p6', `${m.linkText || 'Open it'} ${m.link.startsWith('#') ? '↓' : '↗'}`);
-      a.href = m.link;
+    (m.links || (m.link ? [{ href: m.link, text: m.linkText }] : [])).forEach(l => {
+      const a = el('a', 'p6', `${l.text || 'Open it'} ${l.href.startsWith('#') ? '↓' : '↗'}`);
+      a.href = l.href;
       meta.append(a);
-    }
+    });
+    if (m.photo) meta.prepend(miniPhoto(m.photo, i));
     row.append(when, body, meta);
     storyBox.append(row);
   });
+
+  // a little pinned photo: no flipping, just the picture in a white frame
+  function miniPhoto(src, i) {
+    const f = el('span', 'mini-pol');
+    f.style.setProperty('--tilt', ((i % 2 ? 1 : -1) * (2 + (i * 7) % 4)) + 'deg');
+    const img = new Image();
+    img.src = src; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+    img.onerror = () => f.remove();
+    f.append(img);
+    return f;
+  }
+
+  /* =========================================================
+     HER FILM
+  ========================================================= */
+  const film = D.film;
+  if (film) {
+    $$('[data-film-by]').forEach(e => e.textContent = film.by);
+    $('[data-film-date]').textContent = film.date;
+    $('[data-film-title]').textContent = film.title;
+    $('[data-film-edition]').textContent = film.edition || '';
+    $('[data-film-length]').textContent = film.length || '';
+    $('[data-film-quote]').textContent = `“${film.quote}”`;
+    $('[data-film-after]').textContent = film.after || '';
+    $('[data-film-tribute]').replaceChildren(...(film.tribute || []).map(t => el('p', '', t)));
+    $('[data-film-sign]').textContent = film.sign || '';
+    const video = $('[data-film-video]'), play = $('[data-film-play]');
+    video.src = film.src;
+    video.poster = film.poster;
+    play.addEventListener('click', () => {
+      video.controls = true;
+      play.hidden = true;
+      video.play().catch(() => {});
+    });
+    // the site's music steps aside while her film plays
+    video.addEventListener('play', () => sound.hush(true));
+    video.addEventListener('pause', () => sound.hush(false));
+    video.addEventListener('ended', () => sound.hush(false));
+  } else {
+    const sec = $('#film');
+    sec.previousElementSibling.remove(); sec.nextElementSibling.remove(); sec.remove();
+  }
 
   /* =========================================================
      DATE MEMOS
@@ -329,6 +372,11 @@
       wrap.append(ul);
       card.append(wrap);
     }
+    if (m.photos && m.photos.length) {
+      const strip = el('div', 'memo-photos');
+      m.photos.forEach((src, j) => strip.append(miniPhoto(src, i + j)));
+      card.append(strip);
+    }
     memoBox.append(card);
   });
 
@@ -357,9 +405,17 @@
   /* =========================================================
      POLAROIDS (reel + mosaic)
   ========================================================= */
+  // a little wooden clothespin, clipped on slightly crooked
+  function clothespin(r) {
+    const pin = el('span', 'pin');
+    pin.setAttribute('aria-hidden', 'true');
+    pin.style.setProperty('--pin-tilt', ((r() * 2 - 1) * 7).toFixed(1) + 'deg');
+    return pin;
+  }
+
   function polaroid(photo, seed, opts = {}) {
     const r = rng(seed * 7919 + 13);
-    const b = el('button', 'polaroid');
+    const b = el('button', 'polaroid' + (photo && photo.favourite ? ' favourite' : ''));
     b.type = 'button';
     b.style.setProperty('--rot', ((r() * 2 - 1) * (opts.tilt || 6)).toFixed(1) + 'deg');
     b.style.setProperty('--dy', ((r() * 2 - 1) * (opts.drop || 18)).toFixed(1) + 'px');
@@ -390,6 +446,7 @@
       b.disabled = true;
     }
     b.append(inner);
+    if (opts.pin) b.append(clothespin(r));
     return b;
   }
 
@@ -401,18 +458,19 @@
   const allPhotos = [];
   D.chapters.forEach((ch, ci) => {
     const card = el('div', 'chapter-card');
+    card.append(clothespin(rng(ci + 77)));
     card.append(el('span', 'p6 muted', `Chapter ${pad(ci + 1)}`), el('h4', 'h4', ch.title), el('span', 'p6 muted', `${ch.photos.length} photos`));
     track.append(card);
     items.push({ el: card, chapter: ci });
     ch.photos.forEach(p => {
-      const pol = polaroid(p, allPhotos.length, { eager: allPhotos.length < 4 });
+      const pol = polaroid(p, allPhotos.length, { eager: allPhotos.length < 4, pin: true, tilt: 4, drop: 9 });
       track.append(pol);
       items.push({ el: pol, chapter: ci, photo: true, n: allPhotos.length + 1 });
       allPhotos.push(p);
     });
   });
   for (let i = 0; i < (D.yetToBeMade || 0); i++) {
-    const pol = polaroid(null, 1000 + i);
+    const pol = polaroid(null, 1000 + i, { pin: true, tilt: 4, drop: 9 });
     track.append(pol);
     items.push({ el: pol, chapter: -1 });
   }
@@ -425,7 +483,40 @@
   let reelX = 0, reelProgress = 0, reelVelocity = 0, lastReelX = null, centres = [];
   let pinST = null;
 
+  const SVG = 'http://www.w3.org/2000/svg';
+  const line = document.createElementNS(SVG, 'svg'), linePath = document.createElementNS(SVG, 'path');
+  line.setAttribute('class', 'reel-line');
+  line.setAttribute('aria-hidden', 'true');
+  line.append(linePath);
+  track.prepend(line);
+
+  // where each pin bites the string: the photo's top (shifted by its little drop),
+  // a chapter card's top-left corner
+  function drawLine() {
+    const W = track.scrollWidth, H = track.offsetHeight;
+    if (!W || !items.length) return;
+    const top = parseFloat(getComputedStyle(track).paddingTop) || 0;
+    const pts = items.map(it => {
+      const card = it.el.classList.contains('chapter-card');
+      const dy = parseFloat(it.el.style.getPropertyValue('--dy')) || 0;
+      return [it.el.offsetLeft + (card ? 0 : it.el.offsetWidth / 2), top + dy - 6];
+    });
+    pts.unshift([0, pts[0][1] - 10]);
+    pts.push([W, pts[pts.length - 1][1] - 10]);
+    let d = `M ${pts[0][0]} ${pts[0][1]}`;
+    for (let i = 1; i < pts.length; i++) {
+      const [ax, ay] = pts[i - 1], [bx, by] = pts[i];
+      const sag = Math.min(46, Math.abs(bx - ax) * .09);   // slack: wider gaps droop more
+      d += ` Q ${((ax + bx) / 2).toFixed(1)} ${(Math.max(ay, by) + sag).toFixed(1)} ${bx.toFixed(1)} ${by.toFixed(1)}`;
+    }
+    line.setAttribute('width', W);
+    line.setAttribute('height', H);
+    line.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    linePath.setAttribute('d', d);
+  }
+
   function measure() {
+    drawLine();
     centres = items.map(it => it.el.offsetLeft + it.el.offsetWidth / 2);
   }
 
@@ -497,14 +588,18 @@
     let dragging = false, lastAngle = 0;
     const centre = () => { const r = crank.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
     const angle = e => { const [x, y] = centre(); return Math.atan2(e.clientY - y, e.clientX - x); };
-    function scrollReelBy(dy) {
+    // fingers jump straight there (the reel's own scrub smooths it); mouse and keys glide
+    function scrollReelBy(dy, immediate) {
       if (!pinST) return;
       const lenis = window.__lenis;
-      const from = lenis ? lenis.targetScroll : window.scrollY;
+      const from = lenis && !immediate ? lenis.targetScroll : window.scrollY;
       const to = clamp(from + dy, pinST.start, pinST.end);
-      if (lenis) lenis.scrollTo(to);
+      if (lenis) lenis.scrollTo(to, { immediate: !!immediate });
       else window.scrollTo(0, to);
     }
+    // keep the crank's touches away from the smooth scroller: it reads a moving finger
+    // as someone scrolling by hand and cancels the crank's scroll on every move
+    ['touchstart', 'touchmove', 'touchend'].forEach(t => crank.addEventListener(t, e => e.stopPropagation(), { passive: true }));
     crank.addEventListener('pointerdown', e => {
       dragging = true;
       crank.setPointerCapture(e.pointerId);
@@ -518,7 +613,7 @@
       if (d > Math.PI) d -= TAU;
       if (d < -Math.PI) d += TAU;
       lastAngle = a;
-      scrollReelBy(d * 140);
+      scrollReelBy(d * 140, e.pointerType === 'touch');
     });
     const end = () => { dragging = false; };
     crank.addEventListener('pointerup', end);
@@ -532,16 +627,45 @@
   }
 
   /* =========================================================
-     SOUND: the current song (and the vinyl crackle) play while the reel
-     moves, or straight through from the record in "Songs that remind me of us"
+     SOUND: two players under one vinyl crackle. The record plays the songs in
+     "Songs that remind me of us"; the reel's music box plays the song marked
+     `reel: true` while the crank (or the scroll) turns it, keeping its place.
   ========================================================= */
   const sound = (() => {
     const btn = $('#soundBtn'), vinylBtn = $('#vinylBtn'), hint = $('[data-player-hint]');
     const tracks = D.songs || [];
-    const song = new Audio(), crackle = new Audio(D.crackle);
-    crackle.loop = true;
+    const song = new Audio(), crackle = new Audio(D.crackle), box = new Audio();
+    crackle.loop = box.loop = true;
     song.preload = 'auto';
-    let enabled = false, steady = false, vol = 0, unlocked = false, cur = -1;
+    const boxTrack = tracks.find(t => t.reel && t.src) || tracks.find(t => t.src);
+    if (boxTrack) box.src = boxTrack.src;
+    let enabled = false, steady = false, vol = 0, bvol = 0, unlocked = false, cur = -1, hushed = false, boxOk = !!boxTrack;
+    box.addEventListener('error', () => { boxOk = false; });
+    // Download the music box song in full while the loading screen is up, so the crank
+    // plays the moment it turns. Phones (iPhones especially) won't preload audio before a
+    // tap, so it is fetched as a file and handed to the player. The loading screen waits
+    // for it (see window.preloadGate in ../js/style-editorial.js) and its counter follows
+    // the download. Opened straight from disk, fetch isn't allowed, so it just plays as is.
+    window.preloadGate = (async () => {
+      if (!boxTrack || location.protocol === 'file:') return;
+      try {
+        const res = await fetch(boxTrack.src);
+        if (!res.ok || !res.body) throw new Error(res.status);
+        const total = +res.headers.get('content-length') || 0;
+        if (total) window.preloadProgress = 0;
+        const reader = res.body.getReader(), parts = [];
+        let got = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          parts.push(value);
+          got += value.length;
+          if (total) window.preloadProgress = Math.min(1, got / total);
+        }
+        box.src = URL.createObjectURL(new Blob(parts, { type: 'audio/mpeg' }));
+      } catch (e) { /* the player keeps the normal file and streams it instead */ }
+      window.preloadProgress = 1;
+    })();
     const playable = i => !!(tracks[i] && tracks[i].src && !tracks[i].missing);
 
     /* ---- the tracklist ---- */
@@ -558,7 +682,7 @@
         el('span', 'p6 track-state', t.src ? 'Play' : t.link ? 'Listen ↗' : ''));
       if (t.src) row.addEventListener('click', () => {
         if (i === cur && steady) setSteady(false);
-        else { setTrack(i); setSteady(true); }
+        else { setTrack(i); retry(); setSteady(true); }
       });
       li.append(row);
       list.append(li);
@@ -580,8 +704,18 @@
       });
       vinylBtn.setAttribute('aria-pressed', String(steady));
       vinylBtn.setAttribute('aria-label', `${steady ? 'Pause' : 'Play'} ${t.title || ''}`.trim());
-      if (tracks[cur] && tracks[cur].missing) hint.textContent = `song not found: add us/${tracks[cur].src}`;
+      // can't tell a missing file from a browser that can't play it (like VS Code's preview panel), so name both
+      if (tracks[cur] && tracks[cur].missing) hint.textContent = `couldn't play ${tracks[cur].src}: check it's in the us folder, or open the page in Chrome or Edge`;
       else hint.textContent = steady ? 'playing for us ♡' : 'tap the record';
+    }
+
+    // a file that failed once (say, while it was being moved) gets another go on the next tap
+    function retry() {
+      const t = tracks[cur];
+      if (!t || !t.missing) return;
+      t.missing = false;
+      song.src = t.src;
+      song.load();
     }
 
     function setTrack(i) {
@@ -597,59 +731,75 @@
       if (steady) setSteady(false);
       paint();
     });
-    // from the record the playlist plays on; under the reel the song just loops
+    // from the record the playlist plays on, round and round
     song.addEventListener('ended', () => {
-      if (steady) {
-        for (let k = 1; k <= tracks.length; k++) {
-          const n = (cur + k) % tracks.length;
-          if (playable(n)) { setTrack(n); song.play().catch(() => {}); return; }
-        }
+      if (!steady) return;
+      for (let k = 1; k <= tracks.length; k++) {
+        const n = (cur + k) % tracks.length;
+        if (playable(n)) { setTrack(n); song.play().catch(() => {}); return; }
       }
-      song.currentTime = 0;
-      if (vol > .01) song.play().catch(() => {});
     });
 
     function unlock() {
       if (unlocked) return;
       unlocked = true;
-      [song, crackle].forEach(a => a.play().then(() => { if (!steady && vol < .01) a.pause(); }).catch(() => {}));
+      [song, box, crackle].forEach(a => a.play().then(() => {
+        if ((a === song && vol < .01) || (a === box && bvol < .01) || (a === crackle && Math.max(vol, bvol) < .01)) a.pause();
+      }).catch(() => {}));
+    }
+    const run = (a, on) => { if (on && a.paused) a.play().catch(() => {}); if (!on && !a.paused) a.pause(); };
+    // the crackle follows whichever player is louder
+    function crackleUp() {
+      const v = Math.max(vol, bvol);
+      crackle.volume = clamp(v * .3, 0, 1);
+      run(crackle, v > .01);
+      btn.classList.toggle('quiet', v <= .01);
     }
     function setVol(v) {
       vol = v;
       song.volume = clamp(v, 0, 1);
-      crackle.volume = clamp(v * .3, 0, 1);
-      const on = v > .01;
-      [song, crackle].forEach(a => { if (on && a.paused) a.play().catch(() => {}); if (!on && !a.paused) a.pause(); });
-      btn.classList.toggle('quiet', !on);
+      run(song, v > .01);
+      crackleUp();
+    }
+    function setBoxVol(v) {
+      bvol = v;
+      box.volume = clamp(v, 0, 1);
+      run(box, v > .01);
+      crackleUp();
     }
     function setEnabled(on) {
       enabled = on;
       btn.setAttribute('aria-pressed', String(on));
       $$('[data-sound-label]', btn).forEach(s => s.textContent = on ? 'Sound on' : 'Sound off');
       if (on) unlock();
-      if (!on) { setSteady(false); setVol(0); }
+      if (!on) { setSteady(false); setVol(0); setBoxVol(0); }
     }
     function setSteady(on) {
       if (on && !playable(cur)) { paint(); return; }
       steady = on;
-      if (on) { if (!enabled) setEnabled(true); setVol(1); }
+      if (on) { if (!enabled) setEnabled(true); setBoxVol(0); setVol(1); }
       else if (vol > .01) setVol(0);
       paint();
     }
     btn.addEventListener('click', () => setEnabled(!enabled));
-    vinylBtn.addEventListener('click', () => setSteady(!steady));
+    vinylBtn.addEventListener('click', () => { if (!steady) retry(); setSteady(!steady); });
     setTrack(0);
 
     return {
       unlock,
       // grabbing the crank turns the sound on, like the Valentine page
       wake() { if (!enabled) setEnabled(true); },
+      // quiet while her film plays
+      hush(on) {
+        hushed = on;
+        if (on) { if (steady) setSteady(false); setVol(0); setBoxVol(0); }
+      },
       // called every frame with how fast the reel is moving
       drive(speed) {
-        if (!enabled || steady || !playable(cur)) return;
+        if (!enabled || steady || hushed || !boxOk) return;
         const target = clamp(speed / 6, 0, 1);
-        const next = vol + (target - vol) * (target > vol ? .25 : .05);
-        if (Math.abs(next - vol) > .002 || (next < .01 && vol >= .01)) setVol(next < .01 ? 0 : next);
+        const next = bvol + (target - bvol) * (target > bvol ? .25 : .05);
+        if (Math.abs(next - bvol) > .002 || (next < .01 && bvol >= .01)) setBoxVol(next < .01 ? 0 : next);
       },
     };
   })();
