@@ -36,7 +36,7 @@
   <div class="preloader" aria-hidden="true">
     <div class="preloader-top">
       <span class="p6">Adam &amp; Alvy</span>
-      <span class="p6 right">Loading us</span>
+      <span class="p6 right">Winding up the music box</span>
     </div>
     <div class="preloader-mid">
       <div class="h1 preloader-count"><span data-count>0</span>%</div>
@@ -68,12 +68,13 @@
   <!-- Menu overlay -->
   <nav class="menu" id="menu" aria-label="Main navigation">
     <ul class="menu-links">
-      <li><a href="#story"><span class="p6">01</span><span class="h2">Our story</span></a></li>
-      <li><a href="#dates"><span class="p6">02</span><span class="h2">Date memos</span></a></li>
-      <li><a href="#reel"><span class="p6">03</span><span class="h2">The reel</span></a></li>
-      <li><a href="#letters"><span class="p6">04</span><span class="h2">Letters</span></a></li>
-      <li><a href="#lists"><span class="p6">05</span><span class="h2">Lists</span></a></li>
-      <li><a href="#song"><span class="p6">06</span><span class="h2">Our songs</span></a></li>
+      <li><a href="#film"><span class="p6">01</span><span class="h2">Her film</span></a></li>
+      <li><a href="#story"><span class="p6">02</span><span class="h2">Our story</span></a></li>
+      <li><a href="#dates"><span class="p6">03</span><span class="h2">Date memos</span></a></li>
+      <li><a href="#reel"><span class="p6">04</span><span class="h2">The reel</span></a></li>
+      <li><a href="#letters"><span class="p6">05</span><span class="h2">Letters</span></a></li>
+      <li><a href="#lists"><span class="p6">06</span><span class="h2">Lists</span></a></li>
+      <li><a href="#song"><span class="p6">07</span><span class="h2">Our songs</span></a></li>
     </ul>
     <div class="menu-foot">
       <span class="p6">Adam &amp; Alvy</span>
@@ -113,10 +114,49 @@
       <h2 class="p6 label">prologue</h2>
       <p class="h5 sentence" data-split data-prologue></p>
       <div class="actions" data-fade>
-        <a href="#reel" class="btn p6"><span class="roll"><span>Open the reel</span><span>Open the reel</span></span></a>
-        <a href="#letters" class="btn ghost p6"><span class="roll"><span>Read the letters</span><span>Read the letters</span></span></a>
+        <a href="#film" class="btn p6"><span class="roll"><span>Watch what she made ♥</span><span>Watch what she made ♥</span></span></a>
+        <a href="#reel" class="btn ghost p6"><span class="roll"><span>Open the reel</span><span>Open the reel</span></span></a>
       </div>
     </section>
+
+    <div class="fade-band" aria-hidden="true"><canvas class="art" data-dither="fade" data-phase="1.2" data-cell="9"></canvas></div>
+
+    <!-- Her film: the sweetest thing anyone has ever made for me -->
+    <section class="section dark wrap film" id="film" data-theme="dark">
+      <div class="section-head center">
+        <h2 class="p6 label">presented by <span data-film-by></span></h2>
+        <h3 class="h2" data-split>The sweetest thing anyone has ever made for me</h3>
+      </div>
+
+      <figure class="screen" data-fade>
+        <div class="screen-meta p6">
+          <span data-film-date></span>
+          <span class="center"><span data-film-title></span> · <span data-film-edition></span></span>
+          <span class="right" data-film-length></span>
+        </div>
+        <div class="screen-frame">
+          <video class="screen-video" playsinline preload="metadata" data-film-video></video>
+          <button class="screen-play" type="button" data-film-play aria-label="Play the film">
+            <span class="screen-play-ring" aria-hidden="true"><span class="screen-play-tri"></span></span>
+            <span class="h5">Play her film</span>
+            <span class="hand">turn your sound on ♡</span>
+          </button>
+        </div>
+        <figcaption class="p6 muted center">A film by <span data-film-by></span>, made for our first date</figcaption>
+      </figure>
+
+      <blockquote class="film-quote" data-fade>
+        <p class="h4 sentence" data-film-quote></p>
+        <footer class="hand" data-film-after></footer>
+      </blockquote>
+
+      <div class="film-tribute" data-fade>
+        <div class="film-tribute-body hand" data-film-tribute></div>
+        <p class="film-sign hand"><span data-film-sign></span><b>Adam</b></p>
+      </div>
+    </section>
+
+    <div class="fade-band up" aria-hidden="true"><canvas class="art" data-dither="fadeUp" data-phase="3.3" data-cell="9"></canvas></div>
 
     <!-- Our story -->
     <section class="section wrap" id="story">

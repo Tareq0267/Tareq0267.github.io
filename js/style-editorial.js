@@ -298,19 +298,28 @@ window.initStyle = function () {
   let loaded = document.readyState === 'complete';
   window.addEventListener('load', () => { loaded = true; });
 
+  // A page can hold the preloader for something it needs by setting window.preloadGate
+  // (a promise) and, optionally, window.preloadProgress (0..1) for the counter to follow.
+  // us/ uses it to have its music box song fully downloaded before the page opens.
+  const gate = window.preloadGate;
+  const cap = () => (gate && typeof window.preloadProgress === 'number') ? 99 * window.preloadProgress : 100;
+  const paint = v => { countEl.textContent = Math.round(v); bar.style.transform = `scaleX(${v / 100})`; };
+
   const fill = gsap.to(progress, {
     v: 90, duration: 1.4, ease: 'power2.out',
-    onUpdate: () => { countEl.textContent = Math.round(progress.v); bar.style.transform = `scaleX(${progress.v / 100})`; }
+    onUpdate: () => paint(Math.min(progress.v, cap()))
   });
 
-  let finished = false;
+  let finished = false, waiting = null;
   function finish() {
     if (finished) return;
     finished = true;
+    if (waiting) gsap.ticker.remove(waiting);
+    progress.v = Math.min(progress.v, cap());
     gsap.timeline()
       .to(progress, {
         v: 100, duration: .4, ease: 'power1.out',
-        onUpdate: () => { countEl.textContent = Math.round(progress.v); bar.style.transform = `scaleX(${progress.v / 100})`; }
+        onUpdate: () => paint(progress.v)
       })
       .to(preloader, { yPercent: -100, duration: 1.1, ease: 'power4.inOut' }, '+=.15')
       .add(() => {
@@ -322,8 +331,10 @@ window.initStyle = function () {
   }
 
   fill.then(() => {
-    if (loaded) return finish();
-    const giveUp = setTimeout(finish, 2500);
-    window.addEventListener('load', () => { clearTimeout(giveUp); finish(); }, { once: true });
+    const pageLoaded = loaded ? null : new Promise(r => window.addEventListener('load', r, { once: true }));
+    if (gate) { waiting = () => paint(Math.min(99, cap())); gsap.ticker.add(waiting); }
+    // never keep anyone waiting forever: the page opens anyway and loading carries on behind it
+    setTimeout(finish, gate ? 20000 : 2500);
+    Promise.all([pageLoaded, gate]).then(finish, finish);
   });
 };
