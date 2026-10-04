@@ -45,7 +45,7 @@ window.US = {
     { when: '26 September 2026', title: 'Our first date', place: 'Four Seasons, Tanjung Malim',
       photo: 'photos/2026-09-26-first-date/31.jpg',
       links: [{ href: '#film', text: 'Her film' }, { href: '#dates', text: 'The memo' }],
-      text: 'Your first date ever, and the first of thousands. Malatang at Four Seasons, a Grab to Guardian, flowers from me, and then Mama and Baba sent you home: the first time you met them.' },
+      text: 'Your first date ever, and the first of thousands. Malatang at Four Seasons, a Grab to Watsons, flowers from me, and then Mama and Baba sent you home: the first time you met them.' },
     { when: '27 September 2026', title: 'The letter', place: 'be_mine.html', tag: 'You said yes', link: '../be_mine.html', linkText: 'Open it',
       text: 'An envelope, a capybara, and one very important question. You said yes.' },
     { when: '29 September 2026', title: 'The surprise dinner', place: 'Safa Restaurant', link: '#dates', linkText: 'The memo',
@@ -81,7 +81,7 @@ window.US = {
         { text: 'Gift masing-masing', done: true },
         { text: 'DIY bag', done: true },
       ],
-      note: 'and then: a Grab to Guardian, flowers for you, and Mama and Baba sending you home. the first time you met them ♡',
+      note: 'and then: a Grab to Watsons, flowers for you, and Mama and Baba sending you home. the first time you met them ♡',
       photos: ['photos/2026-09-26-first-date/26.jpg', 'photos/2026-09-26-first-date/33.jpg', 'photos/2026-09-26-first-date/22.jpg'],
     },
     {
@@ -134,7 +134,7 @@ window.US = {
     },
     {
       title: 'First date · 26 September',
-      note: 'our first date: malatang at Four Seasons, a Grab to Guardian, my flowers, and meeting Mama and Baba for the first time.',
+      note: 'our first date: malatang at Four Seasons, a Grab to Watsons, my flowers, and meeting Mama and Baba for the first time.',
       photos: [
         { src: 'photos/2026-09-26-first-date/40.jpg', caption: 'otw ♡',               note: 'otw to our first date ehhehhehe' },
         { src: 'photos/2026-09-26-first-date/26.jpg', caption: 'before the date',     note: 'taken before our date, and you look stunning' },
@@ -143,9 +143,9 @@ window.US = {
         { src: 'photos/2026-09-26-first-date/34.jpg', caption: 'you & malatang',      note: 'malatang at Four Seasons' },
         { src: 'photos/2026-09-26-first-date/35.jpg', caption: 'gorgeous',            note: 'you look gorgeous here. and sayang, you deleted the candid one before this 😤' },
         { src: 'photos/2026-09-26-first-date/38.jpg', caption: 'alololololo',         note: 'alololololo omelnya dia, ayunya dia ♡' },
-        { src: 'photos/2026-09-26-first-date/29.jpg', caption: 'grab to guardian',    note: 'in the Grab to Guardian' },
-        { src: 'photos/2026-09-26-first-date/30.jpg', caption: 'still in the grab',   note: 'in the Grab to Guardian' },
-        { src: 'photos/2026-09-26-first-date/31.jpg', caption: 'forever',             note: 'in the Grab to Guardian. you were so stunningly gorgeous, i wanted to be with you forever the moment i took this', favourite: true },
+        { src: 'photos/2026-09-26-first-date/29.jpg', caption: 'grab to watsons',    note: 'in the Grab to Watsons' },
+        { src: 'photos/2026-09-26-first-date/30.jpg', caption: 'still in the grab',   note: 'in the Grab to Watsons' },
+        { src: 'photos/2026-09-26-first-date/31.jpg', caption: 'forever',             note: 'in the Grab to Watsons. you were so stunningly gorgeous, i wanted to be with you forever the moment i took this', favourite: true },
         { src: 'photos/2026-09-26-first-date/27.jpg', caption: 'in Baba’s car',       note: 'in Baba’s car, on the way to send you home. the first time you met Mama and Baba' },
         { src: 'photos/2026-09-26-first-date/22.jpg', caption: 'my flowers ♡',        note: 'right after our first date, with the flowers i gave you' },
         { src: 'photos/2026-09-26-first-date/25.jpg', caption: 'you + flowers',       note: 'right after our first date, with the flowers i gave you' },
@@ -219,7 +219,7 @@ window.US = {
     { text: 'open a sanctuary for stray dogs' },
     { text: 'let you do my makeup, full glam, no complaints 💄' },
     { text: 'the great waxing competition after our wedding: cabut bulu, whoever says sakit first kalah hahahaha' },
-    { text: 'twins. she wants twins, so we are getting twins 👶👶' },
+    { text: 'triplets. she wanted twins, now she wants triplets, so triplets it is 😂 👶👶👶' },
   ],
 
   // Countdowns on top of the automatic ones (next monthiversary, next anniversary,
