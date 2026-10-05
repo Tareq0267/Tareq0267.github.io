@@ -543,9 +543,10 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .hero-top .stat-b{ grid-column: 1 / span 6; }
   .about-col, .about-col:nth-child(1){ grid-column: span 6; }
   .about-photo{ grid-column: 1 / span 5; grid-row: auto; }
-  .honour .place{ grid-column: 1 / span 2; }
-  .honour .body{ grid-column: 3 / span 10; }
-  .honour .meta{ grid-column: 3 / span 10; grid-template-columns: repeat(3, auto); justify-content: start; gap: 4px 24px; }
+  /* "Now" and the years are too wide for a narrow left column: give them their own line */
+  .honour .place{ grid-column: 1 / -1; margin-bottom: 12px; }
+  .honour .body{ grid-column: 1 / -1; }
+  .honour .meta{ grid-column: 1 / -1; grid-template-columns: repeat(3, auto); justify-content: start; gap: 4px 24px; margin-top: 12px; }
   .exp .when{ grid-column: 1 / -1; }
   .exp .role{ grid-column: 1 / span 5; }
   .exp .detail{ grid-column: 6 / span 7; }
