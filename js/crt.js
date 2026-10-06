@@ -275,10 +275,11 @@
     top: 'exp',           // which window is in front: 'exp' | 'app'
     msg: null,            // a message box, if one is up (it's modal)
     scroll: 0, binSel: -1,
+    mApp: 'exp', mDetail: false,   // the mobile edition: which app is up, and whether a job is open
     start: false, sel: 0, selAt: 0, hover: null, iconSel: null,
     power: true, bootAt: -1, offAt: -1, onAt: -1,
   };
-  let hits = [];                       // clickable areas in screen pixels, rebuilt each paint
+  let hits = [], hitScale = 1;   // hitScale: the mobile edition is drawn at 2x                       // clickable areas in screen pixels, rebuilt each paint
   const hit = (x, y, w, h, id, arg) => hits.push({ x, y, w, h, id, arg });
   const BOOT = 2.4;
   const hv = (id, arg) => st.hover && st.hover.id === id && (arg === undefined || st.hover.arg === arg);
@@ -372,24 +373,44 @@
     statusBar(wx, wy + wh - 24, ww, [[`${jobs.length} object(s)`, 200], [`Record ${st.sel + 1} of ${jobs.length}`]]);
   }
 
-  // Resume.pdf: laid out once per width, then drawn through a scrolling viewport
+  // Resume.pdf: laid out once per width (and size), then drawn through a scrolling viewport
   let cvLayout = null;
-  function layoutResume(w) {
-    if (cvLayout && cvLayout.w === w) return cvLayout;
+  function layoutResume(w, k = 1) {
+    if (cvLayout && cvLayout.w === w && cvLayout.k === k) return cvLayout;
     const ops = []; let y = 0;
-    const add = (o, h) => { ops.push({ ...o, y }); y += h; };
-    for (const [k, t] of RESUME) {
-      if (k === 'name') { add({ k, t }, 26); continue; }
-      if (k === 'sub') { add({ k, t }, 16); continue; }
-      if (k === 'h') { y += 10; add({ k, t: t.toUpperCase() }, 24); continue; }
-      if (k === 'b') { add({ k, t }, 17); continue; }
-      if (k === 'pdf') { y += 14; add({ k, t }, 34); continue; }
-      oo.font = `12px ${UI}`;
-      const lines = wrapText(t, k === 'li' ? w - 14 : w);
-      lines.forEach((l, i) => add({ k: k === 'li' && i ? 'li2' : k, t: l }, 17));
-      y += 3;
+    const add = (o, h) => { ops.push({ ...o, y }); y += h * k; };
+    for (const [kind, t] of RESUME) {
+      if (kind === 'name') { add({ k: kind, t }, 26); continue; }
+      if (kind === 'sub') { add({ k: kind, t }, 16); continue; }
+      if (kind === 'h') { y += 10 * k; add({ k: kind, t: t.toUpperCase() }, 24); continue; }
+      if (kind === 'b') { add({ k: kind, t }, 17); continue; }
+      if (kind === 'pdf') { y += 14 * k; add({ k: kind, t }, 34); continue; }
+      oo.font = `${12 * k}px ${UI}`;
+      const lines = wrapText(t, kind === 'li' ? w - 14 * k : w);
+      lines.forEach((l, i) => add({ k: kind === 'li' && i ? 'li2' : kind, t: l }, 17));
+      y += 3 * k;
     }
-    return (cvLayout = { w, ops, h: y + 12 });
+    return (cvLayout = { w, k, ops, h: y + 12 * k });
+  }
+  function drawResume(L, vx, vy, vw, vh, k = 1) {
+    oo.save(); oo.beginPath(); oo.rect(vx, vy, vw, vh); oo.clip();
+    const px = vx + 20 * k, f = n => n * k;
+    for (const o of L.ops) {
+      const y = vy + f(16) + o.y - st.scroll;
+      if (y < vy - 30 || y > vy + vh + 30) continue;
+      if (o.k === 'name') text(o.t.toUpperCase(), vx + vw / 2, y + f(8), { size: f(17), bold: true, align: 'center', max: vw - 10 });
+      else if (o.k === 'sub') text(o.t, vx + vw / 2, y + f(6), { size: f(11), align: 'center', max: vw - 10 });
+      else if (o.k === 'h') {
+        const tw = text(o.t, vx + vw / 2, y + f(10), { size: f(12), align: 'center' });
+        line(px, y + f(10), vx + vw / 2 - tw / 2 - 8, y + f(10)); line(vx + vw / 2 + tw / 2 + 8, y + f(10), vx + vw - 20 * k, y + f(10));
+      }
+      else if (o.k === 'b') text(o.t, px, y + f(7), { size: f(12), bold: true, max: vw - 40 * k });
+      else if (o.k === 'li') { text('•', px + 2, y + f(7), { size: f(12) }); text(o.t, px + f(14), y + f(7), { size: f(12) }); }
+      else if (o.k === 'li2') text(o.t, px + f(14), y + f(7), { size: f(12) });
+      else if (o.k === 'p') text(o.t, px, y + f(7), { size: f(12) });
+      else if (o.k === 'pdf' && y >= vy && y + f(26) <= vy + vh) button(vx + vw / 2 - f(110), y, f(220), f(26), o.t, 'cv-pdf', undefined, { bold: true, size: f(11) });
+    }
+    oo.restore();
   }
   function paintResume(a) {
     ['File', 'View', 'Help'].reduce((x, m) => x + text(m, x, a.y + 34, { size: 12 }) + 14, a.x + 10);
@@ -399,25 +420,7 @@
     const maxScroll = Math.max(0, L.h - vh + 20);
     st.scroll = Math.max(0, Math.min(maxScroll, st.scroll));
     st.cvView = { x: vx, y: vy, w: vw, h: vh, max: maxScroll };
-    // the page
-    oo.save(); oo.beginPath(); oo.rect(vx, vy, vw, vh); oo.clip();
-    const px = vx + 20;
-    for (const o of L.ops) {
-      const y = vy + 16 + o.y - st.scroll;
-      if (y < vy - 30 || y > vy + vh + 30) continue;
-      if (o.k === 'name') text(o.t.toUpperCase(), vx + vw / 2, y + 8, { size: 17, bold: true, align: 'center', max: vw - 30 });
-      else if (o.k === 'sub') text(o.t, vx + vw / 2, y + 6, { size: 11, align: 'center', max: vw - 30 });
-      else if (o.k === 'h') {
-        const tw = text(o.t, vx + vw / 2, y + 10, { size: 12, align: 'center' });
-        line(px, y + 10, vx + vw / 2 - tw / 2 - 8, y + 10); line(vx + vw / 2 + tw / 2 + 8, y + 10, vx + vw - 20, y + 10);
-      }
-      else if (o.k === 'b') text(o.t, px, y + 7, { size: 12, bold: true, max: vw - 40 });
-      else if (o.k === 'li') { text('•', px + 2, y + 7, { size: 12 }); text(o.t, px + 14, y + 7, { size: 12 }); }
-      else if (o.k === 'li2') text(o.t, px + 14, y + 7, { size: 12 });
-      else if (o.k === 'p') text(o.t, px, y + 7, { size: 12 });
-      else if (o.k === 'pdf' && y >= vy && y + 26 <= vy + vh) button(vx + vw / 2 - 110, y, 220, 26, o.t, 'cv-pdf', undefined, { bold: true });
-    }
-    oo.restore();
+    drawResume(L, vx, vy, vw, vh);
     // the scrollbar
     const sx = vx + vw, tTop = vy + 16, tH = vh - 32;
     grey(sx, tTop, 16, tH, .72);
@@ -476,21 +479,146 @@
   }
 
   // a message box; while it's up, nothing else can be clicked
-  function paintMessage() {
-    const m = st.msg, w = 330;
-    oo.font = `12px ${UI}`;
+  function paintMessage(AW = SW, AH = SH - 28, w = 330, fs = 12) {
+    const m = st.msg;
+    oo.font = `${fs}px ${UI}`;
     const lines = wrapText(m.text, w - 80);
-    const h = 74 + lines.length * 17 + 30, x = (SW - w) / 2, y = (SH - 28 - h) / 2;
-    hit(0, 0, SW, SH, 'modal');
+    const lh = fs + 5, h = 74 + lines.length * lh + 30, x = (AW - w) / 2, y = (AH - h) / 2;
+    hit(0, 0, AW, AH + 28, 'modal');
     windowFrame(x, y, w, h, m.title, 'pc', 'msg', true, false);
     // its icon: a ring with a mark in it
     const ix = x + 32, iy = y + 50;
     grey(ix - 15, iy - 15, 30, 30, 1);
     oo.fillStyle = ink; oo.beginPath(); oo.arc(ix, iy, 14, 0, TAU); oo.fill();
     text(m.icon === 'x' ? '×' : m.icon, ix, iy + 1, { size: m.icon === 'x' ? 24 : 18, bold: true, col: paper, align: 'center', font: 'Georgia, serif' });
-    lines.forEach((l, i) => text(l, x + 60, y + 44 + i * 17, { size: 12 }));
+    lines.forEach((l, i) => text(l, x + 60, y + 44 + i * lh, { size: fs }));
     const bw = 76, gap = 8, total = m.buttons.length * bw + (m.buttons.length - 1) * gap;
     m.buttons.forEach((b, i) => button(x + (w - total) / 2 + i * (bw + gap), y + h - 34, bw, 24, b.label, 'msg-btn', i));
+  }
+
+  /* ---------- the mobile edition ----------
+     On a phone the full desktop shrinks to nothing, so the screen runs a big-type
+     edition instead: a 320x240 layout (drawn at 2x into the same texture), one
+     full-screen app at a time, like an old handheld. Not zoomed in it's a job picker
+     (the spec plate under the monitor has the details); zoomed in, the apps open up. */
+  const MW = 320, MH = 240, MT = MH - 22;   // MT: where the taskbar starts
+  function paintMobile(now) {
+    grey(0, 0, MW, MH, .55);
+    const app = st.mApp;
+    const titles = { exp: ['Experience', 'folder'], cv: ['Resume.pdf', 'doc'], pc: ['My Computer', 'pc'], bin: ['Recycle Bin', 'bin'] };
+    const [title, kind] = titles[app];
+    windowFrame(0, 0, MW, MT, title, kind, 'm', true, false);
+    const top = 26, bot = MT - 4;
+
+    if (app === 'exp' && !st.mDetail) {
+      jobs.forEach((j, i) => {
+        const y = top + 2 + i * 46, on = i === st.sel;
+        if (on) grey(4, y, MW - 8, 42, 0);
+        icon('folder', 10, y + 10, .7);
+        text(j.role, 38, y + 15, { size: 13, bold: true, col: on ? paper : ink, max: MW - 50 });
+        text(j.when, 38, y + 31, { size: 11, col: on ? paper : ink, max: MW - 50 });
+        hit(4, y, MW - 8, 42, 'mjob', i);
+      });
+      line(8, top + 146, MW - 8, top + 146);
+      text(zoomTo ? 'Tap a job to open it' : 'Tap the screen to zoom in · details below ↓', MW / 2, top + 162, { size: 11, align: 'center', max: MW - 16 });
+      text(`Record ${st.sel + 1} of ${jobs.length}`, MW / 2, top + 180, { size: 10, align: 'center' });
+    }
+    else if (app === 'exp') {
+      const j = jobs[st.sel];
+      button(4, top + 2, 56, 20, '‹ Back', 'mback');
+      text(`${st.sel + 1} / ${jobs.length}`, MW - 8, top + 12, { size: 10, align: 'right' });
+      text(j.role, 8, top + 42, { size: 20, font: displayFont, max: MW - 16 });
+      const [company] = (j.meta[0] || '').split(' · ');
+      const [type] = (j.meta[1] || '').split(' · ');
+      text([company, type].filter(Boolean).join(' · '), 8, top + 62, { size: 10, max: MW - 16 });
+      text(j.when, 8, top + 76, { size: 10, bold: true });
+      line(8, top + 86, MW - 8, top + 86);
+      const budget = reduce ? Infinity : (now - st.selAt) * 700;
+      oo.font = `11px ${UI}`;
+      let y = top + 100, used = 0;
+      for (const l of wrapText(j.desc, MW - 16)) {
+        if (y > bot - 34) break;
+        const shown = l.slice(0, Math.max(0, Math.floor(budget - used))); used += l.length;
+        text(shown, 8, y, { size: 11 }); y += 14;
+      }
+      oo.font = `10px ${UI}`;
+      const tags = wrapText('Skills: ' + j.tags.join(' / '), MW - 16);
+      tags.slice(0, 2).forEach((l, i) => text(l, 8, bot - 22 + i * 12, { size: 10 }));
+    }
+    else if (app === 'cv') {
+      const vx = 4, vy = top, vw = MW - 8 - 12, vh = bot - top;
+      grey(vx, vy, vw + 12, vh, 1); bevel(vx - 1, vy - 1, vw + 14, vh + 2, false);
+      const L = layoutResume(vw - 16, .85);
+      const maxScroll = Math.max(0, L.h - vh + 12);
+      st.scroll = Math.max(0, Math.min(maxScroll, st.scroll));
+      st.cvView = { x: vx, y: vy, w: vw, h: vh, max: maxScroll };
+      drawResume(L, vx, vy, vw, vh, .85);
+      // a slim scrollbar with arrow buttons
+      const sx = vx + vw;
+      grey(sx, vy + 12, 12, vh - 24, .72);
+      if (maxScroll) {
+        const th = Math.max(16, (vh - 24) * vh / (vh + maxScroll)), ty = vy + 12 + (vh - 24 - th) * st.scroll / maxScroll;
+        grey(sx, ty, 12, th, 1); bevel(sx, ty, 12, th);
+      }
+      for (const [id, by, dir] of [['cv-up', vy, -1], ['cv-down', vy + vh - 12, 1]]) {
+        grey(sx, by, 12, 12, 1); bevel(sx, by, 12, 12);
+        oo.fillStyle = ink; oo.beginPath();
+        oo.moveTo(sx + 3, by + 6 - dir * 2); oo.lineTo(sx + 9, by + 6 - dir * 2); oo.lineTo(sx + 6, by + 6 + dir * 2); oo.closePath(); oo.fill();
+        hit(sx, by, 12, 12, id);
+      }
+    }
+    else if (app === 'pc') {
+      DRIVES.forEach((d, i) => {
+        const y = top + 2 + i * 46;
+        icon(d.kind, 8, y + 6, .8);
+        text(d.name, 42, y + 12, { size: 12, bold: true, max: MW - 54 });
+        text(d.note, 42, y + 27, { size: 10, max: 120 });
+        grey(170, y + 22, 100, 9, 1); bevel(170, y + 22, 100, 9, false);
+        if (d.fill) grey(171, y + 23, 98 * d.fill, 7, 0);
+        hit(4, y, MW - 8, 42, 'drive', i);
+      });
+    }
+    else if (app === 'bin') {
+      BIN.forEach((r, i) => {
+        const y = top + 2 + i * 24, on = i === st.binSel;
+        if (on) grey(4, y, MW - 8, 22, 0);
+        icon('doc', 8, y + 3, .5);
+        text(r[0], 28, y + 11, { size: 11, col: on ? paper : ink, max: 190 });
+        text(r[2], MW - 10, y + 11, { size: 10, col: on ? paper : ink, align: 'right', max: 90 });
+        hit(4, y, MW - 8, 22, 'bin-row', i);
+      });
+      button(4, bot - 24, 130, 22, 'Empty Recycle Bin', 'bin-empty');
+    }
+
+    // taskbar
+    grey(0, MT, MW, MH - MT, 1); line(0, MT, MW, MT);
+    grey(2, MT + 3, 52, 17, 1); bevel(2, MT + 3, 52, 17, !st.start);
+    icon('flag', 6, MT + 6, .8);
+    text('Start', 20, MT + 12, { size: 11, bold: true });
+    hit(2, MT + 3, 52, 17, 'start');
+    grey(58, MT + 3, 190, 17, 1); bevel(58, MT + 3, 190, 17, false);
+    text(title, 64, MT + 12, { size: 11, bold: true, max: 178 });
+    grey(MW - 66, MT + 3, 64, 17, 1); bevel(MW - 66, MT + 3, 64, 17, false);
+    text(new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), MW - 34, MT + 12, { size: 10, align: 'center' });
+
+    if (st.start) {
+      const items = [['open', 'folder', 'Experience'], ['cv', 'doc', 'Resume.pdf'], ['mypc', 'pc', 'My Computer'], ['mbin', 'bin', 'Recycle Bin'], null, ['off', 'pc', 'Shut Down...']];
+      const mw = 160, mh = 5 * 26 + 8 + 8, mx = 2, my = MT - mh;
+      grey(mx, my, mw, mh, 1); bevel(mx, my, mw, mh); bevel(mx + 1, my + 1, mw - 2, mh - 2);
+      grey(mx + 3, my + 3, 18, mh - 6, 0);
+      oo.save(); oo.translate(mx + 12, my + mh - 6); oo.rotate(-Math.PI / 2);
+      text('Tingkap98', 0, 0, { size: 12, bold: true, col: paper }); oo.restore();
+      let iy = my + 4;
+      for (const it of items) {
+        if (!it) { line(mx + 24, iy + 3, mx + mw - 4, iy + 3); iy += 8; continue; }
+        const [id, k, label] = it;
+        icon(k, mx + 26, iy + 5, .5);
+        text(label, mx + 48, iy + 13, { size: 12 });
+        hit(mx + 22, iy, mw - 26, 26, id);
+        iy += 26;
+      }
+    }
+    if (st.msg) paintMessage(MW, MH - 22, 290, 11);
   }
 
   function paintDesktop(now) {
@@ -587,7 +715,9 @@
     if (st.offAt >= 0) paintOff(reduce ? 1 : (now - st.offAt) / .6);
     else if (st.bootAt < 0) grey(0, 0, SW, SH, 0);
     else if (now - st.bootAt < BOOT && !reduce) paintBoot(now - st.bootAt);
+    else if (small) { gg.setTransform(2, 0, 0, 2, 0, 0); oo.setTransform(2, 0, 0, 2, 0, 0); paintMobile(now); }
     else paintDesktop(now);
+    hitScale = small && st.offAt < 0 ? 2 : 1;
     const img = gg.getImageData(0, 0, SW, SH), d = img.data, px = new Uint32Array(d.buffer);
     const inkW = rgbWord(ink), paperW = rgbWord(paper);
     for (let y = 0, i = 0; y < SH; y++) {
@@ -601,11 +731,13 @@
   /* =========================================================
      PROJECTION + DRAWING
   ========================================================= */
-  let W = 0, H = 0, dpr = 1;
+  let W = 0, H = 0, dpr = 1, small = false;
   function resize() {
     const r = canvas.getBoundingClientRect();
     dpr = Math.min(devicePixelRatio || 1, fine ? 1.5 : 1.25);
     W = r.width; H = r.height;
+    const was = small; small = W < 640;
+    if (was !== small) { st.start = false; lastPaint = 0; }
     canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
   }
 
@@ -634,14 +766,16 @@
     const rot = n => { const x1 = n[0] * cyw - n[2] * syw, z1 = n[0] * syw + n[2] * cyw; return [x1, n[1] * cp - z1 * sp, n[1] * sp + z1 * cp]; };
     // zoomed in, the whole front of the monitor fills the canvas (bezel included, so
     // nothing is cut off at the top or bottom) and the desktop is big enough to read
+    // on a phone the glass itself fills the width instead, letting the bezel crop
+    const zp = small ? [0, (GL.y0 + GL.y1) / 2, GL.z] : [0, 0, 0];
     if (zoom > .001) {
-      const zg = xf([0, 0, 0])[2];
-      const fit = Math.min(.9 * H / (2 * .883), .94 * W / 2) * (D - zg) / F;
+      const zg = xf(zp)[2];
+      const fit = (small ? Math.min(.97 * W / (GL.x1 - GL.x0), .92 * H / (GL.y1 - GL.y0)) : Math.min(.9 * H / (2 * .883), .94 * W / 2)) * (D - zg) / F;
       scale += (fit - scale) * zoom;
     }
     const raw = v => { const s = F / (D - v[2]) * scale; return [v[0] * s, -v[1] * s]; };
     // zooming in brings the middle of the screen to the middle of the canvas
-    const c0 = raw(xf([0, 0, 0]));
+    const c0 = raw(xf(zp));
     const cx = W / 2 - c0[0] * zoom, cy = H * .5 - c0[1] * zoom;
     const toScreen = v => { const r = raw(v); return [cx + r[0], cy + r[1]]; };
 
@@ -816,7 +950,7 @@
     }
     return null;
   }
-  const hitAt = p => { for (let k = hits.length - 1; k >= 0; k--) { const h = hits[k]; if (p[0] >= h.x && p[0] < h.x + h.w && p[1] >= h.y && p[1] < h.y + h.h) return h; } return null; };
+  const hitAt = q => { const p = [q[0] / hitScale, q[1] / hitScale]; for (let k = hits.length - 1; k >= 0; k--) { const h = hits[k]; if (p[0] >= h.x && p[0] < h.x + h.w && p[1] >= h.y && p[1] < h.y + h.h) return h; } return null; };
   function inQuad(q, x, y) {
     let inside = false;
     for (let i = 0, j = 3; i < 4; j = i++) {
@@ -886,6 +1020,7 @@
     st.app = k; st.top = 'app';
     if (k === 'cv') st.scroll = 0;
     if (k === 'bin') st.binSel = -1;
+    st.mApp = k;
   }
   function act(h) {
     const id = h ? h.id : null;
@@ -897,7 +1032,7 @@
     }
     if (id !== 'start' && st.start) {
       st.start = false;
-      if (!h || !['open', 'cv', 'mypc', 'off'].includes(id)) return;
+      if (!h || !['open', 'cv', 'mypc', 'mbin', 'off'].includes(id)) return;
     }
     if (!h) { st.iconSel = null; return; }
     if (!id.startsWith('icon-')) st.iconSel = null;
@@ -914,6 +1049,7 @@
       case 'app-close': st.app = null; st.top = 'exp'; break;
       case 'start': st.start = !st.start; break;
       case 'open': case 'icon-exp':
+        st.mApp = 'exp'; st.mDetail = false;
         if (st.win !== 'open') { st.win = 'open'; st.selAt = clock(); }
         st.top = 'exp';
         if (id === 'icon-exp') st.iconSel = id;
@@ -921,6 +1057,10 @@
       case 'cv': case 'icon-cv': openApp('cv'); if (id === 'icon-cv') st.iconSel = id; break;
       case 'mypc': case 'icon-pc': openApp('pc'); if (id === 'icon-pc') st.iconSel = id; break;
       case 'icon-bin': openApp('bin'); st.iconSel = id; break;
+      case 'mbin': openApp('bin'); break;
+      case 'mjob': select(h.arg); if (zoomTo) { st.mDetail = true; st.selAt = clock(); } break;
+      case 'mback': st.mDetail = false; break;
+      case 'm-close': st.mApp = 'exp'; st.mDetail = false; break;
       case 'cv-up': st.scroll -= 40; break;
       case 'cv-down': st.scroll += 40; break;
       case 'cv-pgup': st.scroll -= st.cvView ? st.cvView.h - 30 : 200; break;
@@ -954,11 +1094,31 @@
     if (onPower(x, y)) { setPower(!st.power); return; }
     const p = toUI(x, y);
     // the first click on the screen zooms in so it can be read; a click off it zooms out
+    if (dragMoved) { dragMoved = false; return; }   // that was a drag through the resume, not a tap
     if (!p) { zoomTo = 0; return; }
-    if (zoomTo < 1) { zoomTo = 1; return; }
+    if (zoomTo < 1) {
+      if (small && desktopUp()) { const h = hitAt(p); if (h && h.id === 'mjob') { act(h); return; } }
+      zoomTo = 1; return;
+    }
     if (p && desktopUp()) act(hitAt(p));
     else if (p && st.bootAt >= 0 && st.offAt < 0) st.bootAt = clock() - BOOT;   // a click skips the boot
   });
+  // phones, zoomed in: drag a finger through the resume to scroll it
+  let drag = null, dragMoved = false;
+  canvas.addEventListener('pointerdown', e => {
+    if (!small || !zoomTo || st.mApp !== 'cv' || st.msg || e.pointerType === 'mouse') return;
+    const r = canvas.getBoundingClientRect(), p = toUI(e.clientX - r.left, e.clientY - r.top);
+    if (p) drag = { y0: p[1], s0: st.scroll };
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!drag) return;
+    const r = canvas.getBoundingClientRect(), p = toUI(e.clientX - r.left, e.clientY - r.top);
+    if (!p) return;
+    const dy = (p[1] - drag.y0) / 2;
+    if (Math.abs(dy) > 4) dragMoved = true;
+    st.scroll = drag.s0 - dy; lastPaint = 0;
+  });
+  for (const ev of ['pointerup', 'pointercancel']) canvas.addEventListener(ev, () => { drag = null; });
   addEventListener('keydown', e => {
     if (e.key !== 'Escape') return;
     if (st.msg) { st.msg = null; lastPaint = 0; } else if (zoomTo) zoomTo = 0;
@@ -982,7 +1142,8 @@
     if (on === zoomedIn) return;
     zoomedIn = on;
     if (band) band.classList.toggle('is-zoomed', on);
-    canvas.toggleAttribute('data-lenis-prevent', on);   // the page's smooth scroll leaves the monitor alone
+    canvas.toggleAttribute('data-lenis-prevent', on);
+    canvas.style.touchAction = on ? 'none' : '';   // the page's smooth scroll leaves the monitor alone
     if (on) canvas.addEventListener('wheel', onWheel, { passive: false });
     else canvas.removeEventListener('wheel', onWheel, { passive: false });
   }
