@@ -33,7 +33,7 @@
     comb:    { n: '04', part: 'Combustion chamber', skill: 'AI & LLMs', short: 'AI', tools: 'LLMs, AI Agents, RAG, MCP, Speech Recognition & Synthesis', why: 'Where fuel meets air and the energy comes in. AI turns working software into something smart.', anchor: [.38, .25], side: 'bottom' },
     hpt:     { n: '05', part: 'High pressure turbine', skill: 'Robotics', short: 'Robotics', tools: 'SLAM, LiDAR, Obstacle Avoidance, Inverse Kinematics, Pick & Place, ROS, RoboCup Soccer & @Home', why: 'Turns that energy into physical motion. Where the software meets the real world.', anchor: [.59, .22], side: 'top' },
     lpt:     { n: '06', part: 'Low pressure turbine', skill: 'Frontend', short: 'Frontend', tools: 'Web Design, UI Design, HTML & CSS, JavaScript, TypeScript', why: 'Drives the shaft that spins the fan up front. The frontend is what people meet first, and I design it to pull them in.', anchor: [.86, .27], side: 'bottom' },
-    exhaust: { n: '07', part: 'Exhaust', skill: 'Shipped Projects', short: 'Shipped', tools: 'RoboCup 2D Sim, Project AWA, Rumi to Jawi, Avicenna, 30Juz', why: 'What comes out the back: thrust. Every idea that makes it through ends up shipped.', anchor: [1.36, .07], side: 'top' },
+    exhaust: { n: '07', part: 'Exhaust', skill: 'Deployment', short: 'Deploy', tools: 'GitHub Pages, Vite, PythonAnywhere, Netlify, DigitalOcean', why: 'What comes out the back: thrust. Deployment is where an idea leaves the engine and goes live for real people.', anchor: [1.36, .07], side: 'top' },
   };
 
   /* ---------- one idea's trip per project ---------- */
@@ -310,16 +310,11 @@
       const nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
       const m = [(v[0][0] + v[2][0]) / 2, (v[0][1] + v[2][1]) / 2, (v[0][2] + v[2][2]) / 2 - D];
       f.pfront = nx * m[0] + ny * m[1] + nz * m[2] < 0;
-      if (view.shade) f.lum = faceLum(nx, ny, nz, f.pfront);
+      f.lum = faceLum(nx, ny, nz, f.pfront);
     }
     const sorted = list.slice().sort((a, b) => a.pz - b.pz);
-    if (view.dither) partScreen.begin(pw, ph, 3);
-    paintBatches(view.dither ? partScreen.g : pctx, sorted, f => f.ps, f => f.pfront, null, view.dither, 3);
-    if (view.dither) partScreen.end(pctx, ink);
-    if (view.dots) partDots(pctx, pw, ph, sorted, f => f.ps, ink);
-    if (view.fine) fineShade(partScreen, pctx, pw, ph, 2, sorted, f => f.ps);
-    if (view.halftone) fineShade(partScreen, pctx, pw, ph, 4, sorted, f => f.ps, 'dots', .4);
-    if (view.hatch) fineShade(partScreen, pctx, pw, ph, 4, sorted, f => f.ps, 'hatch', .75);
+    paintBatches(pctx, sorted, f => f.ps, f => f.pfront, null);
+    partDots(pctx, pw, ph, sorted, f => f.ps, ink);
     if (id === 'exhaust') {
       // thrust: dashed jets streaming out of the nozzle
       const proj = (x, r, a) => {
@@ -389,7 +384,7 @@
     const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
     if (nextBox && x >= nextBox[0] && x <= nextBox[0] + nextBox[2] && y >= nextBox[1] && y <= nextBox[1] + nextBox[3]) return nextPart();
     // a tap on the open card itself leaves it alone
-    const b = open && labelBoxes[open];
+    const b = open && cardBox;
     if (b && x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3]) return;
     const id = pick(x, y);
     if (id) pickPart(id);
@@ -415,75 +410,21 @@
   let spin = 0, rate = 1.2;
   const bodyFont = getComputedStyle(document.body).fontFamily;
   const trail = [];
-  let anchorsOnScreen = {}, labelBoxes = {}, grow = 0, cardId = null;
+  let anchorsOnScreen = {}, labelBoxes = {}, cardBox = null, grow = 0, cardId = null;
   const displayFont = getComputedStyle(document.documentElement).getPropertyValue('--font-display') || 'serif';
   const ease = k => k * k * (3 - 2 * k);
 
 
-  /* ---------- two ways to draw the faces: clean lines, or the site's line-screen dither ---------- */
-  // The dither works like js/dither.js: the faces (shaded by how they catch the light, with
-  // their edges as dark strokes) are painted into a tiny picture, one pixel per cell, and each
-  // cell becomes a vertical ink bar as wide as that pixel is dark.
+  /* ---------- shading: fine ordered dots under the line drawing ---------- */
   const LX = -.45, LY = .65, LZ = .62;   // light from the upper left, towards the viewer
   function faceLum(nx, ny, nz, front) {
     const l = Math.hypot(nx, ny, nz) || 1;
     const d = (nx * LX + ny * LY + nz * LZ) / l;
     return front ? d : -d;               // seen from inside: the other side of the face
   }
-  function shadeLevel(lum, hot) {
-    let g = .66 + Math.max(0, lum) * .34; // shadow .66 .. lit 1: the edges carry the shape, shading just models it
-    if (hot) g -= .2;
-    return Math.round(Math.max(0, g) * 31) * 255 / 31 | 0;
-  }
-  function makeScreen() {
-    const src = document.createElement('canvas');
-    const g = src.getContext('2d', { willReadFrequently: true });
-    let cell = 5, gw = 0, gh = 0;
-    return {
-      g,
-      begin(w, h, c) {
-        cell = c; gw = Math.ceil(w / c); gh = Math.ceil(h / c);
-        if (src.width !== gw || src.height !== gh) { src.width = gw; src.height = gh; }
-        g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, gw, gh);
-        g.setTransform(1 / c, 0, 0, 1 / c, 0, 0);
-      },
-      end(target, inkCol, pattern = 'bars') {
-        const d = g.getImageData(0, 0, gw, gh).data;
-        const light = new Path2D(), heavy = new Path2D(), cross = new Path2D();
-        for (let y = 0, i = 0; y < gh; y++) for (let x = 0; x < gw; x++, i += 4) {
-          const a = d[i + 3] / 255;
-          if (a < .02) continue;
-          const dark = Math.min(1, Math.max(0, (1 - d[i] / 255) * 1.08 - .04)) * a;
-          if (dark < .02) continue;
-          const px = x * cell, py = y * cell;
-          if (pattern === 'dots') {
-            // halftone: a round dot per cell, its area following the darkness
-            const r = Math.sqrt(dark) * cell * .62;
-            light.moveTo(px + cell / 2 + r, py + cell / 2); light.arc(px + cell / 2, py + cell / 2, r, 0, TAU);
-          } else if (pattern === 'hatch') {
-            // engraving: diagonal strokes that join up across cells, crossed in the shadows
-            if (dark < .12) continue;
-            const P = dark < .35 ? light : heavy;
-            P.moveTo(px, py + cell); P.lineTo(px + cell, py);
-            if (dark > .5) { cross.moveTo(px, py); cross.lineTo(px + cell, py + cell); }
-          } else {
-            const bw = Math.max(.6, dark * cell);
-            light.rect(px + (cell - bw) / 2, py, bw, cell);
-          }
-        }
-        if (pattern === 'hatch') {
-          target.save(); target.strokeStyle = inkCol; target.lineCap = 'round';
-          target.lineWidth = .6; target.stroke(light);
-          target.lineWidth = 1; target.stroke(heavy); target.lineWidth = .8; target.stroke(cross);
-          target.restore();
-        } else { target.fillStyle = inkCol; target.fill(light); }
-      },
-    };
-  }
-  const mainScreen = makeScreen(), partScreen = makeScreen();
   const quad = (P, s) => { P.moveTo(s[0][0], s[0][1]); P.lineTo(s[1][0], s[1][1]); P.lineTo(s[2][0], s[2][1]); P.lineTo(s[3][0], s[3][1]); P.closePath(); };
-  // Dots: the clean line drawing with fine ordered (Bayer 8x8) dots for shading underneath.
-  // The faces are filled in grey by how lit they are, then each pixel becomes a dot or not.
+  // The faces are filled in grey by how lit they are, then each pixel becomes a dot or not
+  // through an 8x8 Bayer matrix, so the pattern holds still while the engine turns.
   const BAYER = new Float32Array(64);
   for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
     let v = 0;
@@ -531,102 +472,38 @@
     };
   }
   const mainDots = makeDots(), partDots = makeDots();
-  // shading underneath a clean line drawing, as a fine line-screen, halftone or hatching
-  function fineShade(screen, target, w, h, cell, list, sOf, pattern = 'bars', k = .55) {
-    screen.begin(w, h, cell);
-    const g = screen.g;
-    // far to near, one path per run of faces with the same shade, so nearer faces cover farther ones
-    let level = -1, P = null;
-    const flush = () => { if (P) { g.fillStyle = g.strokeStyle = `rgb(${level},${level},${level})`; g.lineWidth = 1; g.fill(P); g.stroke(P); } };
-    for (const f of list) {
-      const dark = k * Math.pow(1 - Math.max(0, f.lum), 1.3);
-      const v = Math.round((1 - dark) * 23) * 255 / 23 | 0;
-      if (v !== level) { flush(); level = v; P = new Path2D(); }
-      quad(P, sOf(f));
-    }
-    flush();
-    screen.end(target, ink, pattern);
-  }
-  // Paint back to front in small batches: fill neighbouring faces so they hide what's behind
-  // (page colour for lines, their shade for the dither), then draw their edges. The
-  // highlighted component gets a darker fill and heavier edges.
-  function paintBatches(g, list, sOf, frontOf, hot, dith, cell) {
+  // Paint back to front in small batches: fill neighbouring faces in the page colour (plus a
+  // thin stroke of it to close seams) so they hide what's behind, then draw their ink edges.
+  // The highlighted component gets a light ink wash and heavier edges.
+  function paintBatches(g, list, sOf, frontOf, hot) {
     g.lineJoin = 'round';
     for (let i = 0; i < list.length; i += 6) {
       const body = new Path2D(), lines = new Path2D(), hotBody = new Path2D(), hotLines = new Path2D();
-      const groups = dith ? new Map() : null;
       let anyHot = false;
       for (let j = i; j < Math.min(i + 6, list.length); j++) {
         const f = list[j], s = sOf(f), isHot = hot && f.comp === hot;
         quad(body, s);
         if (isHot) { anyHot = true; quad(hotBody, s); }
-        if (dith) {
-          const lv = shadeLevel(f.lum, isHot);
-          let P = groups.get(lv); if (!P) groups.set(lv, P = new Path2D());
-          quad(P, s);
-        }
         // edges: the face's own outline edges, plus silhouettes and cut edges of revolved surfaces
         let e0 = f.edges[0], e2 = f.edges[2];
         if (f.rev) { e0 = !f.left; e2 = !f.right || frontOf(f.right) !== frontOf(f); }
         const ed = [e0, f.edges[1], e2, f.edges[3]], L = isHot ? hotLines : lines;
         for (let k = 0; k < 4; k++) if (ed[k]) { const a = s[k], c = s[(k + 1) % 4]; L.moveTo(a[0], a[1]); L.lineTo(c[0], c[1]); }
       }
-      if (dith) {
-        for (const [lv, P] of groups) { g.fillStyle = g.strokeStyle = `rgb(${lv},${lv},${lv})`; g.lineWidth = 1; g.fill(P); g.stroke(P); }
-        g.strokeStyle = '#000';
-        g.lineWidth = cell * .5; g.stroke(lines);
-        if (anyHot) { g.lineWidth = cell * .8; g.stroke(hotLines); }
-      } else {
-        g.fillStyle = paper; g.fill(body);
-        g.strokeStyle = paper; g.lineWidth = 1; g.stroke(body);
-        if (anyHot) { g.globalAlpha = .18; g.fillStyle = ink; g.fill(hotBody); g.globalAlpha = 1; }
-        g.strokeStyle = ink;
-        if (view.sketch) {
-          g.globalAlpha = .6; g.lineWidth = .8; g.stroke(lines); if (anyHot) g.stroke(hotLines);
-          g.translate(.9, -.6); g.globalAlpha = .45; g.stroke(lines); if (anyHot) { g.lineWidth = 1.4; g.stroke(hotLines); }
-          g.translate(-.9, .6); g.globalAlpha = 1;
-        } else {
-          g.lineWidth = .9; g.stroke(lines);
-          if (anyHot) { g.lineWidth = 1.8; g.stroke(hotLines); }
-        }
-      }
+      g.fillStyle = paper; g.fill(body);
+      g.strokeStyle = paper; g.lineWidth = 1; g.stroke(body);
+      if (anyHot) { g.globalAlpha = .18; g.fillStyle = ink; g.fill(hotBody); g.globalAlpha = 1; }
+      g.strokeStyle = ink;
+      g.lineWidth = .9; g.stroke(lines);
+      if (anyHot) { g.lineWidth = 1.8; g.stroke(hotLines); }
     }
   }
-  // the drawing style, cycled with one button and remembered on this browser
-  const STYLES = [
-    ['lines', 'Lines'], ['sketch', 'Sketch'], ['blueprint', 'Blueprint'], ['fine', 'Fine'],
-    ['halftone', 'Halftone'], ['hatch', 'Hatch'], ['dither', 'Dither'], ['dots', 'Dots'],
-  ];
-  const view = { mode: 'lines' };
-  const styleBtn = document.querySelector('[data-turbine-style]');
-  const band = canvas.closest('.turbine-band');
-  function setView(mode) {
-    if (!STYLES.some(s => s[0] === mode)) mode = 'lines';
-    view.mode = mode;
-    view.dither = mode === 'dither'; view.dots = mode === 'dots'; view.fine = mode === 'fine';
-    view.halftone = mode === 'halftone'; view.hatch = mode === 'hatch'; view.sketch = mode === 'sketch';
-    view.shade = !['lines', 'sketch', 'blueprint'].includes(mode);
-    if (band) band.classList.toggle('blueprint', mode === 'blueprint');
-    colourTick = 0;                                    // pick up the new ink and paper next frame
-    if (styleBtn) styleBtn.textContent = `Style · ${STYLES.find(s => s[0] === mode)[1]} ↻`;
-    try { localStorage.setItem('turbine-view', mode); } catch (e) {}
-  }
-  if (styleBtn) styleBtn.addEventListener('click', () => {
-    const i = STYLES.findIndex(s => s[0] === view.mode);
-    setView(STYLES[(i + 1) % STYLES.length][0]);
-  });
-  let savedView = 'dots';
-  try { savedView = localStorage.getItem('turbine-view') || 'dots'; } catch (e) {}
-  setView(savedView);
 
   function draw(t, yaw, pitch, dt) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
     if (colourTick-- <= 0) {
-      ink = getComputedStyle(canvas).color;
-      const bandBg = band && getComputedStyle(band).backgroundColor;
-      paper = bandBg && bandBg !== 'rgba(0, 0, 0, 0)' && bandBg !== 'transparent' ? bandBg : getComputedStyle(document.body).backgroundColor;
-      colourTick = 30;
+      ink = getComputedStyle(canvas).color; paper = getComputedStyle(document.body).backgroundColor; colourTick = 30;
     }
     const narrow = W < 640;
     const scale = Math.min(W / (narrow ? 2.75 : 3.6), H / 2.6);
@@ -654,14 +531,11 @@
       const nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
       const mx = (v[0][0] + v[2][0]) / 2, my = (v[0][1] + v[2][1]) / 2, mz = (v[0][2] + v[2][2]) / 2 - D;
       f.front = nx * mx + ny * my + nz * mz < 0;
-      if (view.shade) f.lum = faceLum(nx, ny, nz, f.front);
+      f.lum = faceLum(nx, ny, nz, f.front);
     }
     faces.sort((a, b) => a.z - b.z);
 
-    const CELL = narrow ? 3 : 5;
-    const g = view.dither ? mainScreen.g : ctx;
-    if (view.dither) mainScreen.begin(W, H, CELL);
-    paintBatches(g, faces, f => f.s, f => f.front, active, view.dither, CELL);
+    paintBatches(ctx, faces, f => f.s, f => f.front, active);
     // the outer cowl's outline and cut edges go on last so nearer cowl faces don't chip them
     const outline = new Path2D();
     for (const f of faces) {
@@ -670,12 +544,8 @@
       if (!f.left) { outline.moveTo(s[0][0], s[0][1]); outline.lineTo(s[1][0], s[1][1]); }
       if (!f.right || f.right.front !== f.front) { outline.moveTo(s[2][0], s[2][1]); outline.lineTo(s[3][0], s[3][1]); }
     }
-    g.strokeStyle = view.dither ? '#000' : ink; g.lineWidth = view.dither ? CELL * .6 : 1.2; g.stroke(outline);
-    if (view.dither) mainScreen.end(ctx, ink);
-    if (view.dots) mainDots(ctx, W, H, faces, f => f.s, ink);
-    if (view.fine) fineShade(mainScreen, ctx, W, H, narrow ? 2 : 3, faces, f => f.s);
-    if (view.halftone) fineShade(mainScreen, ctx, W, H, narrow ? 4 : 6, faces, f => f.s, 'dots', .4);
-    if (view.hatch) fineShade(mainScreen, ctx, W, H, narrow ? 4 : 5, faces, f => f.s, 'hatch', .75);
+    ctx.strokeStyle = ink; ctx.lineWidth = 1.2; ctx.stroke(outline);
+    mainDots(ctx, W, H, faces, f => f.s, ink);
 
     // airflow arrows: into the intake and out of the exhaust, dashes moving with the flow
     ctx.save();
@@ -773,26 +643,48 @@
     if (card) {
       if (card.id !== cardId) { cardId = card.id; grow = Math.min(grow, .15); }
       const c = COMPONENTS[card.id];
-      const cw = narrow ? W - pad * 2 : Math.min(320, W * .34);
-      const inner = cw - 28;
-      // lay out the card's text to know its height
-      ctx.font = `400 13px ${bodyFont}`;
-      if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
-      const whyLines = wrap(c.why, inner);
-      ctx.font = `500 9.5px ${bodyFont}`;
-      if ('letterSpacing' in ctx) ctx.letterSpacing = '0.08em';
-      const toolLines = wrap(c.tools.toUpperCase(), inner);
       const tapNext = !fine;
-      const ch = 14 + 12 + 8 + 28 + 8 + whyLines.length * 18 + 10 + toolLines.length * 14 + 14 + (tapNext ? 36 : 0);
+      // lay out the card's text for a given width, to know its height
+      const layout = cw => {
+        const inner = cw - 28;
+        ctx.font = `400 13px ${bodyFont}`;
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+        const whyLines = wrap(c.why, inner);
+        ctx.font = `500 9.5px ${bodyFont}`;
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '0.08em';
+        const toolLines = wrap(c.tools.toUpperCase(), inner);
+        const partLines = wrap(`${c.n} · ${c.part}`.toUpperCase(), inner);
+        ctx.font = `400 26px ${displayFont}`;
+        if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.01em';
+        const titleLines = wrap(c.skill.toUpperCase(), inner);   // narrow cards take the title over two lines
+        return { cw, whyLines, toolLines, titleLines, partLines,
+                 ch: 14 + 12 + (partLines.length - 1) * 14 + 8 + 28 * titleLines.length + 8 + whyLines.length * 18 + 10 + toolLines.length * 14 + 14 + (tapNext ? 36 : 0) };
+      };
+      let L, tx, ty;
+      if (tapNext) {
+        // touch screens: full width along the bottom, so Next stays under the thumb
+        L = layout(W - pad * 2);
+        tx = pad; ty = H - 12 - L.ch;
+      } else {
+        // anywhere else: the emptiest spot that fits, as close to the part as it can be
+        const opts = [320, 250, 200, 170].map(cw => layout(Math.min(cw, W - pad * 2)));
+        const best = placeCard(opts, card.p, card.id, pad);
+        L = best.L; tx = best.x; ty = best.y;
+      }
+      const { cw, whyLines, toolLines, titleLines, partLines, ch } = L;
+      // glide to the spot rather than jumping
+      if (!cardAt || cardAt.id !== card.id) cardAt = { id: card.id, x: tx, y: ty };
+      const follow = dt ? Math.min(1, dt * 8) : 1;
+      cardAt.x += (tx - cardAt.x) * follow; cardAt.y += (ty - cardAt.y) * follow;
+      // grow out of the little label into the card
       const k = ease(grow);
       const w = card.w + (cw - card.w) * k, h = 18 + (ch - 18) * k;
-      const x = Math.max(pad, Math.min(W - pad - w, card.p[0] - w / 2 + (card.x + card.w / 2 - card.p[0]) * (1 - k)));
-      const y = card.side === 'top' ? card.y : card.y + 18 - h;
-      labelBoxes[card.id] = [x, y, w, h];
-      // leader to the card's near edge
-      const lx = Math.max(x + 12, Math.min(x + w - 12, card.p[0])), ly = card.side === 'top' ? y + h : y;
+      const x = card.x + (cardAt.x - card.x) * k, y = card.y + (cardAt.y - card.y) * k;
+      cardBox = [x, y, w, h];
+      // leader from the part to the nearest point of the card
+      const lx = Math.max(x, Math.min(x + w, card.p[0])), ly = Math.max(y, Math.min(y + h, card.p[1]));
       ctx.strokeStyle = ink; ctx.lineWidth = 1.4;
-      ctx.beginPath(); ctx.moveTo(card.p[0], card.p[1]); ctx.lineTo(lx, ly); ctx.stroke();
+      if (lx !== card.p[0] || ly !== card.p[1]) { ctx.beginPath(); ctx.moveTo(card.p[0], card.p[1]); ctx.lineTo(lx, ly); ctx.stroke(); }
       ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(card.p[0], card.p[1], 3.4, 0, TAU); ctx.fill();
       ctx.fillStyle = paper; ctx.fillRect(x, y, w, h);
       ctx.lineWidth = 1.2; ctx.strokeRect(x + .5, y + .5, w - 1, h - 1);
@@ -809,12 +701,14 @@
         let ty = y + 14;
         ctx.font = `500 9.5px ${bodyFont}`;
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0.08em';
-        ctx.globalAlpha *= .7; ctx.fillText(`${c.n} · ${c.part}`.toUpperCase(), x + 14, ty); ctx.globalAlpha /= .7;
-        ty += 20;
+        ctx.globalAlpha *= .7;
+        for (const line of partLines) { ctx.fillText(line, x + 14, ty); ty += 14; }
+        ctx.globalAlpha /= .7;
+        ty += 6;
         ctx.font = `400 26px ${displayFont}`;
         if ('letterSpacing' in ctx) ctx.letterSpacing = '-0.01em';
-        ctx.fillText(c.skill.toUpperCase(), x + 14, ty);
-        ty += 36;
+        for (const line of titleLines) { ctx.fillText(line, x + 14, ty); ty += 28; }
+        ty += 8;
         ctx.font = `400 13px ${bodyFont}`;
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
         for (const line of whyLines) { ctx.fillText(line, x + 14, ty); ty += 18; }
@@ -834,8 +728,74 @@
         }
         ctx.restore();
       }
-    } else cardId = null;
+    } else { cardId = null; cardBox = null; }
     return molStage;
+  }
+
+
+  /* ---------- where the open card goes: the emptiest place near its part ---------- */
+  // The canvas is split into 16px cells; cells under the engine or a label count as taken.
+  // Every spot the card could sit is scored by how much it covers plus how far it is from
+  // its part, and the card keeps its current spot unless another is clearly better.
+  const CELLPX = 16;
+  let occ = new Uint8Array(0), sat = new Int32Array(0), cardAt = null, cardSpot = null;
+  function placeCard(opts, anchor, id, pad) {
+    const gx = Math.ceil(W / CELLPX), gy = Math.ceil(H / CELLPX);
+    if (occ.length !== gx * gy) { occ = new Uint8Array(gx * gy); sat = new Int32Array((gx + 1) * (gy + 1)); }
+    occ.fill(0);
+    const mark = (x0, y0, x1, y1) => {
+      const a = Math.max(0, Math.floor(x0 / CELLPX)), b = Math.min(gx - 1, Math.floor(x1 / CELLPX));
+      const c = Math.max(0, Math.floor(y0 / CELLPX)), d = Math.min(gy - 1, Math.floor(y1 / CELLPX));
+      for (let yy = c; yy <= d; yy++) for (let xx = a; xx <= b; xx++) occ[yy * gx + xx] = 1;
+    };
+    let ex0 = Infinity, ex1 = -Infinity;      // the engine's left and right edges on screen
+    for (const f of faces) {
+      const q = f.s;
+      ex0 = Math.min(ex0, q[0][0], q[2][0]); ex1 = Math.max(ex1, q[0][0], q[2][0]);
+      mark(Math.min(q[0][0], q[1][0], q[2][0], q[3][0]), Math.min(q[0][1], q[1][1], q[2][1], q[3][1]),
+           Math.max(q[0][0], q[1][0], q[2][0], q[3][0]), Math.max(q[0][1], q[1][1], q[2][1], q[3][1]));
+    }
+    for (const lid in labelBoxes) if (lid !== id) { const [x, y, w, h] = labelBoxes[lid]; mark(x - 6, y - 6, x + w + 6, y + h + 6); }
+    // summed-area table, so any rectangle's taken cells add up in four lookups
+    for (let yy = 0; yy < gy; yy++) {
+      let run = 0;
+      for (let xx = 0; xx < gx; xx++) {
+        run += occ[yy * gx + xx];
+        sat[(yy + 1) * (gx + 1) + xx + 1] = sat[yy * (gx + 1) + xx + 1] + run;
+      }
+    }
+    const taken = (x, y, w, h) => {
+      const a = Math.max(0, Math.floor(x / CELLPX)), b = Math.min(gx, Math.ceil((x + w) / CELLPX));
+      const c = Math.max(0, Math.floor(y / CELLPX)), d = Math.min(gy, Math.ceil((y + h) / CELLPX));
+      return sat[d * (gx + 1) + b] - sat[c * (gx + 1) + b] - sat[d * (gx + 1) + a] + sat[c * (gx + 1) + a];
+    };
+    // a part left of the engine's middle opens to the left, one right of it to the right;
+    // crossing over costs about as much as covering six cells of the drawing
+    const mid = (ex0 + ex1) / 2, side = anchor[0] < mid ? -1 : 1;
+    const score = (x, y, L) => taken(x, y, L.cw, L.ch) * 400
+      + Math.hypot(x + L.cw / 2 - anchor[0], y + L.ch / 2 - anchor[1])
+      + ((x + L.cw / 2 - mid) * side < 0 ? 2500 : 0)
+      + opts.indexOf(L) * 40;
+    let best = null;
+    for (const L of opts) {
+      const maxX = W - pad - L.cw, maxY = H - pad - L.ch;
+      if (maxX < pad || maxY < pad) continue;
+      for (let y = pad; y <= maxY + .1; y += CELLPX / 2) for (let x = pad; x <= maxX + .1; x += CELLPX / 2) {
+        const v = score(x, y, L);
+        if (!best || v < best.v) best = { v, x, y, L };
+      }
+      // the last edge positions, so the card can sit flush right or bottom
+      for (const [x, y] of [[maxX, pad], [maxX, maxY], [pad, maxY]]) { const v = score(x, y, L); if (v < best.v) best = { v, x, y, L }; }
+    }
+    if (!best) { const L = opts[opts.length - 1]; return { x: pad, y: pad, L }; }
+    // stay put unless the new spot is clearly better
+    if (cardSpot && cardSpot.id === id) {
+      const L = opts.find(o => o.cw === cardSpot.cw);
+      if (L && cardSpot.x <= W - pad - L.cw && cardSpot.y <= H - pad - L.ch && score(cardSpot.x, cardSpot.y, L) <= best.v + 120)
+        return { x: cardSpot.x, y: cardSpot.y, L };
+    }
+    cardSpot = { id, x: best.x, y: best.y, cw: best.L.cw };
+    return best;
   }
 
   function wrap(text, max) {
@@ -852,6 +812,7 @@
   // which component the cursor is nearest to (within reach)
   function pick(cx = pointer.cx, cy = pointer.cy) {
     if (cx < 0) return null;
+    if (cardBox && open && cx >= cardBox[0] && cx <= cardBox[0] + cardBox[2] && cy >= cardBox[1] && cy <= cardBox[1] + cardBox[3]) return open;
     for (const id in labelBoxes) {
       const [x, y, w, h] = labelBoxes[id];
       if (cx >= x && cx <= x + w && cy >= y && cy <= y + h) return id;
@@ -865,6 +826,7 @@
   }
 
   /* ---------- animate ---------- */
+  let lastHover = null, lastHoverAt = 0;
   let last = performance.now(), shownRpm = -1, acc = 0, lastProgress = 0;
   // 30 redraws a second is plenty for a slowly turning drawing, and it leaves most
   // frames free so the rest of the page keeps scrolling smoothly
@@ -893,7 +855,9 @@
         lastProgress = progress;
         yaw = -.62 + (progress - .5) * .5 + dragYaw;
       } else {
-        if (!paused) {
+        // hovering a part holds the air there until the mouse moves away
+        const holding = fine && lastHover && now - lastHoverAt < 500;
+        if (!paused && !holding) {
           mol += step / LOOP;
           if (mol >= 1.02) nextStory();
         }
@@ -902,12 +866,15 @@
       const pitch = .36 + (fine ? pointer.y * .12 : 0);
       const molStage = draw(now / 1000, yaw, pitch, step);
       showStory(molStage);
-      const hovered = fine && pointer.over ? pick() : null;
+      // a short grace period, so the mouse can travel from a label to its card
+      let hovered = fine && pointer.over ? pick() : null;
+      if (hovered) { lastHover = hovered; lastHoverAt = now; }
+      else if (fine && lastHover && now - lastHoverAt < 500) hovered = lastHover;
       if (fine) canvas.style.cursor = hovered ? 'pointer' : '';
       active = hovered || picked || (molStage === 'intake' ? null : molStage);
       // desktop: the hovered callout opens; phones: the molecule's stage is always open
       if (sideOn()) { open = null; showSide(active); if (sideShown) drawPart(sideShown, step, spin); }
-      else if (fine) open = hovered || picked;
+      else if (fine) open = active;      // hovered, held, or wherever the air is
       else {
         // the current part stays open unless the reader folded it; a new part opens again
         const want = active || 'fan';
