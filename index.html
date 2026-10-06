@@ -303,27 +303,36 @@
       <div class="section-head center">
         <h2 class="p6 label">toolkit</h2>
         <h3 class="h3" data-split>Technical skills</h3>
+        <p class="p5 muted turbine-intro">Think of me as a turbofan: ideas go in the front, every part of the engine is a skill they pass through, and shipped projects come out the back. Hover a part to see what it stands for.</p>
       </div>
 
-      <div class="skills-grid" data-fade>
-        <div class="skill"><span class="p6 muted">01</span><div><h4 class="h6">AI &amp; LLMs</h4><p class="p6 muted">LLMs, AI Agents, RAG, MCP, Speech Recognition, Speech Synthesis</p></div></div>
-        <div class="skill"><span class="p6 muted">02</span><div><h4 class="h6">Programming</h4><p class="p6 muted">Python, JavaScript, TypeScript, Docker, Web Scraping</p></div></div>
-        <div class="skill"><span class="p6 muted">03</span><div><h4 class="h6">Web Development</h4><p class="p6 muted">Django, REST APIs, UI Design, HTML &amp; CSS, Full-Stack</p></div></div>
-        <div class="skill"><span class="p6 muted">04</span><div><h4 class="h6">Computer Vision</h4><p class="p6 muted">YOLO, OpenCV, Object Detection</p></div></div>
-        <div class="skill"><span class="p6 muted">05</span><div><h4 class="h6">Robotics</h4><p class="p6 muted">SLAM, LiDAR, Obstacle Avoidance, Inverse Kinematics, Pick &amp; Place, ROS</p></div></div>
-        <div class="skill"><span class="p6 muted">06</span><div><h4 class="h6">RoboCup</h4><p class="p6 muted">Humanoid Soccer, @Home Task Logic, Simulation, Competitions</p></div></div>
+      <!-- The TA-1: ideas in, shipped projects out, each component a skill (js/turbine.js) -->
+      <div class="turbine-pin">
+        <figure class="turbine-band">
+          <div class="turbine-main">
+            <canvas class="turbine" aria-hidden="true"></canvas>
+            <!-- detail for the hovered component (or the molecule's stage); desktop only -->
+            <aside class="turbine-side" aria-live="polite">
+              <canvas class="side-part empty" aria-hidden="true"></canvas>
+              <span class="p6 muted" data-side-part>Hover a part of the engine</span>
+              <h4 class="h4" data-side-skill>TA-1 Turbofan</h4>
+              <p class="p5 side-why" data-side-why>Ideas go in the front, every part of the engine is a skill they pass through, and shipped projects come out the back.</p>
+              <p class="p6 muted" data-side-tools></p>
+            </aside>
+          </div>
+          <figcaption class="turbine-story">
+            <span class="p6 muted" data-story-stage>Intake · An idea</span>
+            <span class="h6 sentence" data-story-text></span>
+            <span class="turbine-story-actions">
+              <a href="#projects" class="p6 story-link" data-story-link hidden>Open project ↗</a>
+              <button type="button" class="p6 story-next" data-story-next>Another idea ↻</button>
+              <span class="p6 muted rpm" data-rpm>N1 3,420 RPM</span>
+            </span>
+          </figcaption>
+        </figure>
       </div>
+
     </section>
-
-    <!-- Turbofan cutaway schematic: lines in js/turbine.js, shading by the dither engine -->
-    <figure class="turbine-band wrap" aria-hidden="true">
-      <canvas class="art turbine-shade" data-dither="turbineShade" data-cell="4"></canvas>
-      <canvas class="turbine"></canvas>
-      <figcaption class="turbine-cap">
-        <span class="p6">Fig. 01 · Turbofan engine, cutaway</span>
-        <span class="p6 muted" data-rpm>N1 3,420 RPM</span>
-      </figcaption>
-    </figure>
 
     <!-- Projects -->
     <section class="section wrap" id="projects" data-label="Projects">

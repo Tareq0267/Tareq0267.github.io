@@ -1133,7 +1133,7 @@
 
       // newest click wave that is still alive (the plain transition bands don't react to clicks)
       let wave = [0, 0, 0, 0];
-      const clickable = this.scene !== 'fade' && this.scene !== 'fadeUp' && this.scene !== 'turbineShade';
+      const clickable = this.scene !== 'fade' && this.scene !== 'fadeUp';
       for (let i = clickable ? waves.length - 1 : -1; i >= 0; i--) {
         const age = now - waves[i].t0;
         if (age > WAVE_LIFE) continue;
