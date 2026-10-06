@@ -301,9 +301,27 @@
       <!-- An old PC, drawn like the turbine (a line drawing with hidden lines removed,
            js/crt.js), with a Windows 98 style desktop on its slightly curved screen -->
       <figure class="crt-band" data-fade>
-        <canvas class="crt3d" tabindex="0" role="img"
-          aria-label="An old computer showing the work experience listed above. Click a job on its screen, or focus it and use the arrow keys."></canvas>
-        <figcaption class="crt-hint p6 muted">Click around the desktop · the button under the screen is the power switch</figcaption>
+        <div class="crt-stage">
+          <canvas class="crt3d" tabindex="0" role="img"
+            aria-label="An old computer showing the work experience listed above. Click a job on its screen, or focus it and use the arrow keys."></canvas>
+          <!-- either side of the monitor: the jobs as a timeline, and the picked one's spec
+               plate (styled like the turbine's side card); both follow the screen -->
+          <nav class="crt-timeline" aria-label="Jobs" data-crt-timeline>
+            <span class="p6 muted">Timeline</span>
+            <ol></ol>
+          </nav>
+          <aside class="crt-spec" aria-live="polite" data-crt-spec>
+            <span class="p6 muted" data-spec-kicker></span>
+            <h4 class="h4" data-spec-role></h4>
+            <dl class="p6" data-spec-rows></dl>
+            <p class="p5 crt-spec-desc" data-spec-desc></p>
+            <p class="p6 muted" data-spec-tags></p>
+          </aside>
+        </div>
+        <figcaption class="crt-caption">
+          <span class="p6 muted">Click the screen to zoom in · Esc or click outside to zoom out · the button under the screen is the power switch</span>
+          <span class="p6 muted">Tareqtron 98 · 640 × 480 · <span data-crt-count></span></span>
+        </figcaption>
       </figure>
     </section>
 
