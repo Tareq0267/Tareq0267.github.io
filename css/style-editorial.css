@@ -751,7 +751,9 @@ html{ -webkit-tap-highlight-color: transparent; }
 
 /* touch screens: pin the engine and let scrolling carry the molecule through it */
 @media (hover: none){
-  .turbine-pin{ height: 260vh; margin-inline: calc(var(--gutter) * -1); }
+  /* pinned for only half a screen of scrolling: enough to carry the air through the engine,
+     short enough that the page doesn't feel stuck on the way past (it was 260vh) */
+  .turbine-pin{ height: 150vh; height: 150svh; margin-inline: calc(var(--gutter) * -1); }
   .turbine-pin .turbine-band{
     position: sticky; top: 0; height: 100vh; height: 100svh;
     padding: calc(var(--header-h) + 8px) var(--gutter) 16px;
