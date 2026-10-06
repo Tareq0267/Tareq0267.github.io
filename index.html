@@ -20,8 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&text=hello!&display=swap" rel="stylesheet">
-  <!-- Jawi output: only downloaded once Arabic-script text is on screen (unicode-range) -->
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&text=hello!&display=swap" rel="stylesheet">  <!-- Jawi output: only downloaded once Arabic-script text is on screen (unicode-range) -->
   <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@500&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lenis@1.3.15/dist/lenis.css">
@@ -259,8 +258,10 @@
         <h3 class="h3" data-split>Where I've worked</h3>
       </div>
 
-      <div class="rows">
-        <article class="row grid-12 exp" data-fade>
+      <!-- The jobs, as plain text for screen readers and search engines. The CRT below
+           (js/crt.js) reads them from here, so this is the one place to edit them. -->
+      <div class="rows sr-only" data-jobs>
+        <article class="exp">
           <p class="p6 when">May 2025 – Present</p>
           <div class="role">
             <h4 class="h5">Full-stack Web Developer</h4>
@@ -272,7 +273,7 @@
           </div>
         </article>
 
-        <article class="row grid-12 exp" data-fade>
+        <article class="exp">
           <p class="p6 when">Jan 2025 – May 2025</p>
           <div class="role">
             <h4 class="h5">Helper at Makerspace UM</h4>
@@ -284,7 +285,7 @@
           </div>
         </article>
 
-        <article class="row grid-12 exp" data-fade>
+        <article class="exp">
           <p class="p6 when">Jun 2023 – Dec 2023</p>
           <div class="role">
             <h4 class="h5">Intern</h4>
@@ -296,6 +297,14 @@
           </div>
         </article>
       </div>
+
+      <!-- An old PC, drawn like the turbine (a line drawing with hidden lines removed,
+           js/crt.js), with a Windows 98 style desktop on its slightly curved screen -->
+      <figure class="crt-band" data-fade>
+        <canvas class="crt3d" tabindex="0" role="img"
+          aria-label="An old computer showing the work experience listed above. Click a job on its screen, or focus it and use the arrow keys."></canvas>
+        <figcaption class="crt-hint p6 muted">Click around the desktop · the button under the screen is the power switch</figcaption>
+      </figure>
     </section>
 
     <!-- Skills -->
@@ -525,6 +534,7 @@
   <div class="indicator p6" aria-hidden="true"><span class="ind-num">01</span> / <span class="ind-total">08</span> · <span class="ind-name">Intro</span></div>
 
   <script src="js/turbine.js"></script>
+  <script src="js/crt.js"></script>
   <script src="js/fun.js"></script>
   <script src="js/site.js"></script>
   <script src="js/secret.js"></script>

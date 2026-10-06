@@ -129,7 +129,7 @@ window.initFun = function () {
   }
 
   // Labels decode once as they scroll in, and again whenever the cursor lands on them
-  const SCRAMBLE = '.section-head .label, .about-head .h6, .exp .when, .honour .meta .p6:first-child, .menu-links .h2, .hero-bottom > span';
+  const SCRAMBLE = '.section-head .label, .about-head .h6, .honour .meta .p6:first-child, .menu-links .h2, .hero-bottom > span';
   const seen = new IntersectionObserver(entries => entries.forEach(en => {
     if (!en.isIntersecting) return;
     seen.unobserve(en.target);
@@ -223,16 +223,10 @@ window.initFun = function () {
       el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
       el.classList.remove('is-hot');
     });
-
-    // Experience files turn ink while the cursor is on them
-    track('#experience .exp', el => el.classList.add('is-hot'), el => el.classList.remove('is-hot'));
   } else {
     /* On phones there is no hover: a spotlight line 40% down the screen lights
-       whichever news row, experience file or skill it crosses as you scroll.
-       Scrolling down, ink rises from the bottom and the item you leave drains
-       upwards; scrolling up, the reverse. */
+       whichever news row it crosses as you scroll. */
     const SPOT = .4;
-    const items = [...document.querySelectorAll('#experience .exp')];
 
     // News rows and skills: on/off fills hopped and snapped. Instead one block
     // glides along the list and settles on the item under the spotlight line; it
@@ -267,30 +261,6 @@ window.initFun = function () {
       })();
     }
     glideSpot(document.querySelector('#honours .rows'), '.honour');
-    const lit = new Set();
-    let lastY = scrollY, down = true, queued = false;
-    function spotlight() {
-      queued = false;
-      if (scrollY !== lastY) { down = scrollY > lastY; lastY = scrollY; }
-      const line = innerHeight * SPOT;
-      for (const el of items) {
-        const r = el.getBoundingClientRect();
-        const on = r.top <= line && r.bottom > line;
-        if (on === lit.has(el)) continue;
-        if (on) {
-          lit.add(el);
-          el.dataset.from = down ? 'bottom' : 'top';
-          requestAnimationFrame(() => { if (lit.has(el)) el.classList.add('is-hot'); });
-        } else {
-          lit.delete(el);
-          el.dataset.from = down ? 'top' : 'bottom';
-          el.classList.remove('is-hot');
-        }
-      }
-    }
-    addEventListener('scroll', () => { if (!queued) { queued = true; requestAnimationFrame(spotlight); } }, { passive: true });
-    addEventListener('resize', spotlight);
-    spotlight();
   }
 
   /* =========================================================

@@ -1093,8 +1093,9 @@
     render(t, now) {
       const draw = scenes[this.scene];
       this.lastT = t;
+      // a canvas that had no size yet has no ink either (reduced motion renders every canvas up front)
+      if (!draw || !this.cols || !this.ink || GL.lost) return;
       lightInk = this.ink[0] * .299 + this.ink[1] * .587 + this.ink[2] * .114 > .4;
-      if (!draw || !this.cols || GL.lost) return;
       const r = this.canvas.getBoundingClientRect();
       const vh = window.innerHeight;
       const st = {
