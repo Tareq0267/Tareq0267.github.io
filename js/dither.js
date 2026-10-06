@@ -1109,6 +1109,8 @@
           .map(c => ({ x: (c.x - r.left) / this.cell, y: (c.y - r.top) / this.cell, age: Math.max(0, now - c.t0), id: c.id }))
       };
       this.lastNow = now;
+      // a scene with hold() returning true has nothing new: keep what's on screen
+      if (draw.hold && draw.hold()) return;
       const { ctx } = this;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, this.cols, this.rows);
@@ -1131,7 +1133,7 @@
 
       // newest click wave that is still alive (the plain transition bands don't react to clicks)
       let wave = [0, 0, 0, 0];
-      const clickable = this.scene !== 'fade' && this.scene !== 'fadeUp';
+      const clickable = this.scene !== 'fade' && this.scene !== 'fadeUp' && this.scene !== 'turbineShade';
       for (let i = clickable ? waves.length - 1 : -1; i >= 0; i--) {
         const age = now - waves[i].t0;
         if (age > WAVE_LIFE) continue;
