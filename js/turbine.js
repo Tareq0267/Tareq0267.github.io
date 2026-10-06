@@ -28,11 +28,11 @@
   /* ---------- the components, in the order air meets them ---------- */
   const COMPONENTS = {
     fan:     { n: '01', part: 'Fan', skill: 'Programming', short: 'Code', tools: 'Python, JavaScript, TypeScript, Docker, Web Scraping', why: 'The first thing the air hits. Every idea starts as code before it becomes anything else.', anchor: [-.77, .55], side: 'top' },
-    lpc:     { n: '02', part: 'Low pressure compressor', skill: 'Web Development', short: 'Web', tools: 'Django, REST APIs, UI Design, HTML & CSS', why: 'Squeezes loose code into real structure: apps, APIs and interfaces people can actually use.', anchor: [-.45, .27], side: 'bottom' },
+    lpc:     { n: '02', part: 'Low pressure compressor', skill: 'Web Development', short: 'Web', tools: 'Django, REST APIs, Full Stack Web Apps', why: 'Squeezes loose code into real structure: apps, APIs and interfaces people can actually use.', anchor: [-.45, .27], side: 'bottom' },
     hpc:     { n: '03', part: 'High pressure compressor', skill: 'Computer Vision', short: 'Vision', tools: 'YOLO, OpenCV, Object Detection', why: 'Compresses raw input into understanding: seeing, detecting and making sense of the world.', anchor: [-.02, .24], side: 'top' },
     comb:    { n: '04', part: 'Combustion chamber', skill: 'AI & LLMs', short: 'AI', tools: 'LLMs, AI Agents, RAG, MCP, Speech Recognition & Synthesis', why: 'Where fuel meets air and the energy comes in. AI turns working software into something smart.', anchor: [.38, .25], side: 'bottom' },
-    hpt:     { n: '05', part: 'High pressure turbine', skill: 'Robotics', short: 'Robotics', tools: 'SLAM, LiDAR, Obstacle Avoidance, Inverse Kinematics, Pick & Place, ROS', why: 'Turns that energy into physical motion. Where the software meets the real world.', anchor: [.59, .22], side: 'top' },
-    lpt:     { n: '06', part: 'Low pressure turbine & shaft', skill: 'RoboCup', short: 'RoboCup', tools: 'Humanoid Soccer, @Home Task Logic, Simulation, Competitions', why: 'Drives the shaft that turns the fan. Competing feeds lessons back into how the next idea starts.', anchor: [.86, .27], side: 'bottom' },
+    hpt:     { n: '05', part: 'High pressure turbine', skill: 'Robotics', short: 'Robotics', tools: 'SLAM, LiDAR, Obstacle Avoidance, Inverse Kinematics, Pick & Place, ROS, RoboCup Soccer & @Home', why: 'Turns that energy into physical motion. Where the software meets the real world.', anchor: [.59, .22], side: 'top' },
+    lpt:     { n: '06', part: 'Low pressure turbine', skill: 'Frontend', short: 'Frontend', tools: 'Web Design, UI Design, HTML & CSS, JavaScript, TypeScript', why: 'Drives the shaft that spins the fan up front. The frontend is what people meet first, and I design it to pull them in.', anchor: [.86, .27], side: 'bottom' },
     bypass:  { n: '07', part: 'Bypass duct', skill: 'Workflow Digitisation (DTS)', short: 'DTS', tools: 'Web apps, LLMs and MCP for company workflows', why: "Most of a real turbofan's thrust skips the core. Day to day, digitising company workflows is mine.", anchor: [-.2, .56], side: 'bottom' },
     exhaust: { n: '08', part: 'Exhaust', skill: 'Shipped Projects', short: 'Shipped', tools: 'RoboCup 2D Sim, Project AWA, Rumi to Jawi, Avicenna, 30Juz', why: 'What comes out the back: thrust. Every idea that makes it through ends up shipped.', anchor: [1.36, .07], side: 'top' },
   };
@@ -44,7 +44,7 @@
       fan: 'Modelled the pitch and robots in TypeScript',
       hpc: 'Gave the robots a sense of where the ball is',
       hpt: 'Simulated how the T1 moves and turns',
-      lpt: 'Tuned it against real match situations',
+      lpt: 'Built the pitch view and parameter controls for the browser',
       exhaust: 'Shipped: RoboCup 2D Sim' } },
     { project: '30Juz', tab: 'tab-5', lines: {
       intake: 'Can finishing the Quran in Ramadan feel less overwhelming?',
@@ -76,10 +76,10 @@
   //         left/right: neighbours for silhouette edges on surfaces of revolution }
   const faces = [];
   const at = (x, r, a) => [x, Math.cos(a) * r, Math.sin(a) * r];
-  const inCut = a => { a -= CUT_AT; a = Math.atan2(Math.sin(a), Math.cos(a)); return Math.abs(a) < CUT; };
+  const inCut = (a, w = CUT) => { a -= CUT_AT; a = Math.atan2(Math.sin(a), Math.cos(a)); return Math.abs(a) < w; };
 
   // surface of revolution as a grid of quads; ring edges are stroked at the listed stations
-  function revolve(profile, M, { cut = false, spin = false, rings = 'ends', shell = false, comp = null } = {}) {
+  function revolve(profile, M, { cut = false, cutW = CUT, spin = false, rings = 'ends', shell = false, comp = null } = {}) {
     const n = profile.length;
     const ringSet = rings === 'all' ? null : new Set(rings === 'ends' ? [0, n - 1] : rings);
     const grid = [];
@@ -87,7 +87,7 @@
       const row = [];
       for (let j = 0; j < M; j++) {
         const a0 = j / M * TAU, a1 = (j + 1) / M * TAU;
-        if (cut && inCut((a0 + a1) / 2)) { row.push(null); continue; }
+        if (cut && inCut((a0 + a1) / 2, cutW)) { row.push(null); continue; }
         const [x0, r0] = profile[i], [x1, r1] = profile[i + 1];
         const f = {
           p: [at(x0, r0, a0), at(x1, r1, a0), at(x1, r1, a1), at(x0, r0, a1)],
@@ -122,7 +122,7 @@
   stage(-.50, .38, .74, 26, .05, .12, 'bypass', false);
   // core casing, cut open
   revolve([[-.58, .36], [-.40, .37], [-.25, .36], [.25, .30], [.32, .32], [.48, .32],
-           [.55, .30], [.70, .30], [1.05, .36], [1.20, .34]], 32, { cut: true, rings: [0, 2, 3, 5, 6, 7, 9] });
+           [.55, .30], [.70, .30], [1.05, .36]], 32, { cut: true, rings: [0, 2, 3, 5, 6, 7, 8] });
   // shaft: driven by the low pressure turbine, it turns the fan
   revolve([[-.80, .05], [1.20, .05]], 12, { spin: true, comp: 'lpt' });
   // low pressure compressor (3 stages)
@@ -134,8 +134,10 @@
   // high pressure turbine (2 stages) and low pressure turbine (4 stages, widening)
   for (const x of [.56, .62]) stage(x, .13, .27, 26, .035, -.35, 'hpt');
   for (let s = 0; s < 4; s++) stage(.74 + s * .08, .14, .28 + s * .02, 26, .045, -.35, 'lpt');
-  // exhaust cone
-  revolve([[.95, .24], [1.15, .20], [1.35, .10], [1.48, .0]], 20, { rings: [0], comp: 'exhaust' });
+  // exhaust: a converging nozzle, cut open wide so the long pointed plug shows inside
+  revolve([[1.05, .36], [1.20, .345], [1.38, .30], [1.44, .295]], 32, { cut: true, cutW: 1.6, rings: [0, 2, 3], comp: 'exhaust' });
+  revolve([[.95, .24], [1.15, .22], [1.35, .15], [1.52, .06], [1.60, 0]], 20, { rings: [0, 2], comp: 'exhaust' });
+  revolve([[.95, 0], [.95, .24]], 20, { rings: [], comp: 'exhaust' });   // closes the plug's front so it reads as solid
   // spinner and fan: these spin
   revolve([[-1.08, 0], [-1.02, .09], [-.94, .17], [-.84, .24], [-.74, .27]], 20, { spin: true, rings: [4], comp: 'fan' });
   const BLADES = 18;
@@ -179,9 +181,25 @@
     if (x < 1.15) return 'lpt';
     return 'exhaust';
   }
+  // the stages are very different lengths along the path, so moving at one speed would
+  // flash through the turbines. Instead each stage gets an equal slice of the journey:
+  // the molecule glides in, slows to a near stop in the middle, then glides on.
+  const STAGES = ['intake', 'fan', 'lpc', 'hpc', 'comb', 'hpt', 'lpt', 'exhaust'];
+  const stageU = [0];
+  for (let i = 1, u = 0; i < STAGES.length; i++) {
+    while (u < 1 && stageAt(corePath(u)[0]) !== STAGES[i]) u += .0005;
+    stageU.push(u);
+  }
+  stageU.push(1);
+  function paced(m) {
+    const f = Math.max(0, Math.min(1, m)) * STAGES.length;
+    const i = Math.min(STAGES.length - 1, Math.floor(f)), k = f - i;
+    const e = k + Math.sin(k * TAU) / TAU * .85;     // slow in the middle of each stage
+    return stageU[i] + (stageU[i + 1] - stageU[i]) * e;
+  }
   // background air: faint particles, some through the core, most around it (like a real turbofan)
   const particles = Array.from({ length: 34 }, (_, i) => ({
-    bypass: i % 3 !== 0, u: Math.random(), a: CUT_AT + (Math.random() - .5) * 1.4, sp: .035 + Math.random() * .025
+    bypass: i % 3 !== 0, u: Math.random(), a: CUT_AT + (Math.random() - .5) * 1.4, sp: .022 + Math.random() * .016
   }));
 
   /* ---------- story caption + spec card (DOM) ---------- */
@@ -209,7 +227,7 @@
     }
   }
   function nextStory() { story = (story + 1) % STORIES.length; mol = 0; trail.length = 0; shownLine = ''; shownStage = ''; showStory('intake'); }
-  if (storyNext) storyNext.addEventListener('click', nextStory);
+  if (storyNext) storyNext.addEventListener('click', () => { setPaused(false); nextStory(); });
   if (storyLink) storyLink.addEventListener('click', e => {
     e.preventDefault();
     const tab = document.getElementById(storyLink.dataset.tab);
@@ -219,6 +237,24 @@
     else target.scrollIntoView({ behavior: 'smooth' });
   });
 
+  // tapping or clicking a part holds it: the air stops and that part stays open
+  let paused = false, picked = null, nextBox = null;
+  let closedId = null;        // phones: the card the reader tapped away from, folded back to its label
+  const pauseBtn = document.querySelector('[data-story-pause]');
+  function setPaused(on) {
+    paused = on;
+    if (!on) picked = null;
+    if (pauseBtn) { pauseBtn.textContent = on ? 'Play ▶' : 'Pause ❚❚'; pauseBtn.setAttribute('aria-pressed', on); }
+  }
+  if (pauseBtn) pauseBtn.addEventListener('click', () => setPaused(!paused));
+  function pickPart(id) {
+    picked = id; closedId = null; setPaused(true);
+    // park the molecule in the middle of that stage so the caption follows
+    const i = STAGES.indexOf(id);
+    if (i >= 0) { mol = (i + .5) / STAGES.length; trail.length = 0; }
+  }
+  const ORDER = ['fan', 'lpc', 'hpc', 'comb', 'hpt', 'lpt', 'exhaust', 'bypass'];
+  const nextPart = () => pickPart(ORDER[(ORDER.indexOf(picked || active || 'fan') + 1) % ORDER.length]);
   let active = null;         // the component that's highlighted (hovered, or the molecule's stage)
   let open = null;           // the callout that's grown into a detail card (phones)
   // wide screens show the detail in a side panel instead of a card on the drawing
@@ -235,15 +271,13 @@
   const partCanvas = document.querySelector('.side-part');
   const pctx = partCanvas && partCanvas.getContext('2d');
   const partFaces = {}, partFit = {};
-  for (const f of faces) if (f.comp) (partFaces[f.comp] = partFaces[f.comp] || []).push(f);
+  const isShaft = f => f.comp === 'lpt' && f.p.every(q => Math.hypot(q[1], q[2]) < .06);
+  for (const f of faces) if (f.comp && !isShaft(f)) (partFaces[f.comp] = partFaces[f.comp] || []).push(f);
   for (const id in partFaces) {
     // centre along the axis and the radius of a sphere that holds the part
     let x0 = Infinity, x1 = -Infinity, r = 0;
-    // fit to the part itself; the long, thin shaft is allowed to run off the edges
-    for (const f of partFaces[id]) {
-      if (f.p.every(q => Math.hypot(q[1], q[2]) < .06) && partFaces[id].some(g => g.p.some(q => Math.hypot(q[1], q[2]) > .1))) continue;
-      for (const q of f.p) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); r = Math.max(r, Math.hypot(q[1], q[2])); }
-    }
+    for (const f of partFaces[id]) for (const q of f.p) { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); r = Math.max(r, Math.hypot(q[1], q[2])); }
+    if (id === 'exhaust') x1 += .2;     // room for the thrust behind it
     const cx = (x0 + x1) / 2;
     partFit[id] = { cx, size: Math.hypot((x1 - x0) / 2, r) };
   }
@@ -257,10 +291,11 @@
     pctx.clearRect(0, 0, pw, ph);
     turn += dt * .35;
     const { cx: mx, size } = partFit[id];
-    const yaw = -.9 + Math.sin(turn) * .6, pitch = .45;
+    // the exhaust is seen more from the side, so the plug's point and the thrust read clearly
+    const yaw = id === 'exhaust' ? -.3 + Math.sin(turn) * .3 : -.9 + Math.sin(turn) * .6, pitch = .45;
     const cyw = Math.cos(yaw), syw = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
     const cs = Math.cos(spinAngle), ss = Math.sin(spinAngle);
-    const D = 4.2, F = 3.6, scale = Math.min(pw, ph) * .5 / size * .82;
+    const D = 4.2, F = 3.6, scale = Math.min(pw, ph) * .5 / size * (id === 'exhaust' ? .98 : .82);
     const list = partFaces[id];
     for (const f of list) {
       const v = f.p.map(q => {
@@ -292,6 +327,31 @@
       pctx.fillStyle = paper; pctx.fill(body);
       pctx.strokeStyle = paper; pctx.lineWidth = 1; pctx.stroke(body);
       pctx.strokeStyle = ink; pctx.lineWidth = .9; pctx.stroke(lines);
+    }
+    if (id === 'exhaust') {
+      // thrust: dashed jets streaming out of the nozzle
+      const proj = (x, r, a) => {
+        let X = x - mx, y = Math.cos(a) * r, z = Math.sin(a) * r;
+        const x1 = X * cyw - z * syw, z1 = X * syw + z * cyw;
+        const v = [x1 / size, (y * cp - z1 * sp) / size, (y * sp + z1 * cp) / size];
+        const s = F / (D - v[2]) * scale;
+        return [pw / 2 + v[0] * s * size, ph / 2 - v[1] * s * size];
+      };
+      pctx.save();
+      pctx.strokeStyle = ink; pctx.fillStyle = ink; pctx.lineWidth = 1;
+      pctx.setLineDash([5, 4]); pctx.lineDashOffset = -turn * 90;
+      for (const [x0, r0, x1, r1, a] of [[1.62, 0, 2.1, 0, 0], [1.46, .2, 1.98, .26, 2.65], [1.46, .2, 1.98, .26, 5.8]]) {
+        const pa = proj(x0, r0, a), pb = proj(x1, r1, a);
+        pctx.beginPath(); pctx.moveTo(pa[0], pa[1]); pctx.lineTo(pb[0], pb[1]); pctx.stroke();
+        const ang = Math.atan2(pb[1] - pa[1], pb[0] - pa[0]);
+        pctx.setLineDash([]);
+        pctx.beginPath(); pctx.moveTo(pb[0], pb[1]);
+        pctx.lineTo(pb[0] - 7 * Math.cos(ang - .4), pb[1] - 7 * Math.sin(ang - .4));
+        pctx.lineTo(pb[0] - 7 * Math.cos(ang + .4), pb[1] - 7 * Math.sin(ang + .4));
+        pctx.closePath(); pctx.fill();
+        pctx.setLineDash([5, 4]);
+      }
+      pctx.restore();
     }
   }
 
@@ -331,6 +391,31 @@
       pointer.cx = e.clientX - r.left; pointer.cy = e.clientY - r.top;
     }, { passive: true });
   }
+  let dragged = false;
+  canvas.addEventListener('click', e => {
+    if (dragged) return;                // the end of a turn, not a tap
+    const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    if (nextBox && x >= nextBox[0] && x <= nextBox[0] + nextBox[2] && y >= nextBox[1] && y <= nextBox[1] + nextBox[3]) return nextPart();
+    // a tap on the open card itself leaves it alone
+    const b = open && labelBoxes[open];
+    if (b && x >= b[0] && x <= b[0] + b[2] && y >= b[1] && y <= b[1] + b[3]) return;
+    const id = pick(x, y);
+    if (id) pickPart(id);
+    else if (open) closedId = open;   // tapped empty space: fold the card back to its label
+  });
+  // phones: a tap anywhere else on the page folds the card too (but not the caption's buttons)
+  if (!fine) addEventListener('click', e => {
+    if (open && e.target !== canvas && !e.target.closest('.turbine-story-actions')) closedId = open;
+  });
+  // touch screens: drag sideways on the drawing to turn the engine (up and down still scrolls)
+  let dragYaw = 0, drag = null;
+  canvas.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') { drag = { x: e.clientX, yaw: dragYaw }; dragged = false; } });
+  canvas.addEventListener('pointermove', e => {
+    if (!drag) return;
+    dragYaw = drag.yaw + (e.clientX - drag.x) / canvas.clientWidth * 3;
+    if (Math.abs(e.clientX - drag.x) > 8) dragged = true;
+  });
+  for (const ev of ['pointerup', 'pointercancel']) canvas.addEventListener(ev, () => { drag = null; });
   let lastScroll = scrollY, scrollKick = 0;
   addEventListener('scroll', () => { scrollKick = Math.min(1, scrollKick + Math.abs(scrollY - lastScroll) / 400); lastScroll = scrollY; }, { passive: true });
 
@@ -420,7 +505,7 @@
     ctx.strokeStyle = ink; ctx.fillStyle = ink; ctx.lineWidth = 1;
     ctx.setLineDash([6, 5]); ctx.lineDashOffset = -t * 30;
     const arrows = [[[-1.85, .55, 2.6], [-1.2, .55, 2.6]], [[-1.85, .30, 3.4], [-1.2, .30, 3.4]], [[-1.85, .5, 4.2], [-1.2, .5, 4.2]],
-                    [[1.35, .30, 2.2], [2.0, .40, 2.2]], [[1.50, .10, 3.6], [2.1, .10, 3.6]]];
+                    [[1.48, .26, 2.2], [2.25, .32, 2.2]], [[1.66, .02, 3.6], [2.4, .02, 3.6]], [[1.48, .26, 4.4], [2.25, .32, 4.4]]];
     for (const [a, b] of arrows) {
       const pa = screenAt(a[0], a[1], a[2]), pb = screenAt(b[0], b[1], b[2]);
       ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.stroke();
@@ -446,7 +531,7 @@
     ctx.globalAlpha = 1;
 
     // the story molecule, with a trail
-    const [mx, mr] = corePath(mol);
+    const [mx, mr] = corePath(paced(mol));
     const mq = screenAt(mx, mr, CUT_AT);
     trail.push(mq); if (trail.length > 18) trail.shift();
     ctx.strokeStyle = ink;
@@ -462,7 +547,7 @@
 
     // callouts: dot on the component, leader line, boxed label along the top or bottom.
     // The open one grows into a card: part, skill, the analogy and the tools.
-    // Phones only show the open one.
+    // Phones use the short names so all of them fit.
     const small = `500 ${narrow ? 9 : 10}px ${bodyFont}`;
     ctx.font = small;
     if ('letterSpacing' in ctx) ctx.letterSpacing = '0.08em';
@@ -472,13 +557,13 @@
       const c = COMPONENTS[id];
       const p = screenAt(c.anchor[0], c.anchor[1], CUT_AT * .85);
       anchorsOnScreen[id] = p;
-      if (narrow && id !== open) continue;
-      const text = c.skill.toUpperCase();
+      const text = (narrow ? c.short : c.skill).toUpperCase();
       const w = ctx.measureText(text).width + 14;
       rows[c.side].push({ id, p, text, w, x: p[0] - w / 2 });
     }
     const pad = 8;
     let card = null;
+    nextBox = null;
     for (const side of ['top', 'bottom']) {
       const row = rows[side].sort((a, b) => a.p[0] - b.p[0]);
       let edge = pad;
@@ -493,7 +578,8 @@
       const y = side === 'top' ? 10 : H - 30;
       for (const l of row) {
         labelBoxes[l.id] = [l.x, y, l.w, 18];
-        if (l.id === open) { card = { ...l, side, y }; continue; }
+        // on touch screens the card always sits at the bottom, so Next stays under the thumb
+        if (l.id === open) { card = fine ? { ...l, side, y } : { ...l, side: 'bottom', y: H - 30 }; continue; }
         const on = l.id === active;
         const lx = l.x + l.w / 2, ly = side === 'top' ? y + 18 : y;
         ctx.strokeStyle = ink; ctx.lineWidth = on ? 1.4 : .8;
@@ -519,7 +605,8 @@
       ctx.font = `500 9.5px ${bodyFont}`;
       if ('letterSpacing' in ctx) ctx.letterSpacing = '0.08em';
       const toolLines = wrap(c.tools.toUpperCase(), inner);
-      const ch = 14 + 12 + 8 + 28 + 8 + whyLines.length * 18 + 10 + toolLines.length * 14 + 14;
+      const tapNext = !fine;
+      const ch = 14 + 12 + 8 + 28 + 8 + whyLines.length * 18 + 10 + toolLines.length * 14 + 14 + (tapNext ? 36 : 0);
       const k = ease(grow);
       const w = card.w + (cw - card.w) * k, h = 18 + (ch - 18) * k;
       const x = Math.max(pad, Math.min(W - pad - w, card.p[0] - w / 2 + (card.x + card.w / 2 - card.p[0]) * (1 - k)));
@@ -559,6 +646,15 @@
         if ('letterSpacing' in ctx) ctx.letterSpacing = '0.08em';
         ctx.globalAlpha *= .7;
         for (const line of toolLines) { ctx.fillText(line, x + 14, ty); ty += 14; }
+        ctx.globalAlpha /= .7;
+        if (tapNext) {
+          // a Next button, bottom right, that steps to the following part
+          const label = 'NEXT PART →', bw = ctx.measureText(label).width + 24, bh = 26;
+          const bx = x + w - 14 - bw, by = y + h - 14 - bh;
+          ctx.fillStyle = ink; ctx.fillRect(bx, by, bw, bh);
+          ctx.fillStyle = paper; ctx.textBaseline = 'middle'; ctx.fillText(label, bx + 12, by + bh / 2 + .5);
+          nextBox = [bx - 8, by - 8, bw + 16, bh + 16];
+        }
         ctx.restore();
       }
     } else cardId = null;
@@ -577,15 +673,15 @@
   }
 
   // which component the cursor is nearest to (within reach)
-  function pick() {
-    if (!pointer.over) return null;
+  function pick(cx = pointer.cx, cy = pointer.cy) {
+    if (cx < 0) return null;
     for (const id in labelBoxes) {
       const [x, y, w, h] = labelBoxes[id];
-      if (pointer.cx >= x && pointer.cx <= x + w && pointer.cy >= y && pointer.cy <= y + h) return id;
+      if (cx >= x && cx <= x + w && cy >= y && cy <= y + h) return id;
     }
     let best = null, bd = 70;
     for (const id in anchorsOnScreen) {
-      const p = anchorsOnScreen[id], d = Math.hypot(p[0] - pointer.cx, p[1] - pointer.cy);
+      const p = anchorsOnScreen[id], d = Math.hypot(p[0] - cx, p[1] - cy);
       if (d < bd) { bd = d; best = id; }
     }
     return best;
@@ -596,7 +692,7 @@
   // 30 redraws a second is plenty for a slowly turning drawing, and it leaves most
   // frames free so the rest of the page keeps scrolling smoothly
   const STEP = 1 / 31;
-  const LOOP = 16;        // seconds for one idea to cross the engine on desktop
+  const LOOP = 8 * 5;     // seconds for one idea to cross the engine on desktop: 5 per stage
   function frame(now) {
     const dt = Math.min(.05, (now - last) / 1000); last = now;
     acc += dt;
@@ -613,23 +709,34 @@
         // pinned on touch screens: scroll position moves the molecule through the engine
         const r = pin.getBoundingClientRect();
         const progress = Math.max(0, Math.min(1, -r.top / Math.max(1, r.height - innerHeight)));
-        if (progress < .02 && lastProgress > .5) nextStory();      // came back for another pass
+        if (!paused) {
+          if (progress < .02 && lastProgress > .5) nextStory();    // came back for another pass
+          mol += (progress - mol) * .25;
+        }
         lastProgress = progress;
-        mol += (progress - mol) * .25;
-        yaw = -.62 + (progress - .5) * .5;
+        yaw = -.62 + (progress - .5) * .5 + dragYaw;
       } else {
-        mol += step / LOOP;
-        if (mol >= 1.04) nextStory();
+        if (!paused) {
+          mol += step / LOOP;
+          if (mol >= 1.02) nextStory();
+        }
         yaw = -.62 + Math.sin(now / 1000 * .08) * .12 + pointer.x * .45;
       }
       const pitch = .36 + (fine ? pointer.y * .12 : 0);
       const molStage = draw(now / 1000, yaw, pitch, step);
       showStory(molStage);
-      const hovered = fine ? pick() : null;
-      active = hovered || (molStage === 'intake' ? null : molStage);
+      const hovered = fine && pointer.over ? pick() : null;
+      if (fine) canvas.style.cursor = hovered ? 'pointer' : '';
+      active = hovered || picked || (molStage === 'intake' ? null : molStage);
       // desktop: the hovered callout opens; phones: the molecule's stage is always open
       if (sideOn()) { open = null; showSide(active); if (sideShown) drawPart(sideShown, step, spin); }
-      else open = fine ? hovered : active;
+      else if (fine) open = hovered || picked;
+      else {
+        // the current part stays open unless the reader folded it; a new part opens again
+        const want = active || 'fan';
+        if (want !== closedId) closedId = null;
+        open = closedId ? null : want;
+      }
       if (rpmEl) {
         const rpm = Math.round(rate * 2850 / 10) * 10;
         if (rpm !== shownRpm) { rpmEl.textContent = 'N1 ' + rpm.toLocaleString('en-US') + ' RPM'; shownRpm = rpm; }
