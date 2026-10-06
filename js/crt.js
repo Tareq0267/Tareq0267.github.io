@@ -1103,6 +1103,22 @@
     if (p && desktopUp()) act(hitAt(p));
     else if (p && st.bootAt >= 0 && st.offAt < 0) st.bootAt = clock() - BOOT;   // a click skips the boot
   });
+  // touch screens, zoomed out: drag sideways across the monitor to turn it; the side
+  // under your finger follows it. It stops short of showing the open back of the case.
+  let spinDrag = null, dragYaw = 0;
+  canvas.addEventListener('pointerdown', e => {
+    dragMoved = false;
+    if (e.pointerType === 'mouse' || zoomTo) return;
+    spinDrag = { x: e.clientX, yaw: dragYaw };
+  });
+  canvas.addEventListener('pointermove', e => {
+    if (!spinDrag) return;
+    const dx = e.clientX - spinDrag.x;
+    if (Math.abs(dx) > 8) dragMoved = true;
+    dragYaw = Math.max(-1.3, Math.min(1.1, spinDrag.yaw - dx / canvas.clientWidth * 3));
+  });
+  for (const ev of ['pointerup', 'pointercancel']) canvas.addEventListener(ev, () => { spinDrag = null; });
+
   // phones, zoomed in: drag a finger through the resume to scroll it
   let drag = null, dragMoved = false;
   canvas.addEventListener('pointerdown', e => {
@@ -1177,7 +1193,7 @@
       if (i2 !== ink || p2 !== paper) { ink = i2; paper = p2; lastPaint = 0; dirty = true; }   // the theme flipped
       colourTick = 30;
     }
-    const ty = .2 + pointer.tx * .3, tp = .11 + pointer.ty * .08;
+    const ty = Math.max(-1.1, Math.min(1.3, .2 + pointer.tx * .3 + dragYaw)), tp = .11 + pointer.ty * .08;
     const k = reduce ? 1 : .08;
     const was = yaw + pitch + zoom;
     const ease = (v, to, kk) => (Math.abs(to - v) < 6e-4 ? to : v + (to - v) * kk);

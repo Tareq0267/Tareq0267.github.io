@@ -399,7 +399,8 @@
   canvas.addEventListener('pointerdown', e => { if (e.pointerType !== 'mouse') { drag = { x: e.clientX, yaw: dragYaw }; dragged = false; } });
   canvas.addEventListener('pointermove', e => {
     if (!drag) return;
-    dragYaw = drag.yaw + (e.clientX - drag.x) / canvas.clientWidth * 3;
+    // the part under your finger follows it: drag left and the near side moves left
+    dragYaw = drag.yaw - (e.clientX - drag.x) / canvas.clientWidth * 3;
     if (Math.abs(e.clientX - drag.x) > 8) dragged = true;
   });
   for (const ev of ['pointerup', 'pointercancel']) canvas.addEventListener(ev, () => { drag = null; });
