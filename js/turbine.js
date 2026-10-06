@@ -33,8 +33,7 @@
     comb:    { n: '04', part: 'Combustion chamber', skill: 'AI & LLMs', short: 'AI', tools: 'LLMs, AI Agents, RAG, MCP, Speech Recognition & Synthesis', why: 'Where fuel meets air and the energy comes in. AI turns working software into something smart.', anchor: [.38, .25], side: 'bottom' },
     hpt:     { n: '05', part: 'High pressure turbine', skill: 'Robotics', short: 'Robotics', tools: 'SLAM, LiDAR, Obstacle Avoidance, Inverse Kinematics, Pick & Place, ROS, RoboCup Soccer & @Home', why: 'Turns that energy into physical motion. Where the software meets the real world.', anchor: [.59, .22], side: 'top' },
     lpt:     { n: '06', part: 'Low pressure turbine', skill: 'Frontend', short: 'Frontend', tools: 'Web Design, UI Design, HTML & CSS, JavaScript, TypeScript', why: 'Drives the shaft that spins the fan up front. The frontend is what people meet first, and I design it to pull them in.', anchor: [.86, .27], side: 'bottom' },
-    bypass:  { n: '07', part: 'Bypass duct', skill: 'Workflow Digitisation (DTS)', short: 'DTS', tools: 'Web apps, LLMs and MCP for company workflows', why: "Most of a real turbofan's thrust skips the core. Day to day, digitising company workflows is mine.", anchor: [-.2, .56], side: 'bottom' },
-    exhaust: { n: '08', part: 'Exhaust', skill: 'Shipped Projects', short: 'Shipped', tools: 'RoboCup 2D Sim, Project AWA, Rumi to Jawi, Avicenna, 30Juz', why: 'What comes out the back: thrust. Every idea that makes it through ends up shipped.', anchor: [1.36, .07], side: 'top' },
+    exhaust: { n: '07', part: 'Exhaust', skill: 'Shipped Projects', short: 'Shipped', tools: 'RoboCup 2D Sim, Project AWA, Rumi to Jawi, Avicenna, 30Juz', why: 'What comes out the back: thrust. Every idea that makes it through ends up shipped.', anchor: [1.36, .07], side: 'top' },
   };
 
   /* ---------- one idea's trip per project ---------- */
@@ -119,7 +118,7 @@
            [.20, .83], [.45, .76], [.65, .68], [.80, .62]], 32, { cut: true, rings: [0, 2, 9], shell: true });
   revolve([[-1.00, .80], [-.96, .76], [-.88, .745], [-.60, .745], [-.46, .74]], 32, { cut: true, rings: [0, 4] });
   // outlet guide vanes in the bypass duct (static)
-  stage(-.50, .38, .74, 26, .05, .12, 'bypass', false);
+  stage(-.50, .38, .74, 26, .05, .12, null, false);
   // core casing, cut open
   revolve([[-.58, .36], [-.40, .37], [-.25, .36], [.25, .30], [.32, .32], [.48, .32],
            [.55, .30], [.70, .30], [1.05, .36]], 32, { cut: true, rings: [0, 2, 3, 5, 6, 7, 8] });
@@ -253,7 +252,7 @@
     const i = STAGES.indexOf(id);
     if (i >= 0) { mol = (i + .5) / STAGES.length; trail.length = 0; }
   }
-  const ORDER = ['fan', 'lpc', 'hpc', 'comb', 'hpt', 'lpt', 'exhaust', 'bypass'];
+  const ORDER = ['fan', 'lpc', 'hpc', 'comb', 'hpt', 'lpt', 'exhaust'];
   const nextPart = () => pickPart(ORDER[(ORDER.indexOf(picked || active || 'fan') + 1) % ORDER.length]);
   let active = null;         // the component that's highlighted (hovered, or the molecule's stage)
   let open = null;           // the callout that's grown into a detail card (phones)
@@ -311,23 +310,16 @@
       const nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
       const m = [(v[0][0] + v[2][0]) / 2, (v[0][1] + v[2][1]) / 2, (v[0][2] + v[2][2]) / 2 - D];
       f.pfront = nx * m[0] + ny * m[1] + nz * m[2] < 0;
+      if (view.shade) f.lum = faceLum(nx, ny, nz, f.pfront);
     }
     const sorted = list.slice().sort((a, b) => a.pz - b.pz);
-    pctx.lineJoin = 'round';
-    for (let i = 0; i < sorted.length; i += 6) {
-      const body = new Path2D(), lines = new Path2D();
-      for (let j = i; j < Math.min(i + 6, sorted.length); j++) {
-        const f = sorted[j], s = f.ps;
-        body.moveTo(s[0][0], s[0][1]); body.lineTo(s[1][0], s[1][1]); body.lineTo(s[2][0], s[2][1]); body.lineTo(s[3][0], s[3][1]); body.closePath();
-        let e0 = f.edges[0], e2 = f.edges[2];
-        if (f.rev) { e0 = !f.left; e2 = !f.right || f.right.pfront !== f.pfront; }
-        const ed = [e0, f.edges[1], e2, f.edges[3]];
-        for (let k = 0; k < 4; k++) if (ed[k]) { const a = s[k], c = s[(k + 1) % 4]; lines.moveTo(a[0], a[1]); lines.lineTo(c[0], c[1]); }
-      }
-      pctx.fillStyle = paper; pctx.fill(body);
-      pctx.strokeStyle = paper; pctx.lineWidth = 1; pctx.stroke(body);
-      pctx.strokeStyle = ink; pctx.lineWidth = .9; pctx.stroke(lines);
-    }
+    if (view.dither) partScreen.begin(pw, ph, 3);
+    paintBatches(view.dither ? partScreen.g : pctx, sorted, f => f.ps, f => f.pfront, null, view.dither, 3);
+    if (view.dither) partScreen.end(pctx, ink);
+    if (view.dots) partDots(pctx, pw, ph, sorted, f => f.ps, ink);
+    if (view.fine) fineShade(partScreen, pctx, pw, ph, 2, sorted, f => f.ps);
+    if (view.halftone) fineShade(partScreen, pctx, pw, ph, 4, sorted, f => f.ps, 'dots', .4);
+    if (view.hatch) fineShade(partScreen, pctx, pw, ph, 4, sorted, f => f.ps, 'hatch', .75);
     if (id === 'exhaust') {
       // thrust: dashed jets streaming out of the nozzle
       const proj = (x, r, a) => {
@@ -427,11 +419,214 @@
   const displayFont = getComputedStyle(document.documentElement).getPropertyValue('--font-display') || 'serif';
   const ease = k => k * k * (3 - 2 * k);
 
+
+  /* ---------- two ways to draw the faces: clean lines, or the site's line-screen dither ---------- */
+  // The dither works like js/dither.js: the faces (shaded by how they catch the light, with
+  // their edges as dark strokes) are painted into a tiny picture, one pixel per cell, and each
+  // cell becomes a vertical ink bar as wide as that pixel is dark.
+  const LX = -.45, LY = .65, LZ = .62;   // light from the upper left, towards the viewer
+  function faceLum(nx, ny, nz, front) {
+    const l = Math.hypot(nx, ny, nz) || 1;
+    const d = (nx * LX + ny * LY + nz * LZ) / l;
+    return front ? d : -d;               // seen from inside: the other side of the face
+  }
+  function shadeLevel(lum, hot) {
+    let g = .66 + Math.max(0, lum) * .34; // shadow .66 .. lit 1: the edges carry the shape, shading just models it
+    if (hot) g -= .2;
+    return Math.round(Math.max(0, g) * 31) * 255 / 31 | 0;
+  }
+  function makeScreen() {
+    const src = document.createElement('canvas');
+    const g = src.getContext('2d', { willReadFrequently: true });
+    let cell = 5, gw = 0, gh = 0;
+    return {
+      g,
+      begin(w, h, c) {
+        cell = c; gw = Math.ceil(w / c); gh = Math.ceil(h / c);
+        if (src.width !== gw || src.height !== gh) { src.width = gw; src.height = gh; }
+        g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, gw, gh);
+        g.setTransform(1 / c, 0, 0, 1 / c, 0, 0);
+      },
+      end(target, inkCol, pattern = 'bars') {
+        const d = g.getImageData(0, 0, gw, gh).data;
+        const light = new Path2D(), heavy = new Path2D(), cross = new Path2D();
+        for (let y = 0, i = 0; y < gh; y++) for (let x = 0; x < gw; x++, i += 4) {
+          const a = d[i + 3] / 255;
+          if (a < .02) continue;
+          const dark = Math.min(1, Math.max(0, (1 - d[i] / 255) * 1.08 - .04)) * a;
+          if (dark < .02) continue;
+          const px = x * cell, py = y * cell;
+          if (pattern === 'dots') {
+            // halftone: a round dot per cell, its area following the darkness
+            const r = Math.sqrt(dark) * cell * .62;
+            light.moveTo(px + cell / 2 + r, py + cell / 2); light.arc(px + cell / 2, py + cell / 2, r, 0, TAU);
+          } else if (pattern === 'hatch') {
+            // engraving: diagonal strokes that join up across cells, crossed in the shadows
+            if (dark < .12) continue;
+            const P = dark < .35 ? light : heavy;
+            P.moveTo(px, py + cell); P.lineTo(px + cell, py);
+            if (dark > .5) { cross.moveTo(px, py); cross.lineTo(px + cell, py + cell); }
+          } else {
+            const bw = Math.max(.6, dark * cell);
+            light.rect(px + (cell - bw) / 2, py, bw, cell);
+          }
+        }
+        if (pattern === 'hatch') {
+          target.save(); target.strokeStyle = inkCol; target.lineCap = 'round';
+          target.lineWidth = .6; target.stroke(light);
+          target.lineWidth = 1; target.stroke(heavy); target.lineWidth = .8; target.stroke(cross);
+          target.restore();
+        } else { target.fillStyle = inkCol; target.fill(light); }
+      },
+    };
+  }
+  const mainScreen = makeScreen(), partScreen = makeScreen();
+  const quad = (P, s) => { P.moveTo(s[0][0], s[0][1]); P.lineTo(s[1][0], s[1][1]); P.lineTo(s[2][0], s[2][1]); P.lineTo(s[3][0], s[3][1]); P.closePath(); };
+  // Dots: the clean line drawing with fine ordered (Bayer 8x8) dots for shading underneath.
+  // The faces are filled in grey by how lit they are, then each pixel becomes a dot or not.
+  const BAYER = new Float32Array(64);
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) {
+    let v = 0;
+    for (let i = 0; i < 3; i++) v = (v << 2) | ((((x ^ y) >> i) & 1) << 1) | ((y >> i) & 1);
+    BAYER[y * 8 + x] = (v + .5) / 64;
+  }
+  const BAYER255 = Uint8Array.from(BAYER, v => v * 255);
+  function makeDots() {
+    const src = document.createElement('canvas'), sg = src.getContext('2d', { willReadFrequently: true });
+    const out = document.createElement('canvas'), og = out.getContext('2d');
+    return function (target, w, h, list, sOf, inkCol) {
+      const gw = Math.ceil(w), gh = Math.ceil(h);
+      if (src.width !== gw || src.height !== gh) { src.width = out.width = gw; src.height = out.height = gh; }
+      // only the engine's own area is shaded, read back and dotted, not the whole canvas
+      let x0 = gw, y0 = gh, x1 = 0, y1 = 0;
+      for (const f of list) for (const q of sOf(f)) {
+        if (q[0] < x0) x0 = q[0]; if (q[0] > x1) x1 = q[0]; if (q[1] < y0) y0 = q[1]; if (q[1] > y1) y1 = q[1];
+      }
+      x0 = Math.max(0, Math.floor(x0) - 2); y0 = Math.max(0, Math.floor(y0) - 2);
+      x1 = Math.min(gw, Math.ceil(x1) + 2); y1 = Math.min(gh, Math.ceil(y1) + 2);
+      const bw = x1 - x0, bh = y1 - y0;
+      if (bw <= 0 || bh <= 0) return;
+      sg.setTransform(1, 0, 0, 1, 0, 0); sg.clearRect(x0, y0, bw, bh);
+      let level = -1, P = null;
+      const flush = () => { if (P) { sg.fillStyle = sg.strokeStyle = `rgb(${level},${level},${level})`; sg.lineWidth = 1; sg.fill(P); sg.stroke(P); } };
+      for (const f of list) {
+        const dark = .36 * Math.pow(1 - Math.max(0, f.lum), 1.6);   // shadows get sparse dots, lit faces none
+        const v = Math.round((1 - dark) * 23) * 255 / 23 | 0;
+        if (v !== level) { flush(); level = v; P = new Path2D(); }
+        quad(P, sOf(f));
+      }
+      flush();
+      const img = sg.getImageData(x0, y0, bw, bh), d = img.data, px = new Uint32Array(d.buffer);
+      const m = /(\d+)\D+(\d+)\D+(\d+)/.exec(inkCol) || [0, 40, 40, 40];
+      const dot = (255 << 24 | +m[3] << 16 | +m[2] << 8 | +m[1]) >>> 0;   // RGBA as one little-endian word
+      for (let y = 0, i = 0; y < bh; y++) {
+        const row = ((y + y0) & 7) * 8;
+        for (let x = 0; x < bw; x++, i++) {
+          const k = i * 4;
+          px[i] = d[k + 3] > 127 && 255 - d[k] > BAYER255[row + ((x + x0) & 7)] ? dot : 0;
+        }
+      }
+      og.putImageData(img, x0, y0);
+      target.save(); target.imageSmoothingEnabled = false; target.drawImage(out, x0, y0, bw, bh, x0, y0, bw, bh); target.restore();
+    };
+  }
+  const mainDots = makeDots(), partDots = makeDots();
+  // shading underneath a clean line drawing, as a fine line-screen, halftone or hatching
+  function fineShade(screen, target, w, h, cell, list, sOf, pattern = 'bars', k = .55) {
+    screen.begin(w, h, cell);
+    const g = screen.g;
+    // far to near, one path per run of faces with the same shade, so nearer faces cover farther ones
+    let level = -1, P = null;
+    const flush = () => { if (P) { g.fillStyle = g.strokeStyle = `rgb(${level},${level},${level})`; g.lineWidth = 1; g.fill(P); g.stroke(P); } };
+    for (const f of list) {
+      const dark = k * Math.pow(1 - Math.max(0, f.lum), 1.3);
+      const v = Math.round((1 - dark) * 23) * 255 / 23 | 0;
+      if (v !== level) { flush(); level = v; P = new Path2D(); }
+      quad(P, sOf(f));
+    }
+    flush();
+    screen.end(target, ink, pattern);
+  }
+  // Paint back to front in small batches: fill neighbouring faces so they hide what's behind
+  // (page colour for lines, their shade for the dither), then draw their edges. The
+  // highlighted component gets a darker fill and heavier edges.
+  function paintBatches(g, list, sOf, frontOf, hot, dith, cell) {
+    g.lineJoin = 'round';
+    for (let i = 0; i < list.length; i += 6) {
+      const body = new Path2D(), lines = new Path2D(), hotBody = new Path2D(), hotLines = new Path2D();
+      const groups = dith ? new Map() : null;
+      let anyHot = false;
+      for (let j = i; j < Math.min(i + 6, list.length); j++) {
+        const f = list[j], s = sOf(f), isHot = hot && f.comp === hot;
+        quad(body, s);
+        if (isHot) { anyHot = true; quad(hotBody, s); }
+        if (dith) {
+          const lv = shadeLevel(f.lum, isHot);
+          let P = groups.get(lv); if (!P) groups.set(lv, P = new Path2D());
+          quad(P, s);
+        }
+        // edges: the face's own outline edges, plus silhouettes and cut edges of revolved surfaces
+        let e0 = f.edges[0], e2 = f.edges[2];
+        if (f.rev) { e0 = !f.left; e2 = !f.right || frontOf(f.right) !== frontOf(f); }
+        const ed = [e0, f.edges[1], e2, f.edges[3]], L = isHot ? hotLines : lines;
+        for (let k = 0; k < 4; k++) if (ed[k]) { const a = s[k], c = s[(k + 1) % 4]; L.moveTo(a[0], a[1]); L.lineTo(c[0], c[1]); }
+      }
+      if (dith) {
+        for (const [lv, P] of groups) { g.fillStyle = g.strokeStyle = `rgb(${lv},${lv},${lv})`; g.lineWidth = 1; g.fill(P); g.stroke(P); }
+        g.strokeStyle = '#000';
+        g.lineWidth = cell * .5; g.stroke(lines);
+        if (anyHot) { g.lineWidth = cell * .8; g.stroke(hotLines); }
+      } else {
+        g.fillStyle = paper; g.fill(body);
+        g.strokeStyle = paper; g.lineWidth = 1; g.stroke(body);
+        if (anyHot) { g.globalAlpha = .18; g.fillStyle = ink; g.fill(hotBody); g.globalAlpha = 1; }
+        g.strokeStyle = ink;
+        if (view.sketch) {
+          g.globalAlpha = .6; g.lineWidth = .8; g.stroke(lines); if (anyHot) g.stroke(hotLines);
+          g.translate(.9, -.6); g.globalAlpha = .45; g.stroke(lines); if (anyHot) { g.lineWidth = 1.4; g.stroke(hotLines); }
+          g.translate(-.9, .6); g.globalAlpha = 1;
+        } else {
+          g.lineWidth = .9; g.stroke(lines);
+          if (anyHot) { g.lineWidth = 1.8; g.stroke(hotLines); }
+        }
+      }
+    }
+  }
+  // the drawing style, cycled with one button and remembered on this browser
+  const STYLES = [
+    ['lines', 'Lines'], ['sketch', 'Sketch'], ['blueprint', 'Blueprint'], ['fine', 'Fine'],
+    ['halftone', 'Halftone'], ['hatch', 'Hatch'], ['dither', 'Dither'], ['dots', 'Dots'],
+  ];
+  const view = { mode: 'lines' };
+  const styleBtn = document.querySelector('[data-turbine-style]');
+  const band = canvas.closest('.turbine-band');
+  function setView(mode) {
+    if (!STYLES.some(s => s[0] === mode)) mode = 'lines';
+    view.mode = mode;
+    view.dither = mode === 'dither'; view.dots = mode === 'dots'; view.fine = mode === 'fine';
+    view.halftone = mode === 'halftone'; view.hatch = mode === 'hatch'; view.sketch = mode === 'sketch';
+    view.shade = !['lines', 'sketch', 'blueprint'].includes(mode);
+    if (band) band.classList.toggle('blueprint', mode === 'blueprint');
+    colourTick = 0;                                    // pick up the new ink and paper next frame
+    if (styleBtn) styleBtn.textContent = `Style · ${STYLES.find(s => s[0] === mode)[1]} ↻`;
+    try { localStorage.setItem('turbine-view', mode); } catch (e) {}
+  }
+  if (styleBtn) styleBtn.addEventListener('click', () => {
+    const i = STYLES.findIndex(s => s[0] === view.mode);
+    setView(STYLES[(i + 1) % STYLES.length][0]);
+  });
+  let savedView = 'dots';
+  try { savedView = localStorage.getItem('turbine-view') || 'dots'; } catch (e) {}
+  setView(savedView);
+
   function draw(t, yaw, pitch, dt) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, W, H);
     if (colourTick-- <= 0) {
-      ink = getComputedStyle(canvas).color; paper = getComputedStyle(document.body).backgroundColor; colourTick = 30;
+      ink = getComputedStyle(canvas).color;
+      const bandBg = band && getComputedStyle(band).backgroundColor;
+      paper = bandBg && bandBg !== 'rgba(0, 0, 0, 0)' && bandBg !== 'transparent' ? bandBg : getComputedStyle(document.body).backgroundColor;
+      colourTick = 30;
     }
     const narrow = W < 640;
     const scale = Math.min(W / (narrow ? 2.75 : 3.6), H / 2.6);
@@ -459,37 +654,14 @@
       const nx = ay * bz - az * by, ny = az * bx - ax * bz, nz = ax * by - ay * bx;
       const mx = (v[0][0] + v[2][0]) / 2, my = (v[0][1] + v[2][1]) / 2, mz = (v[0][2] + v[2][2]) / 2 - D;
       f.front = nx * mx + ny * my + nz * mz < 0;
+      if (view.shade) f.lum = faceLum(nx, ny, nz, f.front);
     }
     faces.sort((a, b) => a.z - b.z);
 
-    // Paint back to front in small batches: fill neighbouring faces in the page colour
-    // (plus a thin stroke of it to close seams) so they hide what's behind, then draw
-    // their ink edges. The highlighted component gets a light ink wash and heavier edges.
-    ctx.lineJoin = 'round';
-    const BATCH = 6;
-    for (let i = 0; i < faces.length; i += BATCH) {
-      const body = new Path2D(), lines = new Path2D(), hotBody = new Path2D(), hotLines = new Path2D();
-      let hot = false;
-      for (let j = i; j < Math.min(i + BATCH, faces.length); j++) {
-        const f = faces[j], s = f.s, isHot = active && f.comp === active;
-        body.moveTo(s[0][0], s[0][1]); body.lineTo(s[1][0], s[1][1]); body.lineTo(s[2][0], s[2][1]); body.lineTo(s[3][0], s[3][1]); body.closePath();
-        if (isHot) {
-          hot = true;
-          hotBody.moveTo(s[0][0], s[0][1]); hotBody.lineTo(s[1][0], s[1][1]); hotBody.lineTo(s[2][0], s[2][1]); hotBody.lineTo(s[3][0], s[3][1]); hotBody.closePath();
-        }
-        // ink edges: the face's own outline edges, plus silhouettes and cut edges of revolved surfaces
-        let e0 = f.edges[0], e2 = f.edges[2];
-        if (f.rev) { e0 = !f.left; e2 = !f.right || f.right.front !== f.front; }
-        const ed = [e0, f.edges[1], e2, f.edges[3]], L = isHot ? hotLines : lines;
-        for (let k = 0; k < 4; k++) if (ed[k]) { const a = s[k], c = s[(k + 1) % 4]; L.moveTo(a[0], a[1]); L.lineTo(c[0], c[1]); }
-      }
-      ctx.fillStyle = paper; ctx.fill(body);
-      ctx.strokeStyle = paper; ctx.lineWidth = 1; ctx.stroke(body);
-      if (hot) { ctx.globalAlpha = .18; ctx.fillStyle = ink; ctx.fill(hotBody); ctx.globalAlpha = 1; }
-      ctx.strokeStyle = ink;
-      ctx.lineWidth = .9; ctx.stroke(lines);
-      if (hot) { ctx.lineWidth = 1.8; ctx.stroke(hotLines); }
-    }
+    const CELL = narrow ? 3 : 5;
+    const g = view.dither ? mainScreen.g : ctx;
+    if (view.dither) mainScreen.begin(W, H, CELL);
+    paintBatches(g, faces, f => f.s, f => f.front, active, view.dither, CELL);
     // the outer cowl's outline and cut edges go on last so nearer cowl faces don't chip them
     const outline = new Path2D();
     for (const f of faces) {
@@ -498,7 +670,12 @@
       if (!f.left) { outline.moveTo(s[0][0], s[0][1]); outline.lineTo(s[1][0], s[1][1]); }
       if (!f.right || f.right.front !== f.front) { outline.moveTo(s[2][0], s[2][1]); outline.lineTo(s[3][0], s[3][1]); }
     }
-    ctx.strokeStyle = ink; ctx.lineWidth = 1.2; ctx.stroke(outline);
+    g.strokeStyle = view.dither ? '#000' : ink; g.lineWidth = view.dither ? CELL * .6 : 1.2; g.stroke(outline);
+    if (view.dither) mainScreen.end(ctx, ink);
+    if (view.dots) mainDots(ctx, W, H, faces, f => f.s, ink);
+    if (view.fine) fineShade(mainScreen, ctx, W, H, narrow ? 2 : 3, faces, f => f.s);
+    if (view.halftone) fineShade(mainScreen, ctx, W, H, narrow ? 4 : 6, faces, f => f.s, 'dots', .4);
+    if (view.hatch) fineShade(mainScreen, ctx, W, H, narrow ? 4 : 5, faces, f => f.s, 'hatch', .75);
 
     // airflow arrows: into the intake and out of the exhaust, dashes moving with the flow
     ctx.save();

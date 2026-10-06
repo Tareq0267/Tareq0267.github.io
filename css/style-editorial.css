@@ -460,6 +460,11 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 .story-link{ border-bottom: 1px solid currentColor; padding-bottom: 1px; }
 .story-next{ color: var(--ink-70); }
 .story-next:hover{ color: var(--ink); }
+/* Blueprint style for the turbine: the band becomes a sheet of blueprint paper */
+.turbine-band.blueprint{
+  --ink: #e6edf5; --ink-70: rgba(230,237,245,.75); --ink-10: rgba(230,237,245,.16);
+  background: #1e3a5f; color: var(--ink); padding: 14px 18px 0;
+}
 .rpm{ font-variant-numeric: tabular-nums; min-width: 9.5em; text-align: right; }
 .turbine-intro{ max-width: 40em; margin: 20px auto 0; text-transform: none; letter-spacing: .01em; }
 
