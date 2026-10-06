@@ -212,11 +212,11 @@ window.initFun = function () {
     if (sidesToo) { d.left = e.clientX - r.left; d.right = r.right - e.clientX; }
     return Object.keys(d).reduce((a, b) => (d[a] < d[b] ? a : b));
   }
-  document.querySelectorAll('.honour, .skill').forEach(el => el.classList.add('fillable'));
+  document.querySelectorAll('.honour').forEach(el => el.classList.add('fillable'));
   const touchUI = matchMedia('(hover: none)').matches;
 
   if (!touchUI) {
-    track('.honour, .skill', (el, e) => {
+    track('.honour', (el, e) => {
       el.dataset.from = nearestEdge(el, e, el.classList.contains('skill'));
       requestAnimationFrame(() => { if (kinds.some(k => k.cur === el)) el.classList.add('is-hot'); });
     }, (el, e) => {
@@ -266,7 +266,6 @@ window.initFun = function () {
         requestAnimationFrame(glide);
       })();
     }
-    glideSpot(document.querySelector('.skills-grid'), '.skill');
     glideSpot(document.querySelector('#honours .rows'), '.honour');
     const lit = new Set();
     let lastY = scrollY, down = true, queued = false;

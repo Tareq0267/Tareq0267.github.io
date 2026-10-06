@@ -415,18 +415,54 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 /* =========================================================
    11) SKILLS
 ========================================================= */
-.skills-grid{
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  border-top: 1px solid var(--ink-10);
+/* The TA-1 turbofan (js/turbine.js): ideas in, shipped projects out, each component
+   a skill. Its callouts carry the detail; hovering one opens it into a card. */
+.turbine-band{ position: relative; margin: 0; height: clamp(420px, 56vw, 680px); }
+/* faint blueprint grid behind the drawing, fading out towards the edges */
+.turbine-band::before{
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(var(--ink-10) 1px, transparent 1px), linear-gradient(90deg, var(--ink-10) 1px, transparent 1px);
+  background-size: 28px 28px; background-position: center;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 45%, transparent 80%);
+          mask-image: radial-gradient(ellipse at center, #000 45%, transparent 80%);
 }
-.skill{
-  padding: 24px var(--gutter) 40px 0;
-  border-bottom: 1px solid var(--ink-10);
-  min-height: 240px;
-  display: flex; flex-direction: column; justify-content: space-between; gap: 32px;
+.turbine-band{ display: flex; flex-direction: column; }
+.turbine-main{ position: relative; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) min(320px, 27%); gap: clamp(16px, 2vw, 32px); }
+.turbine{ position: relative; display: block; width: 100%; height: 100%; min-height: 0; color: var(--ink); touch-action: pan-y; }  /* sideways drags turn the engine */
+/* the detail panel: a hairline on its left, content fades in when it changes */
+.turbine-side{
+  align-self: center; display: grid; gap: 10px;
+  padding: 20px 0 20px clamp(16px, 2vw, 28px); border-left: 1px solid var(--ink-10);
 }
-.skill:not(:nth-child(3n+1)){ padding-left: var(--gutter); border-left: 1px solid var(--ink-10); }
-.skill .h6{ margin-bottom: 12px; }
+.turbine-side .h4{ line-height: .95; }
+/* turntable detail view of the selected part */
+.side-part{
+  display: block; width: 100%; height: clamp(150px, 15vw, 210px); color: var(--ink);
+  border-bottom: 1px solid var(--ink-10); margin-bottom: 6px;
+}
+.side-part.empty{ display: none; }
+.turbine-side .side-why{ text-transform: none; letter-spacing: .01em; line-height: 1.6; }
+.turbine-side.swap > *{ animation: side-in .45s var(--ease); }
+@keyframes side-in{ from{ opacity: 0; translate: 0 6px; } to{ opacity: 1; translate: none; } }
+@media (max-width: 900px){
+  .turbine-main{ display: block; }
+  .turbine-side{ display: none; }
+}
+
+/* the story caption that follows the molecule */
+.turbine-story{
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 6px 24px;
+  min-height: 92px; padding-top: 14px; border-top: 1px solid var(--ink-10);
+}
+.turbine-story [data-story-stage]{ grid-column: 1 / -1; }
+.turbine-story [data-story-text]{ font-size: clamp(18px, 1.6vw, 24px); }
+.turbine-story-actions{ display: flex; gap: 16px; align-items: center; justify-self: end; white-space: nowrap; }
+.story-link{ border-bottom: 1px solid currentColor; padding-bottom: 1px; }
+.story-next{ color: var(--ink-70); }
+.story-next:hover{ color: var(--ink); }
+.rpm{ font-variant-numeric: tabular-nums; min-width: 9.5em; text-align: right; }
+.turbine-intro{ max-width: 40em; margin: 20px auto 0; text-transform: none; letter-spacing: .01em; }
+
 
 /* =========================================================
    12) PROJECTS (tabs)
@@ -550,9 +586,6 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .exp .when{ grid-column: 1 / -1; }
   .exp .role{ grid-column: 1 / span 5; }
   .exp .detail{ grid-column: 6 / span 7; }
-  .skills-grid{ grid-template-columns: repeat(2, 1fr); }
-  .skill:not(:nth-child(3n+1)){ padding-left: 0; border-left: 0; }
-  .skill:nth-child(even){ padding-left: var(--gutter); border-left: 1px solid var(--ink-10); }
   .project-tabs, .project-panels{ grid-column: 1 / -1; }
   .project-tabs{ position: static; }
   .project-tabs ul{ display: flex; overflow-x: auto; gap: 8px; scrollbar-width: none; }
@@ -586,8 +619,6 @@ a:hover .arrow{ transform: translate(3px,-3px); }
   .honour .body, .honour .meta{ grid-column: 1 / -1; }
   .honour .meta{ grid-template-columns: 1fr; margin-top: 16px; }
   .exp .role, .exp .detail{ grid-column: 1 / -1; }
-  .skills-grid{ grid-template-columns: 1fr; }
-  .skill, .skill:nth-child(even){ padding-left: 0; border-left: 0; min-height: 0; padding-bottom: 28px; }
   /* one column: let the ink fill run edge to edge so the text isn't flush against it */
   .panel-feats{ grid-template-columns: 1fr; }
   .panel-body.has-shot{ grid-template-columns: 1fr; }
@@ -672,6 +703,21 @@ html{ -webkit-tap-highlight-color: transparent; }
 }
 .panel-art{ touch-action: none; }
 
+
+/* touch screens: pin the engine and let scrolling carry the molecule through it */
+@media (hover: none){
+  .turbine-pin{ height: 260vh; margin-inline: calc(var(--gutter) * -1); }
+  .turbine-pin .turbine-band{
+    position: sticky; top: 0; height: 100vh; height: 100svh;
+    padding: calc(var(--header-h) + 8px) var(--gutter) 16px;
+    display: flex; flex-direction: column;
+  }
+  .turbine-pin .turbine-main{ flex: 1; }
+  .turbine-story{ grid-template-columns: 1fr; }
+  .turbine-story-actions{ justify-self: start; }
+  .turbine-story .rpm{ display: none; }
+}
+
 /* =========================================================
    16) PLAYFUL EXTRAS (js/fun.js)
 ========================================================= */
@@ -684,7 +730,6 @@ html{ -webkit-tap-highlight-color: transparent; }
   transition: transform .55s var(--ease);
   pointer-events: none;
 }
-.skill.fillable::before{ inset: 0; }
 
 /* touch screens: one gliding ink block (js/fun.js) instead of per-cell fills.
    The grid carries its own sand and runs edge to edge because its fade-in
@@ -693,7 +738,6 @@ html{ -webkit-tap-highlight-color: transparent; }
   position: relative;
   margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter);
 }
-.skills-grid.has-spot{ background: var(--sand); }
 #honours .rows.has-spot{ background: var(--ink); }   /* dark section: the block shows sand */
 .skill-spot{
   position: absolute; top: 0; left: 0; width: 100%;

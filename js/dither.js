@@ -1109,6 +1109,8 @@
           .map(c => ({ x: (c.x - r.left) / this.cell, y: (c.y - r.top) / this.cell, age: Math.max(0, now - c.t0), id: c.id }))
       };
       this.lastNow = now;
+      // a scene with hold() returning true has nothing new: keep what's on screen
+      if (draw.hold && draw.hold()) return;
       const { ctx } = this;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, this.cols, this.rows);
