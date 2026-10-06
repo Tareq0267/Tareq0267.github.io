@@ -632,15 +632,16 @@
       return [x1, y * cp - z1 * sp, y * sp + z1 * cp];
     };
     const rot = n => { const x1 = n[0] * cyw - n[2] * syw, z1 = n[0] * syw + n[2] * cyw; return [x1, n[1] * cp - z1 * sp, n[1] * sp + z1 * cp]; };
-    // zoomed in, the glass fills most of the canvas so the desktop can be read
+    // zoomed in, the whole front of the monitor fills the canvas (bezel included, so
+    // nothing is cut off at the top or bottom) and the desktop is big enough to read
     if (zoom > .001) {
-      const zg = xf([0, (GL.y0 + GL.y1) / 2, GL.z])[2];
-      const fit = Math.min(.86 * H / (GL.y1 - GL.y0), .94 * W / (GL.x1 - GL.x0)) * (D - zg) / F;
+      const zg = xf([0, 0, 0])[2];
+      const fit = Math.min(.9 * H / (2 * .883), .94 * W / 2) * (D - zg) / F;
       scale += (fit - scale) * zoom;
     }
     const raw = v => { const s = F / (D - v[2]) * scale; return [v[0] * s, -v[1] * s]; };
     // zooming in brings the middle of the screen to the middle of the canvas
-    const c0 = raw(xf([0, (GL.y0 + GL.y1) / 2, GL.z]));
+    const c0 = raw(xf([0, 0, 0]));
     const cx = W / 2 - c0[0] * zoom, cy = H * .5 - c0[1] * zoom;
     const toScreen = v => { const r = raw(v); return [cx + r[0], cy + r[1]]; };
 

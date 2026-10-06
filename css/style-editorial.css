@@ -419,7 +419,10 @@ a:hover .arrow{ transform: translate(3px,-3px); }
 }
 .crt3d:focus-visible{ outline: 1px dashed currentColor; outline-offset: 6px; }
 /* timeline on the left, spec plate on the right; both step aside while zoomed in */
-.crt-timeline, .crt-spec{ position: absolute; top: 46%; translate: 0 -50%; transition: opacity .45s; }
+.crt-timeline, .crt-spec{
+  position: absolute; top: 46%; translate: 0 -50%; transition: opacity .45s;
+  background: var(--sand);   /* solid, so the desk's horizon line doesn't run through them */
+}
 .crt-band.is-zoomed .crt-timeline, .crt-band.is-zoomed .crt-spec{ opacity: 0; pointer-events: none; }
 .crt-timeline{ left: 0; width: min(230px, 19%); display: grid; gap: 18px; }
 .crt-timeline ol{ position: relative; display: grid; gap: 24px; padding-left: 22px; }
