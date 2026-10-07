@@ -158,7 +158,6 @@
   const gg = greyC.getContext('2d', { willReadFrequently: true }), oo = overC.getContext('2d'), ss = screenC.getContext('2d');
   const UI = 'Tahoma, Verdana, "Segoe UI", sans-serif';
   const displayFont = (getComputedStyle(document.documentElement).getPropertyValue('--font-display') || 'serif').trim();
-  const bodyFont = getComputedStyle(document.body).fontFamily;
 
   let ink = '#2c2824', paper = '#a89474';
   // greys get dithered into ink dots; crisp lines and text go on top in ink or paper
@@ -688,8 +687,12 @@
 
   function paintBoot(t) {
     grey(0, 0, SW, SH, 0);
-    text('Tingkap', SW / 2 - 8, SH / 2 - 30, { size: 64, font: displayFont, col: paper, align: 'right' });
-    text('98', SW / 2 + 2, SH / 2 - 30, { size: 64, bold: true, col: paper });
+    // centre "Tingkap 98" as a whole: measure both words, then set them side by side
+    oo.font = `64px ${displayFont}`; const w1 = oo.measureText('Tingkap').width;
+    oo.font = 'bold 64px ' + UI; const w2 = oo.measureText('98').width;
+    const tx = SW / 2 - (w1 + 10 + w2) / 2;
+    text('Tingkap', tx, SH / 2 - 30, { size: 64, font: displayFont, col: paper });
+    text('98', tx + w1 + 10, SH / 2 - 30, { size: 64, bold: true, col: paper });
     text('Starting Tingkap 98...', SW / 2, SH / 2 + 30, { size: 13, col: paper, align: 'center' });
     const bw = 220, bx = SW / 2 - bw / 2, by = SH / 2 + 56;
     line(bx, by, bx + bw, by, paper); line(bx, by + 15, bx + bw, by + 15, paper);
@@ -764,13 +767,12 @@
       return [x1, y * cp - z1 * sp, y * sp + z1 * cp];
     };
     const rot = n => { const x1 = n[0] * cyw - n[2] * syw, z1 = n[0] * syw + n[2] * cyw; return [x1, n[1] * cp - z1 * sp, n[1] * sp + z1 * cp]; };
-    // zoomed in, the whole front of the monitor fills the canvas (bezel included, so
-    // nothing is cut off at the top or bottom) and the desktop is big enough to read
-    // on a phone the glass itself fills the width instead, letting the bezel crop
-    const zp = small ? [0, (GL.y0 + GL.y1) / 2, GL.z] : [0, 0, 0];
+    // zoomed in, the glass itself fills the canvas so the desktop is big enough to
+    // read, letting the bezel crop at the edges
+    const zp = [0, (GL.y0 + GL.y1) / 2, GL.z];
     if (zoom > .001) {
       const zg = xf(zp)[2];
-      const fit = (small ? Math.min(.97 * W / (GL.x1 - GL.x0), .92 * H / (GL.y1 - GL.y0)) : Math.min(.9 * H / (2 * .883), .94 * W / 2)) * (D - zg) / F;
+      const fit = (small ? Math.min(.97 * W / (GL.x1 - GL.x0), .92 * H / (GL.y1 - GL.y0)) : Math.min(.9 * Math.min(H, innerHeight) / (GL.y1 - GL.y0), .94 * W / (GL.x1 - GL.x0))) * (D - zg) / F;
       scale += (fit - scale) * zoom;
     }
     const raw = v => { const s = F / (D - v[2]) * scale; return [v[0] * s, -v[1] * s]; };
@@ -875,14 +877,52 @@
     ctx.stroke();
   }
 
-  // text laid flat on the front of the case
-  function decal(P, str, x0, y0, x1, y1, font) {
-    const p = P.toScreen(P.xf([x0, y1, 0])), px = P.toScreen(P.xf([x1, y1, 0])), py = P.toScreen(P.xf([x0, y0, 0]));
-    const bw = 400, bh = 60;
+  // a sticky note on the bottom left of the bezel, its bottom hanging off the edge
+  // and curling out toward you, more at the right corner
+  const NOTE = { cx: -.68, top: -.71, w: .31, h: .31, tilt: -.04, flat: .55 };
+  function notePt(u, v, shadow) {
+    const s = Math.max(0, (v - NOTE.flat) / (1 - NOTE.flat)), k = s * s * (.6 + .8 * u);
+    let lx = (u - .5) * NOTE.w, ly = -v * NOTE.h, z = .002;
+    if (shadow) { lx += .006 + .03 * k; ly -= .008 + .02 * k; } else { ly += k * .07; z = .004 + k * .12; }
+    const c = Math.cos(NOTE.tilt), sn = Math.sin(NOTE.tilt);
+    return [NOTE.cx + lx * c - ly * sn, NOTE.top + lx * sn + ly * c, z];
+  }
+  function stickyNote(P) {
+    const NU = 6, NV = 12;
+    const S = (u, v, sh) => P.toScreen(P.xf(notePt(u, v, sh)));
+    const outline = sh => {
+      const q = [];
+      for (let i = 0; i <= NU; i++) q.push(S(i / NU, 0, sh));
+      for (let j = 1; j <= NV; j++) q.push(S(1, j / NV, sh));
+      for (let i = NU - 1; i >= 0; i--) q.push(S(i / NU, 1, sh));
+      for (let j = NV - 1; j > 0; j--) q.push(S(0, j / NV, sh));
+      const path = new Path2D();
+      q.forEach((p, k) => (k ? path.lineTo(p[0], p[1]) : path.moveTo(p[0], p[1])));
+      path.closePath();
+      return path;
+    };
+    const body = outline(false);
     ctx.save();
+    ctx.globalAlpha = .18; ctx.fillStyle = ink; ctx.fill(outline(true));
+    ctx.globalAlpha = 1; ctx.fillStyle = paper; ctx.fill(body);
+    // the curl darkens as it turns away from the light
+    ctx.fillStyle = ink;
+    for (let j = 0; j < NV; j++) {
+      const v0 = j / NV, v1 = (j + 1) / NV, s = (v1 - NOTE.flat) / (1 - NOTE.flat);
+      if (s <= 0) continue;
+      ctx.globalAlpha = .28 * s * s;
+      ctx.beginPath();
+      for (let i = 0; i <= NU; i++) { const p = S(i / NU, v0); i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]); }
+      for (let i = NU; i >= 0; i--) { const p = S(i / NU, v1); ctx.lineTo(p[0], p[1]); }
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.globalAlpha = 1; ctx.strokeStyle = ink; ctx.lineWidth = 1; ctx.stroke(body);
+    // the message, written on the flat top part
+    const vt0 = .08, vt1 = .52, bw = 400, bh = bw * (vt1 - vt0) * NOTE.h / NOTE.w;
+    const p = S(0, vt0), px = S(1, vt0), py = S(0, vt1);
     ctx.transform((px[0] - p[0]) / bw, (px[1] - p[1]) / bw, (py[0] - p[0]) / bh, (py[1] - p[1]) / bh, p[0], p[1]);
-    ctx.font = font; ctx.fillStyle = ink; ctx.textBaseline = 'middle';
-    ctx.fillText(str, 0, bh / 2);
+    ctx.font = `italic 50px ${displayFont}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+    ["don't forget to", "click Saturn's", 'moon :)'].forEach((l, i) => ctx.fillText(l, bw / 2, bh * (.18 + i * .32), bw - 30));
     ctx.restore();
   }
 
@@ -911,7 +951,7 @@
       ctx.fillStyle = gr; ctx.fillRect(Math.min(x0, x1), 0, fw, H);
     }
     ctx.restore();
-    // glass edge, badge, vents, power light
+    // glass edge, sticky note and power light
     ctx.strokeStyle = ink; ctx.lineWidth = 1;
     const edge = [];
     for (let i = 0; i <= NX; i++) edge.push(P.g[i].s);
@@ -919,8 +959,7 @@
     for (let i = NX - 1; i >= 0; i--) edge.push(P.g[NY * (NX + 1) + i].s);
     for (let j = NY - 1; j > 0; j--) edge.push(P.g[j * (NX + 1)].s);
     ctx.beginPath(); edge.forEach((q, k) => (k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]))); ctx.closePath(); ctx.stroke();
-    decal(P, 'Tareq', -.88, -.83, -.68, -.72, `italic 48px ${displayFont}`);
-    decal(P, 'TRON 98', -.69, -.815, -.56, -.74, `500 30px ${bodyFont}`);
+    stickyNote(P);
     const led = P.toScreen(P.xf([.5, -.775, .001]));
     ctx.beginPath(); ctx.arc(led[0], led[1], 3, 0, TAU);
     if (st.power) { ctx.fillStyle = ink; ctx.fill(); } else ctx.stroke();
@@ -1088,6 +1127,14 @@
     st.hover = next;
   });
   canvas.addEventListener('pointerleave', () => { st.hover = null; lastPaint = 0; });
+  // the canvas can be taller than the window; zoomed in, bring its middle (where
+  // the screen ends up) to the middle of the window so none of the screen is cut off
+  function centreCanvas() {
+    const r = canvas.getBoundingClientRect(), dy = r.top + r.height / 2 - innerHeight / 2;
+    if (Math.abs(dy) < 4) return;
+    if (window.__lenis) window.__lenis.scrollTo(scrollY + dy, { duration: .8 });
+    else scrollBy({ top: dy, behavior: 'smooth' });
+  }
   canvas.addEventListener('click', e => {
     lastPaint = 0;
     const r = canvas.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
@@ -1098,7 +1145,7 @@
     if (!p) { zoomTo = 0; return; }
     if (zoomTo < 1) {
       if (small && desktopUp()) { const h = hitAt(p); if (h && h.id === 'mjob') { act(h); return; } }
-      zoomTo = 1; return;
+      zoomTo = 1; centreCanvas(); return;
     }
     if (p && desktopUp()) act(hitAt(p));
     else if (p && st.bootAt >= 0 && st.offAt < 0) st.bootAt = clock() - BOOT;   // a click skips the boot
@@ -1164,7 +1211,7 @@
     else canvas.removeEventListener('wheel', onWheel, { passive: false });
   }
   canvas.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !zoomTo) { zoomTo = 1; return; }
+    if (e.key === 'Enter' && !zoomTo) { zoomTo = 1; centreCanvas(); return; }
     if (!desktopUp() || st.win !== 'open') return;
     if (e.key === 'ArrowDown' || e.key === 'ArrowRight') select(st.sel + 1);
     else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') select(st.sel - 1);
