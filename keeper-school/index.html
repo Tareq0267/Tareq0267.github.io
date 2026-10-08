@@ -1,0 +1,1938 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keeper School: Robot RL from Zero</title>
+<meta name="description" content="A self-paced course: from zero to understanding and training a humanoid (Booster T2) policy with MuJoCo MJX + PPO, aimed at building a goalkeeper.">
+<style>
+:root {
+  --bg: #f7f6f2;
+  --surface: #ffffff;
+  --surface-2: #f0efe9;
+  --text: #1d1f1c;
+  --muted: #5d6259;
+  --border: #dcdad2;
+  --accent: #1d7348;
+  --accent-soft: #e3f1e8;
+  --accent-text: #ffffff;
+  --warn: #9a5b00;
+  --warn-soft: #fbf0dc;
+  --info: #2457a6;
+  --info-soft: #e5edf9;
+  --bad: #b3261e;
+  --bad-soft: #fbe5e3;
+  --good: #1d7348;
+  --good-soft: #e3f1e8;
+  --code-bg: #f3f2ec;
+  --tk-c: #6b7468;
+  --tk-s: #a1491d;
+  --tk-k: #7b2fa8;
+  --tk-n: #0f6f8a;
+  --tk-f: #2457a6;
+  --tk-t: #1d7348;
+  --tk-a: #9a5b00;
+  --shadow: 0 1px 2px rgba(0,0,0,.05), 0 2px 8px rgba(0,0,0,.04);
+  --radius: 10px;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141614; --surface: #1b1e1b; --surface-2: #222622; --text: #e6e8e3; --muted: #a3a99f;
+    --border: #333833; --accent: #4cc38a; --accent-soft: #1d3327; --accent-text: #0c1a12;
+    --warn: #e0a84a; --warn-soft: #33281a; --info: #7aa7f0; --info-soft: #1b2638;
+    --bad: #f08a80; --bad-soft: #3a1f1d; --good: #4cc38a; --good-soft: #1d3327;
+    --code-bg: #111311; --tk-c: #7f897c; --tk-s: #e3a173; --tk-k: #cf9df0; --tk-n: #6cc6dc;
+    --tk-f: #8fb6f5; --tk-t: #6fd3a1; --tk-a: #e0b56a; --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141614; --surface: #1b1e1b; --surface-2: #222622; --text: #e6e8e3; --muted: #a3a99f;
+  --border: #333833; --accent: #4cc38a; --accent-soft: #1d3327; --accent-text: #0c1a12;
+  --warn: #e0a84a; --warn-soft: #33281a; --info: #7aa7f0; --info-soft: #1b2638;
+  --bad: #f08a80; --bad-soft: #3a1f1d; --good: #4cc38a; --good-soft: #1d3327;
+  --code-bg: #111311; --tk-c: #7f897c; --tk-s: #e3a173; --tk-k: #cf9df0; --tk-n: #6cc6dc;
+  --tk-f: #8fb6f5; --tk-t: #6fd3a1; --tk-a: #e0b56a; --shadow: none; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans);
+  font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased;
+}
+[hidden] { display: none !important; }
+a { color: var(--info); }
+img { max-width: 100%; }
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 16px 10px;
+  display: flex; align-items: center; gap: 12px;
+}
+.topbar .brand { font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.topbar .brand span { color: var(--accent); }
+.progress { flex: 1; min-width: 60px; display: flex; align-items: center; gap: 10px; }
+.progress .bar { flex: 1; height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; border: 1px solid var(--border); }
+.progress .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+.progress .label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.iconbtn {
+  border: 1px solid var(--border); background: var(--surface); color: var(--text);
+  border-radius: 8px; padding: 6px 10px; font: inherit; font-size: 14px; cursor: pointer;
+}
+.iconbtn:hover { background: var(--surface-2); }
+#menuBtn { display: none; }
+
+/* ---------- layout ---------- */
+.layout { display: grid; grid-template-columns: 290px minmax(0, 1fr); min-height: calc(100vh - 56px); }
+nav.side {
+  border-right: 1px solid var(--border); background: var(--surface);
+  padding: 16px 12px 40px; position: sticky; top: 56px; height: calc(100vh - 56px); overflow-y: auto;
+}
+nav.side h4 { margin: 18px 10px 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+nav.side a {
+  display: flex; gap: 10px; align-items: flex-start; padding: 7px 10px; border-radius: 8px;
+  color: var(--text); text-decoration: none; font-size: 14.5px; line-height: 1.35;
+}
+nav.side a:hover { background: var(--surface-2); }
+nav.side a.active { background: var(--accent-soft); color: var(--text); font-weight: 600; }
+nav.side .num {
+  flex: none; width: 24px; height: 24px; border-radius: 99px; display: grid; place-items: center;
+  font-size: 12px; font-weight: 700; background: var(--surface-2); color: var(--muted); border: 1px solid var(--border);
+}
+nav.side a.done .num { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+nav.side .meta { display: block; font-size: 12px; color: var(--muted); font-weight: 400; }
+main { padding: 28px 16px 80px; }
+.content { max-width: 860px; margin: 0 auto; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  #menuBtn { display: inline-block; }
+  nav.side {
+    position: fixed; inset: 56px 0 0 0; height: auto; z-index: 15; border-right: 0;
+    transform: translateX(-100%); transition: transform .2s; width: min(320px, 88vw);
+    box-shadow: 4px 0 24px rgba(0,0,0,.15);
+  }
+  nav.side.open { transform: none; }
+  .progress .label { display: none; }
+}
+
+/* ---------- typography ---------- */
+h1 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); line-height: 1.2; margin: 0 0 .3em; letter-spacing: -.02em; }
+h2 { font-size: 1.45rem; margin: 2.2em 0 .6em; letter-spacing: -.01em; padding-top: .4em; border-top: 1px solid var(--border); }
+h3 { font-size: 1.12rem; margin: 1.8em 0 .5em; }
+p, li { max-width: 72ch; }
+.lede { font-size: 1.1rem; color: var(--muted); margin-top: 0; }
+.kicker { font-size: 13px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); font-weight: 700; margin-bottom: 6px; }
+code { overflow-wrap: anywhere; font-family: var(--mono); font-size: .88em; background: var(--code-bg); border: 1px solid var(--border); padding: .08em .35em; border-radius: 5px; }
+.muted { color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--border); margin: 2em 0; }
+
+/* ---------- boxes ---------- */
+.goals { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; box-shadow: var(--shadow); }
+.goals h4 { margin: 0 0 6px; font-size: 14px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.goals ul { margin: 0; padding-left: 20px; }
+.callout { border-radius: var(--radius); padding: 12px 16px; margin: 1.2em 0; border-left: 4px solid; }
+.callout b.t { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.callout p { margin: .3em 0; }
+.callout.analogy { background: var(--info-soft); border-color: var(--info); }
+.callout.analogy b.t { color: var(--info); }
+.callout.why { background: var(--accent-soft); border-color: var(--accent); }
+.callout.why b.t { color: var(--accent); }
+.callout.trap { background: var(--warn-soft); border-color: var(--warn); }
+.callout.trap b.t { color: var(--warn); }
+.callout.try { background: var(--surface); border: 1px dashed var(--accent); border-left: 4px solid var(--accent); }
+.callout.try b.t { color: var(--accent); }
+
+.diagram {
+  font-family: var(--mono); font-variant-ligatures: none; font-size: 13.5px; line-height: 1.45; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; overflow-x: auto; white-space: pre;
+}
+.tablewrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { background: var(--surface-2); font-weight: 600; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+
+/* ---------- code ---------- */
+figure.code { margin: 1.2em 0; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--code-bg); }
+figure.code figcaption {
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  font-size: 12.5px; padding: 6px 10px 6px 14px; border-bottom: 1px solid var(--border);
+  background: var(--surface-2); color: var(--muted); font-family: var(--mono);
+}
+figure.code figcaption .src { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+figure.code figcaption .tag {
+  font-family: var(--sans); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  padding: 2px 7px; border-radius: 99px; margin-right: 8px; background: var(--accent-soft); color: var(--accent);
+}
+figure.code figcaption .tag.repo { background: var(--info-soft); color: var(--info); }
+figure.code pre code { background: none; border: 0; padding: 0; font-size: inherit; border-radius: 0; }
+figure.code pre { font-variant-ligatures: none; margin: 0; padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 13.5px; line-height: 1.55; tab-size: 4; }
+.copy { border: 1px solid var(--border); background: var(--surface); color: var(--text); border-radius: 6px; font-size: 12px; padding: 3px 9px; cursor: pointer; font-family: var(--sans); flex: none; }
+.copy:hover { background: var(--bg); }
+.tk-c { color: var(--tk-c); font-style: italic; }
+.tk-s { color: var(--tk-s); }
+.tk-k { color: var(--tk-k); font-weight: 600; }
+.tk-n { color: var(--tk-n); }
+.tk-f { color: var(--tk-f); }
+.tk-t { color: var(--tk-t); font-weight: 600; }
+.tk-a { color: var(--tk-a); }
+
+/* ---------- quiz ---------- */
+.quiz { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 18px 18px; margin: 1.5em 0; box-shadow: var(--shadow); }
+.quiz .qhead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.quiz .qhead h3 { margin: 14px 0 4px; }
+.quiz .best { font-size: 13px; color: var(--muted); }
+.q { border-top: 1px solid var(--border); padding: 14px 0 6px; }
+.q:first-of-type { border-top: 0; }
+.q .qt { font-weight: 600; margin-bottom: 8px; }
+.q .qt .n { color: var(--accent); margin-right: 6px; }
+.opt {
+  display: flex; gap: 10px; align-items: flex-start; padding: 8px 12px; margin: 6px 0;
+  border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: var(--bg);
+}
+.opt:hover { border-color: var(--accent); }
+.opt input { margin-top: 5px; accent-color: var(--accent); flex: none; }
+.opt.correct { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.why-box { font-size: 14.5px; padding: 8px 12px; border-radius: 8px; margin: 6px 0 4px; background: var(--surface-2); }
+.why-box.ok b { color: var(--good); }
+.why-box.no b { color: var(--bad); }
+.qactions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-text); border-radius: 8px; padding: 8px 16px; font: inherit; font-weight: 600; font-size: 15px; cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--accent); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.score { font-weight: 700; }
+
+/* ---------- lesson footer / checklists ---------- */
+.lessonnav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 3em; padding-top: 1.5em; border-top: 1px solid var(--border); }
+.complete-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 2em; padding: 14px 16px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); }
+.checklist { list-style: none; padding: 0; margin: 1em 0; }
+.checklist li { display: flex; gap: 10px; align-items: flex-start; padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px; margin: 6px 0; background: var(--surface); max-width: none; }
+.checklist input { margin-top: 6px; accent-color: var(--accent); flex: none; width: 16px; height: 16px; }
+.checklist li.ticked { opacity: .7; }
+.checklist li.ticked > span > b:first-child { text-decoration: line-through; }
+details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; margin: 1em 0; }
+details summary { cursor: pointer; font-weight: 600; }
+details[open] summary { margin-bottom: 8px; }
+
+/* ---------- home cards ---------- */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin: 1.2em 0; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; text-decoration: none; color: var(--text); box-shadow: var(--shadow); display: block; }
+.card:hover { border-color: var(--accent); }
+.card .cn { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; }
+.card .ct { font-weight: 650; margin: 2px 0 4px; }
+.card .cs { font-size: 13px; color: var(--muted); }
+.card.done { border-color: var(--accent); background: var(--accent-soft); }
+.pill { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); margin-left: 6px; font-weight: 500; }
+.formula { font-variant-ligatures: none; font-family: var(--mono); background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; overflow-x: auto; white-space: pre; font-size: 14px; }
+.small { font-size: 14px; }
+footer.credit { font-size: 13px; color: var(--muted); margin-top: 4em; padding-top: 1em; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <button class="iconbtn" id="menuBtn" aria-label="Open lesson list">☰</button>
+  <div class="brand">Keeper <span>School</span></div>
+  <div class="progress" title="Lessons completed">
+    <div class="bar"><i id="progBar"></i></div>
+    <div class="label" id="progLabel">0 / 0 lessons</div>
+  </div>
+  <button class="iconbtn" id="themeBtn" aria-label="Toggle colour theme">◐</button>
+</header>
+
+<div class="layout">
+<nav class="side" id="side" aria-label="Lessons"></nav>
+<main><div class="content" id="content">
+
+<!-- ===================================================================== -->
+<section data-mod="home" data-title="Start here" data-time="10 min" data-group="Course">
+<div class="kicker">Course home</div>
+<h1>Robot RL from zero, all the way to your first trained policy</h1>
+<p class="lede">A self-paced course for building a goalkeeper policy for the Booster T2 humanoid in MuJoCo MJX. It assumes you know Python and some ROS, and nothing about reinforcement learning.</p>
+
+<div class="goals">
+  <h4>By the end you will be able to</h4>
+  <ul>
+    <li>Explain, in your own words, every box of <b>sensors → policy → actuators</b> and how the policy gets trained.</li>
+    <li>Read an MJX environment (reset / step / obs / reward / termination) line by line.</li>
+    <li>Understand the buzzwords: PPO, advantage, GAE, entropy, domain randomization, MJCF, MJX, Warp, JAX, vmap, pixi, SLURM, A100.</li>
+    <li><b>Run your first real training job</b> on the UM A100 cluster, evaluate it, and watch the video.</li>
+    <li>Write a design doc and skeleton for <b>your own goalkeeper environment</b>.</li>
+  </ul>
+</div>
+
+<h2>How to use this course</h2>
+<ul>
+  <li><b>One lesson at a time.</b> Each has goals, explanations with analogies, real code, a hands-on exercise, and a quiz.</li>
+  <li><b>Quizzes are for learning, not grading.</b> Every answer shows an explanation. Retry as often as you like. Your best score is saved in this browser.</li>
+  <li><b>Exercises run on your laptop</b> (Windows is fine): plain Python + <code>pip install mujoco mujoco-mjx jax numpy</code>. All of them were tested.</li>
+  <li><b>Code tags:</b> <span class="pill">ex</span> = small exercise code written for this course. <span class="pill">repo</span> = an excerpt from the reference repo <code>t2-mujoco-rl-playground</code> (by Fawwaz, <a href="https://github.com/f4ww4z/t2-mujoco-rl-playground">github.com/f4ww4z/t2-mujoco-rl-playground</a>), used here as <i>reading material</i>. Your goalkeeper is your own work. Learn from the repo, then build your own.</li>
+</ul>
+
+<div class="callout trap"><b class="t">Do this today: hardware reality check</b>
+<p>Your laptop GPU (GeForce MX230, 2 GB, old driver) <b>cannot</b> run the training stack, which needs CUDA 12 and several GB of GPU memory. That's fine: your laptop is for learning and exercises, and <b>the first real training run will happen on the UM A100 cluster</b> (or a lab PC with a big GPU).</p>
+<p>Cluster access can take days. <b>Request a full DICC account + the UM VPN profile today</b> (see Lesson 11). A "limited" account cannot use the A100s.</p>
+</div>
+
+<h2>The 14-day plan</h2>
+<p class="muted">About 1.5–2.5 hours a day. If you go faster, great. If something doesn't click, stay on it; later lessons build on earlier ones.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Day</th><th>Lessons</th><th>Hands-on</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>0 Big picture · 1 RL in plain language</td><td>Run <code>toy_keeper.py</code>. <b>Request cluster access.</b></td></tr>
+<tr><td>2</td><td>2 How learning works (PPO)</td><td>Watch <code>reinforce_keeper.py</code> learn</td></tr>
+<tr><td>3</td><td>3 JAX crash course</td><td><code>jax_basics.py</code>: 4096 keepers at once</td></tr>
+<tr><td>4</td><td>4 MuJoCo &amp; MJCF</td><td>Pendulum + open the real T2 model in the viewer</td></tr>
+<tr><td>5</td><td>5 MJX on the GPU · 6 Anatomy of an env (part 1)</td><td><code>mjx_batch.py</code>: 1024 pendulums</td></tr>
+<tr><td>6</td><td>6 Anatomy (part 2) · 7 Observations</td><td>Trace one <code>step()</code> on paper</td></tr>
+<tr><td>7</td><td>8 Rewards · 9 Sim-to-real</td><td>Reward-shaping experiment on the toy keeper</td></tr>
+<tr><td>8</td><td>10 The training script · 11 Tools &amp; the A100</td><td>Read <code>train_stand.py</code> top to bottom</td></tr>
+<tr><td>9</td><td>12 LAB 1, part A</td><td>Log in to UMHPC, build the environment, smoke job</td></tr>
+<tr><td>10</td><td>12 LAB 1, part B</td><td><b>Your first training run</b> → evaluate → video</td></tr>
+<tr><td>11</td><td>12 LAB 1, part C</td><td>Experiment: short vs long training, compare</td></tr>
+<tr><td>12–13</td><td>13 Your goalkeeper</td><td>Design doc + environment skeleton</td></tr>
+<tr><td>14</td><td>Final check</td><td>10-question review; plan the next month</td></tr>
+</tbody></table></div>
+
+<h2>Lessons</h2>
+<div class="cards" id="homeCards"></div>
+
+<h2>Exercise setup (Windows, once)</h2>
+<p>Open PowerShell in a folder of your choice:</p>
+<script type="text/x-code" data-lang="sh" data-tag="ex" data-src="PowerShell: one-time setup for all exercises">
+python -m venv keeper-env
+keeper-env\Scripts\activate
+pip install mujoco mujoco-mjx jax numpy
+python -c "import mujoco, jax; print(mujoco.__version__, jax.__version__)"
+</script>
+<div class="callout trap"><b class="t">Harmless warning</b><p>When importing <code>mujoco.mjx</code> on your laptop you may see <code>Failed to import warp</code>. Ignore it: Warp is the NVIDIA GPU backend, and the exercises use the CPU. Keep <code>mujoco</code> and <code>mujoco-mjx</code> at the <b>same version</b> (pip does this if you install them together).</p></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m0" data-title="The big picture" data-time="30 min" data-group="Part 1: Ideas" hidden>
+<div class="kicker">Lesson 0</div>
+<h1>The big picture</h1>
+<p class="lede">You already know the pipeline: sensors → black magic → effectors. This lesson opens up the black magic.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Map every part of the project onto sensors → policy → actuators.</li>
+<li>Know the three things <i>you</i> design when you create a task.</li>
+<li>Know which layer each buzzword belongs to.</li>
+</ul></div>
+
+<h2>1. The deployed robot: what runs at 50 Hz</h2>
+<div class="diagram"> SENSORS                         POLICY ("black magic")             EFFECTORS
+ ───────                         ──────────────────────             ─────────
+ IMU (tilt, spin rate)    ┐
+ joint encoders (31)      ├──►  obs: 102–109 numbers  ──►  neural  ──►  31 numbers ──► PD control ──► motors
+ camera → ball position   ┘                                network      (target angles)  (in each joint)
+
+                          this loop runs every 0.02 s (50 Hz)</div>
+<p>The policy is a small neural network: three hidden layers (256 → 128 → 128 neurons), about <b>84,000 numbers</b> called <i>weights</i>. Running it is a handful of matrix multiplications, which takes microseconds. There is no hidden logic in it, no "if ball then move leg". The behaviour lives entirely in the values of those 84k numbers.</p>
+<p>The output is <b>not torque</b>. It's 31 <b>target angles</b>, one per joint, written as offsets from a default standing pose. A PD controller inside each joint then pushes toward that target. This is safer and much easier to learn than raw torque.</p>
+<div class="callout analogy"><b class="t">ROS analogy</b><p>The deployed policy is a single node: it subscribes to <code>/imu</code>, <code>/joint_states</code> and <code>/ball_detection</code>, runs <code>action = policy(obs)</code>, and publishes <code>/joint_position_targets</code> at 50 Hz. Training is how you get the weights inside that node.</p></div>
+
+<h2>2. Where the weights come from: training in simulation</h2>
+<p>You can't learn by trial and error on the real robot. It would fall thousands of times. So you build a <b>fake world</b> (a physics simulator), drop thousands of virtual robots into it, and let them practise:</p>
+<div class="diagram">repeat billions of times:
+   1. each robot sees its obs, the network picks an action (slightly random → exploration)
+   2. physics advances 0.02 s
+   3. YOU compute a reward: one number, "how good was that?"
+   4. every few steps: adjust the 84k weights so high-reward actions become more likely</div>
+
+<h2>3. The three things you design</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>You design</th><th>Question it answers</th><th>Goalkeeper example</th></tr></thead>
+<tbody>
+<tr><td><b>Observation</b></td><td>What may the robot know?</td><td>ball position &amp; velocity, own tilt, joint angles, where the goal is</td></tr>
+<tr><td><b>Reward</b></td><td>What counts as good or bad?</td><td>+save, −goal conceded, −fall, +well positioned</td></tr>
+<tr><td><b>Reset</b> (+ termination)</td><td>What situations does it practise, and when does an attempt end?</td><td>keeper in goal, ball shot from random spots; falling ends the attempt</td></tr>
+</tbody></table></div>
+<p>The learning algorithm (PPO), the neural network and the GPU simulation are reusable machinery. Most of your creative work is in this table.</p>
+
+<h2>4. The layers and their buzzwords</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Layer</th><th>Buzzwords</th><th>Lesson</th></tr></thead>
+<tbody>
+<tr><td>Learning</td><td>RL, policy, reward, return, value, PPO, advantage, GAE, entropy, KL</td><td>1–2</td></tr>
+<tr><td>Math on GPU</td><td>JAX, <code>jp</code>, jit, vmap, PRNG keys</td><td>3</td></tr>
+<tr><td>Physics</td><td>MuJoCo, MJCF/XML, body, joint, geom, actuator, sensor, keyframe, qpos/qvel</td><td>4</td></tr>
+<tr><td>Physics on GPU</td><td>MJX, Warp, CUDA, <code>--impl warp</code>, num_envs</td><td>5</td></tr>
+<tr><td>The task</td><td>environment, State, reset/step, observation, termination</td><td>6–8</td></tr>
+<tr><td>Reality</td><td>sim-to-real, domain randomization, noise, ONNX, behaviour tree</td><td>9</td></tr>
+<tr><td>Running it</td><td>brax, checkpoint, pixi, WSL2, wandb, SLURM, sbatch, A100</td><td>10–12</td></tr>
+</tbody></table></div>
+
+<div class="quiz" data-quiz="m0"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m1" data-title="RL in plain language" data-time="1.5 h" data-group="Part 1: Ideas" hidden>
+<div class="kicker">Lesson 1</div>
+<h1>Reinforcement learning in plain language</h1>
+<p class="lede">The vocabulary, the loop, and a goalkeeper you can run in 30 lines of plain Python.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Use agent, environment, observation, action, reward, episode, return, discount, policy and value correctly.</li>
+<li>Compute a discounted return by hand.</li>
+<li>Run a toy goalkeeper environment and compare two policies.</li>
+</ul></div>
+
+<h2>1. The loop</h2>
+<div class="diagram">            action a_t
+   ┌──────────────────────────────┐
+   │                              ▼
+ AGENT (policy π)           ENVIRONMENT (sim + rules)
+   ▲                              │
+   └──────────────────────────────┘
+        observation o_{t+1}, reward r_{t+1}, done</div>
+<div class="tablewrap"><table>
+<thead><tr><th>Word</th><th>Meaning</th><th>In the T2 project</th></tr></thead>
+<tbody>
+<tr><td><b>Agent</b></td><td>The decision-maker</td><td>the neural network policy</td></tr>
+<tr><td><b>Environment</b></td><td>Everything else: physics + rules</td><td>a Python class like <code>T2StandV4</code></td></tr>
+<tr><td><b>State</b></td><td>The complete truth of the world</td><td>every position/velocity in the simulator</td></tr>
+<tr><td><b>Observation</b></td><td>What the agent actually gets to see: partial and noisy</td><td>102 numbers (IMU, joints, last action)</td></tr>
+<tr><td><b>Action</b></td><td>What the agent does</td><td>31 joint target offsets</td></tr>
+<tr><td><b>Reward</b></td><td>One number per step: how good was that</td><td>sum of ~15 weighted terms</td></tr>
+<tr><td><b>Episode</b></td><td>One attempt, from reset until the end</td><td>up to 1000 steps = 20 s</td></tr>
+<tr><td><b>Termination</b></td><td>The attempt ended because of failure</td><td>fell over (tilt &gt; 34°, trunk &lt; 0.75 m…)</td></tr>
+<tr><td><b>Truncation</b></td><td>The attempt ended because time ran out. Not a failure!</td><td>reached step 1000</td></tr>
+<tr><td><b>Policy π</b></td><td>The rule mapping observation → action</td><td>the 84k-weight network</td></tr>
+</tbody></table></div>
+
+<h2>2. Return and discount: what the agent maximizes</h2>
+<p>The agent doesn't maximize the reward of <i>this</i> step. It maximizes the <b>return</b>: the sum of all future rewards, with later ones counted a bit less:</p>
+<div class="formula">G_t = r_t + γ·r_{t+1} + γ²·r_{t+2} + γ³·r_{t+3} + …        (γ = "gamma" = discount, 0.99 here)</div>
+<p><b>Worked example.</b> Rewards <code>[1, 1, 1, 10]</code>, γ = 0.9:</p>
+<div class="formula">G = 1 + 0.9·1 + 0.81·1 + 0.729·10 = 1 + 0.9 + 0.81 + 7.29 = 10.0</div>
+<p><b>Why discount?</b> It sets a <i>horizon</i>: how far ahead the agent effectively cares. A handy rule of thumb is horizon ≈ 1 / (1 − γ). With γ = 0.99 that's about 100 steps, and at 50 Hz that is <b>about 2 seconds</b>. A goalkeeper save happens within about 1–1.5 s of a shot, so this horizon fits.</p>
+<div class="callout why"><b class="t">Why it matters</b><p>If a good outcome comes much later than the horizon, the agent hardly "sees" it. That's one reason we add shaping rewards that pay off <i>now</i> for progress toward something good later (Lesson 8).</p></div>
+
+<h2>3. Policy and value</h2>
+<ul>
+<li><b>Policy π(a | o)</b>: given what I see, which action do I take? During training it's a <i>probability distribution</i> (it explores). At deployment we take its most likely action.</li>
+<li><b>Value V(o)</b>: from here, how much return do I expect? This is a second network, the <i>critic</i>. It never controls the robot; it only helps training judge whether an action turned out better or worse than expected (Lesson 2).</li>
+</ul>
+
+<h2>4. Hands-on: a 1-D goalkeeper</h2>
+<p>A keeper slides along the goal line. Each episode, a shot will cross the line at a random <code>target</code>. The keeper sees <code>obs = target − x</code> ("how far is the ball's line from me?") and chooses left, stay or right. The reward is <code>−|target − x|</code> every step, so being closer is less bad.</p>
+<script type="text/x-code" data-lang="py" data-tag="ex" data-src="toy_keeper.py">
+# toy_keeper.py - a 1-D goalkeeper in plain Python (no libraries).
+import random
+
+class ToyKeeperEnv:
+    """Keeper slides along the goal line. The ball will cross at `target`."""
+    def reset(self):
+        self.x = 0.0                                # keeper position (m)
+        self.target = random.uniform(-1.2, 1.2)     # where the shot will cross
+        self.t = 0
+        return self._obs()
+
+    def _obs(self):
+        return self.target - self.x                 # "how far is the ball's line from me?"
+
+    def step(self, action):                         # action: -1 left, 0 stay, +1 right
+        self.x += 0.1 * action
+        self.t += 1
+        reward = -abs(self.target - self.x)         # closer = less negative
+        done = self.t >= 20                         # episode = 20 steps
+        return self._obs(), reward, done
+
+def run_episode(env, policy):
+    obs, total, done = env.reset(), 0.0, False
+    while not done:
+        obs, r, done = env.step(policy(obs))
+        total += r
+    return total
+
+random_policy = lambda obs: random.choice([-1, 0, 1])
+rule_policy   = lambda obs: 0 if abs(obs) < 0.05 else (1 if obs > 0 else -1)
+
+if __name__ == "__main__":
+    env = ToyKeeperEnv()
+    random.seed(0)
+    for name, pol in [("random", random_policy), ("rule", rule_policy)]:
+        avg = sum(run_episode(env, pol) for _ in range(1000)) / 1000
+        print(f"{name:>6} policy: average return = {avg:.2f}")
+</script>
+<p>Expected output:</p>
+<script type="text/x-code" data-lang="text" data-src="output">
+random policy: average return = -12.12
+  rule policy: average return = -2.42
+</script>
+<p>Notice the shape: <code>reset()</code> returns the first observation; <code>step(action)</code> returns <code>(obs, reward, done)</code>. <b>The real T2 environment has exactly this shape</b>, just with physics inside and 4096 copies at once.</p>
+
+<div class="callout try"><b class="t">Try it</b>
+<ol>
+<li>Run it. Then make the shot harder: change <code>uniform(-1.2, 1.2)</code> to <code>(-2.0, 2.0)</code>. Why does the rule policy's score drop, even though it's "perfect"? (Hint: speed is 0.1 per step, for 20 steps.)</li>
+<li><b>Sparse reward:</b> change the reward to <code>1.0 if (done and abs(self.target - self.x) &lt; 0.1) else 0.0</code>. Run the random policy many times. How often does it get <i>any</i> reward? This is the "sparse reward problem", and it's why we shape rewards.</li>
+</ol></div>
+
+<div class="quiz" data-quiz="m1"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m2" data-title="How learning works (PPO)" data-time="2 h" data-group="Part 1: Ideas" hidden>
+<div class="kicker">Lesson 2</div>
+<h1>How learning works: from "try things" to PPO</h1>
+<p class="lede">The idea is simple: do more of what turned out better than expected. Everything else is engineering to make that stable.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Explain policy gradient, advantage and the critic in one sentence each.</li>
+<li>Know what PPO's clip, entropy, GAE and adaptive learning rate are for.</li>
+<li>Read the batch numbers (4096 × 24, 4 minibatches, 5 epochs).</li>
+<li>Watch a 6-number policy learn the toy keeper.</li>
+</ul></div>
+
+<h2>1. A network is a function with knobs</h2>
+<p>A neural network is <code>action_distribution = f(obs; W)</code>, where <code>W</code> are the knobs (weights). "Learning" means turning the knobs so good actions get more probable. For the T2 policy:</p>
+<div class="formula">obs (102) → 256 → 128 → 128 → 62 outputs  (31 means + 31 spreads for the 31 joints)
+weights ≈ 102·256 + 256·128 + 128·128 + 128·62 (+ biases) ≈ 84,000</div>
+<p>Training samples each action from a Gaussian with those means and spreads, then squashes it with <code>tanh</code> into [−1, 1] (a "tanh-normal" distribution). The env multiplies by <code>action_scale</code> (0.5 for standing) to get radians.</p>
+
+<h2>2. Policy gradient: the core idea</h2>
+<div class="formula">for each action taken:   push log π(action | obs) UP   by an amount ∝ advantage
+                          (advantage > 0: better than expected → more likely)
+                          (advantage < 0: worse than expected → less likely)</div>
+<p><b>Advantage</b> = what actually happened − what the critic expected. Using "better than expected" instead of raw return is crucial. If every return is negative (as in the toy keeper), raw returns would push <i>every</i> action down. Advantages separate the good actions from the bad ones.</p>
+<p><b>One-step version (TD error):</b></p>
+<div class="formula">δ = r + γ·V(next) − V(now)
+example: r = 1, V(now) = 5, V(next) = 6, γ = 0.99  →  δ = 1 + 5.94 − 5 = 1.94 > 0  → "better than expected"</div>
+<p><b>GAE</b> (Generalized Advantage Estimation, <code>gae_lambda = 0.95</code>) blends one-step, two-step, … estimates of the advantage. That reduces noise while staying mostly unbiased. You don't need its formula, just what it's for.</p>
+
+<h2>3. Hands-on: watch a policy learn</h2>
+<p>This is <b>REINFORCE</b>, PPO's ancestor, learning the toy keeper from Lesson 1. The whole brain is a 3×2 matrix <code>W</code>: for each action, logit = <code>w_obs · obs + w_bias</code>.</p>
+<script type="text/x-code" data-lang="py" data-tag="ex" data-src="reinforce_keeper.py (put next to toy_keeper.py)">
+# reinforce_keeper.py - the toy keeper LEARNS its policy (REINFORCE, numpy only).
+import numpy as np
+from toy_keeper import ToyKeeperEnv
+
+rng = np.random.default_rng(0)
+ACTIONS = np.array([-1, 0, 1])
+W = np.zeros((3, 2))          # the whole "brain": 6 numbers. logits = W @ [obs, 1]
+
+def policy_probs(obs):
+    logits = W @ np.array([obs, 1.0])
+    p = np.exp(logits - logits.max())
+    return p / p.sum()
+
+env, lr, gamma = ToyKeeperEnv(), 0.05, 0.99
+for it in range(1, 3001):
+    obs, done, traj = env.reset(), False, []
+    while not done:                                   # 1. ROLLOUT: play one episode
+        p = policy_probs(obs)
+        a = rng.choice(3, p=p)
+        next_obs, r, done = env.step(ACTIONS[a])
+        traj.append((obs, a, r))
+        obs = next_obs
+    G, returns = 0.0, []                              # 2. RETURNS: discounted reward-to-go
+    for _, _, r in reversed(traj):
+        G = r + gamma * G
+        returns.insert(0, G)
+    returns = np.array(returns)
+    adv = (returns - returns.mean()) / (returns.std() + 1e-8)   # 3. ADVANTAGE (crude)
+    for (o, a, _), A in zip(traj, adv):               # 4. UPDATE: make good actions likelier
+        p = policy_probs(o)
+        grad_logp = (np.eye(3)[a] - p)[:, None] * np.array([o, 1.0])[None, :]
+        W += lr * A * grad_logp
+    if it % 500 == 0:                                 # test: always pick the best action
+        rets = []
+        for _ in range(200):
+            o, d, tot = env.reset(), False, 0.0
+            while not d:
+                o, r, d = env.step(ACTIONS[np.argmax(policy_probs(o))])
+                tot += r
+            rets.append(tot)
+        print(f"episode {it:5d}: greedy average return = {np.mean(rets):.2f}")
+print("learned W (rows = left/stay/right, cols = [obs weight, bias]):")
+print(np.round(W, 2))
+</script>
+<p>Typical output: the return climbs from about −12 (random) to about −2.9, close to the hand-written rule (−2.4). The learned matrix looks like:</p>
+<script type="text/x-code" data-lang="text" data-src="output (numbers vary slightly)">
+learned W (rows = left/stay/right, cols = [obs weight, bias]):
+[[-8.12  0.83]
+ [ 0.08 -1.01]
+ [ 8.05  0.17]]
+</script>
+<p><b>Read it:</b> the "right" row has weight +8 on <code>obs</code>, so when the target is to the right (obs &gt; 0), "right" wins. The "left" row is the mirror image. <b>Nobody wrote that rule; it was learned from reward.</b> That is the entire magic, scaled up from 6 weights to 84,000.</p>
+
+<h2>4. What PPO adds on top</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Problem with plain REINFORCE</th><th>PPO's fix</th><th>Repo setting</th></tr></thead>
+<tbody>
+<tr><td>Advantages are very noisy</td><td>A learned <b>critic</b> V(o) + GAE</td><td><code>gae_lambda 0.95</code>, value net 256/128/128</td></tr>
+<tr><td>One bad update can destroy the policy</td><td><b>Clip</b> the probability ratio new/old to [1−ε, 1+ε]</td><td><code>clipping_epsilon 0.2</code></td></tr>
+<tr><td>Exploration dies too early</td><td><b>Entropy bonus</b>: reward for staying a bit random</td><td><code>entropy_cost 0.008</code></td></tr>
+<tr><td>Step size is hard to choose</td><td><b>Adaptive LR</b>: shrink it if the policy changed too much (KL), grow it if too little</td><td><code>ADAPTIVE_KL</code>, <code>desired_kl 0.01</code></td></tr>
+<tr><td>One episode at a time is slow</td><td>Big batches from many parallel envs, reused several times</td><td>4096 envs × 24 steps, 4 minibatches × 5 epochs</td></tr>
+</tbody></table></div>
+
+<h3>PPO in pseudocode</h3>
+<script type="text/x-code" data-lang="py" data-tag="ex" data-src="PPO, the shape of the loop (pseudocode)">
+for iteration in range(num_iterations):
+    # 1) ROLLOUT: 4096 envs x 24 steps = 98,304 transitions
+    for t in range(24):
+        action ~ policy(obs)                     # sampled -> exploration
+        obs, reward, done = env.step(action)     # all 4096 envs at once
+
+    # 2) ADVANTAGES
+    values = critic(all_obs)
+    adv = GAE(rewards, values, gamma=0.99, lam=0.95)
+
+    # 3) UPDATE: 5 passes over the data, each split into 4 minibatches -> 20 gradient steps
+    for epoch in range(5):
+        for mb in split(data, 4):
+            ratio = policy_new(a|o) / policy_old(a|o)
+            policy_loss = -min(ratio * adv, clip(ratio, 0.8, 1.2) * adv)
+            loss = policy_loss + value_loss - 0.008 * entropy
+            gradient_step(loss)
+</script>
+<div class="callout analogy"><b class="t">Analogy</b><p>A coach watches 4096 players each attempt 24 moves. They note which moves beat expectations, then give every player the same small correction. "Small" is the clip: never change their technique so much at once that they forget how to stand.</p></div>
+
+<div class="quiz" data-quiz="m2"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m3" data-title="JAX crash course" data-time="1.5 h" data-group="Part 2: The machinery" hidden>
+<div class="kicker">Lesson 3</div>
+<h1>JAX crash course: the five ideas you need</h1>
+<p class="lede">Every line of the environments is JAX. Learn five ideas and the code stops looking alien.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Recognize <code>jp</code>, <code>.at[].set()</code>, PRNG key splitting, <code>jp.where</code>, <code>jit</code> and <code>vmap</code> in the repo.</li>
+<li>Know why there are no Python <code>if</code>s on array values inside the env.</li>
+</ul></div>
+
+<h2>Why JAX?</h2>
+<p>JAX is NumPy that can (1) <b>compile</b> your function for the GPU (<code>jit</code>), (2) <b>batch</b> it automatically over thousands of inputs (<code>vmap</code>), and (3) take gradients (training uses this). In the repo, <code>import jax.numpy as jp</code>, so <code>jp</code> is "numpy, but JAX".</p>
+
+<script type="text/x-code" data-lang="py" data-tag="ex" data-src="jax_basics.py">
+# jax_basics.py - the 5 JAX ideas you need to read the repo.
+import jax
+import jax.numpy as jp
+
+# 1) jax.numpy looks like numpy
+x = jp.array([1.0, 2.0, 3.0])
+print("1) sum of squares:", jp.sum(jp.square(x)))
+
+# 2) arrays are IMMUTABLE: you never write x[0] = 5, you make a new array
+y = x.at[0].set(5.0)
+print("2) x unchanged:", x, " y new:", y)
+
+# 3) randomness needs explicit keys; split before every use
+key = jax.random.PRNGKey(42)
+key, sub = jax.random.split(key)
+print("3) random push velocity:", jax.random.uniform(sub, minval=-1.0, maxval=1.0))
+
+# 4) no Python `if` on array values inside jit -> use jp.where (both branches computed)
+@jax.jit
+def keeper_step(x, target):
+    action = jp.where(target > x, 1.0, -1.0)      # move toward the target
+    action = jp.where(jp.abs(target - x) < 0.05, 0.0, action)
+    new_x = x + 0.1 * action
+    reward = -jp.abs(target - new_x)
+    return new_x, reward
+
+print("4) one keeper:", keeper_step(0.0, 0.7))
+
+# 5) vmap = run the SAME function on a whole batch -> 4096 keepers at once
+keys = jax.random.split(jax.random.PRNGKey(0), 4096)
+targets = jax.vmap(lambda k: jax.random.uniform(k, minval=-1.2, maxval=1.2))(keys)
+xs = jp.zeros(4096)
+batched_step = jax.jit(jax.vmap(keeper_step))
+for _ in range(20):
+    xs, rewards = batched_step(xs, targets)
+print("5) 4096 keepers, mean final reward:", rewards.mean(), " shape:", rewards.shape)
+</script>
+<script type="text/x-code" data-lang="text" data-src="output">
+1) sum of squares: 14.0
+2) x unchanged: [1. 2. 3.]  y new: [5. 2. 3.]
+3) random push velocity: 0.45532846
+4) one keeper: (Array(0.1, dtype=float32, weak_type=True), Array(-0.59999996, dtype=float32, weak_type=True))
+5) 4096 keepers, mean final reward: -0.024780486  shape: (4096,)
+</script>
+
+<h2>Now spot them in the real environment</h2>
+<p><b>Idea 2 (immutable update)</b>: randomizing the robot's start position in <code>reset()</code>:</p>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · reset()">
+rng, key = jax.random.split(rng)                       # idea 3: fresh key
+dxy = jax.random.uniform(
+    key, (2,), minval=cfg.reset_config.root_xy_range[0],
+    maxval=cfg.reset_config.root_xy_range[1],
+)
+qpos = qpos.at[0:2].set(qpos[0:2] + dxy)               # idea 2: new array, shifted x,y
+</script>
+<p><b>Idea 4 (<code>jp.where</code> instead of <code>if</code>)</b>: the random shove in <code>step()</code>. Every env computes a push every step, but only the ones whose timer says "now" actually use it:</p>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · step()">
+do_push = (
+    jp.mod(state.info["push_step"] + 1, state.info["push_interval_steps"])
+    == 0
+) & cfg.push_config.enable
+root_xy = jp.where(do_push, jp.array([vx, vy]), state.data.qvel[:2])
+qvel = state.data.qvel.at[:2].set(root_xy)
+</script>
+<p><b>Idea 5 (<code>vmap</code>)</b>: domain randomization gives every one of the 4096 envs its own friction and mass:</p>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/randomize.py">
+@jax.vmap
+def rand_dynamics(rng):
+    rng, key = jax.random.split(rng)
+    friction = jax.random.uniform(key, minval=0.7, maxval=1.0)
+    geom_friction = model.geom_friction.at[floor_geom_id, 0].set(friction)
+    ...
+</script>
+
+<div class="callout trap"><b class="t">The classic trap</b><p>Inside a jitted function, <code>if state.info["push_step"] &gt; 5:</code> crashes (<code>ConcretizationTypeError</code>). The value is a <i>traced</i> array whose number isn't known at compile time. Use <code>jp.where</code>. But <code>cfg.push_config.enable</code> is a plain Python constant from the config, known at compile time, so mixing it in is fine.</p></div>
+<div class="callout why"><b class="t">Why immutable?</b><p>Same reason you'll see <code>state.replace(data=data)</code> everywhere: JAX functions must be "pure" (output depends only on input) so they can be compiled and vmapped. Instead of changing things, you return new versions.</p></div>
+
+<div class="callout try"><b class="t">Try it</b><ol>
+<li>In <code>jax_basics.py</code>, replace the first <code>jp.where</code> with a Python <code>if target &gt; x:</code> and run it. Read the error message. You'll meet it again someday.</li>
+<li>Change 4096 to 100,000 keepers. Still fast? That's vmap.</li>
+</ol></div>
+
+<div class="quiz" data-quiz="m3"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m4" data-title="MuJoCo & MJCF" data-time="2 h" data-group="Part 2: The machinery" hidden>
+<div class="kicker">Lesson 4</div>
+<h1>MuJoCo &amp; MJCF: the physics</h1>
+<p class="lede">The robot, the field and the ball are described in one XML file. MuJoCo turns it into physics.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Read an MJCF file: body, joint, geom, site, actuator, sensor, keyframe.</li>
+<li>Know the qpos/qvel layout of the T2 (38 / 37 numbers).</li>
+<li>Understand position actuators = PD control, and why they settle short of the target.</li>
+<li>Open the real T2 in the MuJoCo viewer on your laptop.</li>
+</ul></div>
+
+<h2>1. The building blocks</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>MJCF element</th><th>What it is</th><th>ROS/URDF cousin</th></tr></thead>
+<tbody>
+<tr><td><code>&lt;body&gt;</code></td><td>A rigid link with a frame, mass and inertia. Bodies nest into a tree.</td><td>link</td></tr>
+<tr><td><code>&lt;joint&gt;</code></td><td>How a body moves relative to its parent (hinge = rotation, free = 6-DoF floating base)</td><td>joint</td></tr>
+<tr><td><code>&lt;geom&gt;</code></td><td>A shape on a body, used for collision and/or visuals (capsule, box, mesh…)</td><td>collision / visual</td></tr>
+<tr><td><code>&lt;site&gt;</code></td><td>A named point/frame with no physics, used for sensors and measurements (e.g. <code>imu</code>, <code>goal_back</code>)</td><td>a tf frame</td></tr>
+<tr><td><code>&lt;actuator&gt;</code></td><td>A motor. <code>&lt;position&gt;</code> = PD controller to a target angle</td><td>ros2_control interface</td></tr>
+<tr><td><code>&lt;sensor&gt;</code></td><td>Measurements: gyro, velocimeter, joint position, contact…</td><td>sensor plugins</td></tr>
+<tr><td><code>&lt;keyframe&gt;</code></td><td>A saved pose (the T2's <code>home</code> = standing pose)</td><td>an SRDF named state</td></tr>
+<tr><td><code>&lt;option timestep&gt;</code></td><td>Physics step size (0.005 s = 200 Hz)</td><td>-</td></tr>
+</tbody></table></div>
+
+<h2>2. Hands-on: a pendulum with a PD motor</h2>
+<script type="text/x-code" data-lang="xml" data-tag="ex" data-src="pendulum.xml">
+<mujoco model="pendulum">
+  <option timestep="0.005"/>                       <!-- physics step = 200 Hz -->
+  <worldbody>
+    <light pos="0 0 3"/>
+    <geom name="floor" type="plane" size="2 2 0.1" rgba="0.3 0.5 0.3 1"/>
+    <body name="pole" pos="0 0 1">                 <!-- a rigid link, hung 1 m up -->
+      <joint name="hinge" type="hinge" axis="0 1 0" damping="0.1"/>
+      <geom type="capsule" fromto="0 0 0 0 0 -0.6" size="0.04" mass="1"/>
+    </body>
+  </worldbody>
+  <actuator>
+    <!-- position actuator = a PD controller: torque = kp*(target - angle) - kv*velocity -->
+    <position name="hinge_motor" joint="hinge" kp="20" kv="1"/>
+  </actuator>
+  <sensor>
+    <jointpos name="hinge_angle" joint="hinge"/>
+  </sensor>
+  <keyframe>
+    <key name="home" qpos="0" ctrl="0"/>
+  </keyframe>
+</mujoco>
+</script>
+<script type="text/x-code" data-lang="py" data-tag="ex" data-src="pendulum.py">
+# pendulum.py - step MuJoCo by hand, command a joint TARGET, read a sensor.
+import mujoco
+
+model = mujoco.MjModel.from_xml_path("pendulum.xml")
+data = mujoco.MjData(model)
+print("nq (qpos size):", model.nq, " nv:", model.nv, " nu (actuators):", model.nu)
+
+data.ctrl[0] = 0.8            # "please hold the pole at 0.8 rad" -> the PD does the rest
+for i in range(400):          # 400 x 0.005 s = 2 s
+    mujoco.mj_step(model, data)
+    if i % 80 == 0:
+        print(f"t={data.time:4.2f}s  angle={data.qpos[0]: .3f}  "
+              f"sensor={data.sensordata[0]: .3f}  torque={data.actuator_force[0]: .2f}")
+</script>
+<script type="text/x-code" data-lang="text" data-src="output">
+nq (qpos size): 1  nv: 1  nu (actuators): 1
+t=0.01s  angle= 0.003  sensor= 0.000  torque= 16.00
+t=0.41s  angle= 0.691  sensor= 0.699  torque= 3.63
+t=0.81s  angle= 0.723  sensor= 0.724  torque= 1.70
+t=1.20s  angle= 0.707  sensor= 0.707  torque= 1.83
+t=1.60s  angle= 0.704  sensor= 0.704  torque= 1.90
+</script>
+<div class="callout why"><b class="t">The most important observation in this lesson</b><p>We asked for <b>0.8 rad</b> and got about <b>0.70 rad</b>. Gravity pulls the pole down, and a PD controller only produces torque when there is an error, so it settles where <code>kp × error</code> balances gravity. On the T2 this is everywhere: legs carrying body weight, arms hanging. <b>The policy learns to command whatever targets produce the posture it wants.</b> That's one reason a learned policy beats hand-written joint targets.</p></div>
+
+<h2>3. The real T2 model</h2>
+<p>Motors in the T2 standing model (the <code>default</code> classes set gains per joint group):</p>
+<script type="text/x-code" data-lang="xml" data-tag="repo" data-src="assets/T2_31dof_stand_v4.xml · actuator defaults (comments added)">
+<position kp="350" />   <!-- legs: stiff, carry the body -->
+<position kp="180" />   <!-- hip yaw -->
+<position kp="40" />    <!-- torso + arms: soft -->
+</script>
+<p>Sensors the policy's observation is built from:</p>
+<script type="text/x-code" data-lang="xml" data-tag="repo" data-src="assets/T2_31dof_stand_v4.xml · sensors">
+<velocimeter name="linear-velocity" site="imu" noise="0.001" />
+<gyro name="angular-velocity" site="imu" noise="0.1" />
+<contact name="left_foot_floor" geom1="left_ankle_collision" geom2="floor" num="1" reduce="mindist" data="found" />
+<contact name="right_foot_floor" geom1="right_ankle_collision" geom2="floor" num="1" reduce="mindist" data="found" />
+</script>
+
+<h3>qpos and qvel: the state vectors</h3>
+<div class="formula">qpos (nq = 38) = [ x, y, z,  qw, qx, qy, qz,   joint_0 … joint_30 ]
+                 └ trunk position ┘└ orientation ┘   └ 31 joint angles ┘
+qvel (nv = 37) = [ vx, vy, vz,  wx, wy, wz,   jointvel_0 … jointvel_30 ]
+                                                     (orientation: 4 numbers in qpos but 3 in qvel)
+soccer model adds the ball's free joint:  nq = 45,  nv = 43</div>
+<p>That's why the code is full of <code>qpos[7:]</code> (joint angles), <code>qvel[6:]</code> (joint velocities), <code>qpos[2]</code> (trunk height) and <code>qvel[0:2]</code> (horizontal speed).</p>
+
+<h3>Two clocks</h3>
+<div class="formula">sim_dt  = 0.005 s  → physics, 200 Hz
+ctrl_dt = 0.02 s   → policy, 50 Hz        n_substeps = ctrl_dt / sim_dt = 4 physics steps per action</div>
+
+<div class="callout try"><b class="t">Try it (on your laptop, today)</b><ol>
+<li>Watch the pendulum: <code>python -m mujoco.viewer --mjcf=pendulum.xml</code>. Double-click the pole, then Ctrl + right-drag to push it.</li>
+<li>Change <code>kp</code> to 5 and then to 200. Re-run <code>pendulum.py</code>. How does the final angle change, and why?</li>
+<li><b>Open the real robot:</b> from the reference repo folder, run <code>python -m mujoco.viewer --mjcf=assets/T2_31dof_stand_v4.xml</code>. (Tested: it loads with plain <code>pip install mujoco</code> on Windows: nq 38, nv 37, nu 31.) Open the right-hand panel, find "Control", and move sliders to see joints move. Try <code>assets/T2_31dof_soccer.xml</code> to see the field and goals.</li>
+</ol></div>
+
+<div class="quiz" data-quiz="m4"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m5" data-title="MJX: thousands of robots on a GPU" data-time="1 h" data-group="Part 2: The machinery" hidden>
+<div class="kicker">Lesson 5</div>
+<h1>MJX: thousands of robots on one GPU</h1>
+<p class="lede">MuJoCo + JAX's vmap = MJX. This is where "9 minutes to train" comes from.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Know what <code>mjx.put_model</code>, <code>mjx.make_data</code> and a vmapped <code>mjx.step</code> do.</li>
+<li>Know the difference between <code>--impl jax</code> and <code>--impl warp</code>.</li>
+<li>Do the throughput arithmetic.</li>
+</ul></div>
+
+<h2>1. Same pendulum, 1024 copies</h2>
+<script type="text/x-code" data-lang="py" data-tag="ex" data-src="mjx_batch.py (needs pendulum.xml)">
+# mjx_batch.py - the SAME pendulum, 1024 copies at once (this is what MJX is for).
+import time
+import jax
+import jax.numpy as jp
+import mujoco
+from mujoco import mjx
+
+mj_model = mujoco.MjModel.from_xml_path("pendulum.xml")
+mjx_model = mjx.put_model(mj_model)              # copy the model onto the accelerator
+
+def make_one(target):                             # one world with its own target angle
+    d = mjx.make_data(mjx_model)
+    return d.replace(ctrl=jp.array([target]))
+
+targets = jp.linspace(-1.0, 1.0, 1024)            # 1024 different commands
+batch = jax.vmap(make_one)(targets)               # 1024 worlds, stacked
+
+step = jax.jit(jax.vmap(mjx.step, in_axes=(None, 0)))   # model shared, data batched
+batch = step(mjx_model, batch)                    # first call compiles (slow)
+t0 = time.time()
+for _ in range(400):                              # 2 s of sim time, for ALL 1024 worlds
+    batch = step(mjx_model, batch)
+jax.block_until_ready(batch.qpos)
+print(f"1024 pendulums x 400 steps in {time.time() - t0:.2f}s on {jax.default_backend()}")
+print("first 4 final angles:", batch.qpos[:4, 0], " targets:", targets[:4])
+</script>
+<script type="text/x-code" data-lang="text" data-src="output on a laptop CPU">
+1024 pendulums x 400 steps in 6.75s on cpu
+first 4 final angles: [-0.8859021 -0.8841137 -0.8823259 -0.8805383]  targets: [-1. -0.998 -0.996 -0.994]
+</script>
+<p>The key line is <code>jax.vmap(mjx.step, in_axes=(None, 0))</code>: "the model is shared (<code>None</code>), the data has a batch dimension (<code>0</code>)". Domain randomization (Lesson 9) goes one step further and batches some <i>model</i> fields too, so each env gets its own friction and mass.</p>
+<p>(Notice the gravity offset from Lesson 4 again: target −1.0 rad, settled at −0.886.)</p>
+
+<h2>2. jax vs warp backends</h2>
+<div class="tablewrap"><table>
+<thead><tr><th></th><th><code>--impl jax</code></th><th><code>--impl warp</code></th></tr></thead>
+<tbody>
+<tr><td>What computes the physics</td><td>JAX operations (XLA)</td><td>NVIDIA Warp CUDA kernels</td></tr>
+<tr><td>Runs on</td><td>CPU or GPU</td><td>NVIDIA GPU only</td></tr>
+<tr><td>Speed / memory at 4096 envs</td><td>slower, can run out of memory (soccer OOMs)</td><td>much faster, leaner: <b>what the repo uses</b></td></tr>
+</tbody></table></div>
+<p>You'll also see <code>naconmax</code>: the capacity for contact rows the Warp backend reserves. It must grow with <code>num_envs</code>; the experiment log records a crash at 16384 envs when it didn't.</p>
+
+<h2>3. The arithmetic you should be able to do</h2>
+<div class="formula">throughput  ≈ 150,000 – 200,000 env-steps/s   (4096 envs, warp, big GPU)
+100 M steps ÷ 180,000 /s ≈ 555 s ≈ 9 minutes of wall-clock time
+100 M steps × 0.02 s     = 2,000,000 s ≈ 23 days of robot experience</div>
+<div class="callout analogy"><b class="t">Why a GPU</b><p>A CPU is a few very smart workers. A GPU is thousands of simple workers. Stepping 4096 independent robots means doing the <i>same</i> math on 4096 different sets of numbers, which is exactly what thousands of simple workers are good at.</p></div>
+
+<div class="quiz" data-quiz="m5"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m6" data-title="Anatomy of an environment" data-time="2 h" data-group="Part 3: The task" hidden>
+<div class="kicker">Lesson 6</div>
+<h1>Anatomy of an environment</h1>
+<p class="lede">Read <code>t2_rl/t2_stand.py</code> once with this lesson open, and every other env in the repo becomes a variation on it.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Know what each method of an env class does and when it's called.</li>
+<li>Know what lives in <code>State</code>: <code>data</code>, <code>obs</code>, <code>reward</code>, <code>done</code>, <code>metrics</code>, <code>info</code>.</li>
+<li>Understand how v2 → v3 → v4 → soccer build on each other with <code>super()</code>.</li>
+</ul></div>
+
+<h2>1. The skeleton</h2>
+<div class="diagram">class T2Stand(mjx_env.MjxEnv):
+    default_config()        → all numbers in one place: timesteps, reward scales, noise, pushes
+    __init__()              → load XML → MjModel → mjx.put_model (to GPU)
+    _post_init()            → look up ids once: default pose, imu site, sensor addresses
+    reset(rng)       → State   start a new attempt
+    step(state, a)   → State   apply action, advance physics, compute obs/reward/done
+    _get_obs()              → the observation vector
+    _get_reward()           → dict of reward terms
+    reward()                → weighted sum of the terms
+    _get_termination()      → did it fall?</div>
+<p>The trainer only ever calls <code>reset</code> and <code>step</code>, vmapped over 4096 envs and jitted.</p>
+
+<h2>2. Config: every number in one place</h2>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · default_config() (trimmed)">
+def default_config() -> config_dict.ConfigDict:
+    return config_dict.create(
+        ctrl_dt=0.02,  # 50 Hz policy (sim_dt * decimation 4)
+        sim_dt=0.005,
+        episode_length=1000,  # 20 s
+        action_scale=0.5,
+        reward_config=config_dict.create(
+            scales=config_dict.create(
+                termination_penalty=-200.0,
+                flat_orientation=-1.0,
+                base_height=-1.0,
+                ...
+            ),
+            bad_orientation_limit=0.6,  # rad (~34 deg)
+            min_root_height=0.75,
+        ),
+        push_config=config_dict.create(
+            enable=True,
+            interval_range=[8.0, 14.0],  # s
+            vel_range=[-0.5, 0.5],  # m/s per axis
+        ),
+        ...
+    )
+</script>
+
+<h2>3. reset(): how each attempt starts</h2>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · reset() (simplified)">
+def reset(self, rng):
+    qpos = self._init_q                         # the "home" standing keyframe
+    qvel = jp.zeros(self.mjx_model.nv)
+
+    # random start position (±0.3 m) and heading (any yaw)
+    rng, key = jax.random.split(rng)
+    dxy = jax.random.uniform(key, (2,), minval=-0.3, maxval=0.3)
+    qpos = qpos.at[0:2].set(qpos[0:2] + dxy)
+    ...
+    # random joint pose: every joint scaled by U(0.5, 1.5) around the standing pose
+    qpos = qpos.at[7:].set(self._default_pose_full * scale)
+
+    data = mjx_env.make_data(self.mj_model, qpos=qpos, qvel=qvel, ctrl=self._default_ctrl, ...)
+    # constant external force on the trunk (5-15 N per axis) -> "someone leaning on it"
+    data = data.replace(xfrc_applied=xfrc)
+
+    info = {"rng": rng, "last_act": jp.zeros(self.mjx_model.nu),
+            "push_step": 0, "push_interval_steps": push_interval_steps}
+    metrics = {f"reward/{k}": jp.zeros(()) for k in reward_scales}   # for logging
+    obs = self._get_obs(data, info)
+    return mjx_env.State(data, obs, reward, done, metrics, info)
+</script>
+<div class="callout why"><b class="t">Reset = the curriculum</b><p>Everything the robot will ever be good at, it practised because reset (and step's disturbances) put it in that situation. Random poses → it learns to recover from awkward stances. For your keeper, <b>reset decides which shots it ever sees.</b></p></div>
+
+<h2>4. step(): one 0.02 s tick</h2>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · step() (trimmed)">
+def step(self, state, action):
+    # (1) maybe shove the robot (only on push events; momentum persists otherwise)
+    root_xy = jp.where(do_push, jp.array([vx, vy]), state.data.qvel[:2])
+    ...
+    # (2) action -> PD targets, then 4 physics substeps
+    motor_targets = self._default_pose + cfg.action_scale * action
+    data = mjx_env.step(self.mjx_model, state.data, motor_targets, self.n_substeps)
+
+    # (3) what happened?
+    obs = self._get_obs(data, state.info)
+    done = self._get_termination(data)
+    rewards = self._get_reward(data, action, state.info, done)
+    reward = self.reward(rewards)
+
+    # (4) bookkeeping for next step
+    state.info["last_act"] = action
+    state.info["push_step"] += 1
+    for k, v in rewards.items():
+        state.metrics[f"reward/{k}"] = v
+    return state.replace(data=data, obs=obs, reward=reward, done=done)
+</script>
+
+<h2>5. Termination: what counts as falling</h2>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · _get_termination() (comments added)">
+def _get_termination(self, data):
+    tilt = self._get_tilt(data)
+    bad_orientation = tilt > cfg.bad_orientation_limit            # > 0.6 rad ≈ 34°
+    low_height = data.qpos[2] < cfg.min_root_height               # trunk below 0.75 m
+    illegal = jp.sum(data.sensordata[self._illegal_sensor_adr] > 0.0) > 0.0   # knee/hand/trunk on floor
+    nan = jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()   # simulation exploded
+    return bad_orientation | low_height | illegal | nan
+</script>
+<div class="callout trap"><b class="t">Keeper note</b><p>A <b>dive</b> puts the trunk low and a hip or hand on the floor, so <i>all three</i> fall checks fire. That's why diving is the last stage of the keeper plan: it needs different termination rules plus a way to get back up.</p></div>
+
+<h2>6. State: everything the trainer carries between steps</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Field</th><th>Contents</th></tr></thead>
+<tbody>
+<tr><td><code>data</code></td><td>The MJX physics data: qpos, qvel, contacts, sensors, xpos…</td></tr>
+<tr><td><code>obs</code></td><td>The observation vector the policy sees</td></tr>
+<tr><td><code>reward</code>, <code>done</code></td><td>This step's scalar reward; 1.0 if the episode ended</td></tr>
+<tr><td><code>metrics</code></td><td>Numbers to log and plot (per-term rewards, tilt, height). For you, not the policy</td></tr>
+<tr><td><code>info</code></td><td>Hidden bookkeeping: rng key, last action, push timers, anchor positions…</td></tr>
+</tbody></table></div>
+
+<h2>7. Inheritance: how versions build on each other</h2>
+<div class="diagram">MjxEnv  (mujoco_playground base)
+ └ T2Stand        v1 basics
+   └ T2StandV2    human-like pose + "stay where you started" anchors
+     └ T2StandV3  honest momentum + stronger shoves
+       └ T2StandV4  narrow stance + symmetry + clash impulses
+         └ T2Soccer   + ball, field, goals, camera perception (obs 109)
+           └ T2SoccerAMP + motion-style judge (kicking)</div>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand_v4.py · the pattern">
+def reset(self, rng):
+    state = super().reset(rng)      # run the parent's reset first (v3, which runs v2's, …)
+    info = dict(state.info)
+    info["clash_step"] = jp.zeros((), dtype=jp.int32)   # then add v4's own bookkeeping
+    ...
+    return state.replace(info=info, obs=obs)
+</script>
+
+<div class="callout try"><b class="t">Try it: trace one step on paper</b><p>Open <code>t2_rl/t2_stand.py</code>. Pick any step and write down, in order, every function called from the moment <code>step()</code> is entered until it returns. Note which <code>info</code> keys are read and which are written. If you can do this, you understand the environment.</p></div>
+
+<div class="quiz" data-quiz="m6"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m7" data-title="Observation design" data-time="1 h" data-group="Part 3: The task" hidden>
+<div class="kicker">Lesson 7</div>
+<h1>Observation design: what the robot is allowed to know</h1>
+<p class="lede">The policy can only react to what's in the observation. Too little and it's blind; anything the real robot can't measure and it won't deploy.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Know every slice of the 102-dim standing observation and the 7 soccer additions.</li>
+<li>Understand projected gravity, relative joint positions, last action and noise.</li>
+<li>Apply the "deployable only" rule to a goalkeeper.</li>
+</ul></div>
+
+<h2>1. The 102 numbers</h2>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · _get_obs() (comments added)">
+linvel = add_noise(self.get_local_linvel(data), noise.scales.lin_vel)      # ±0.1
+angvel = add_noise(self.get_local_angvel(data), noise.scales.ang_vel)      # ±0.2
+proj_g = add_noise(self.get_projected_gravity(data), noise.scales.gravity) # ±0.05
+joint_pos = add_noise(data.qpos[7:], noise.scales.joint_pos)               # ±0.01
+joint_vel = add_noise(data.qvel[6:], noise.scales.joint_vel)               # ±1.5
+
+return jp.hstack([
+    linvel,                          # 3   body-frame velocity
+    angvel,                          # 3   gyro
+    proj_g,                          # 3   which way is "down", in the robot's frame
+    joint_pos - self._default_pose,  # 31  joint angles relative to standing pose
+    joint_vel,                       # 31
+    info["last_act"],                # 31  what I commanded last step
+])                                   # = 102
+</script>
+
+<h2>2. Why each piece is there</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Piece</th><th>Why the policy needs it</th></tr></thead>
+<tbody>
+<tr><td><b>Projected gravity</b></td><td>The world's "down" vector (0, 0, −1) expressed in the robot's own frame. Upright → (0, 0, −1). Tilted by θ → the horizontal part has length sin θ. It's the IMU's tilt reading, and the main "am I falling?" signal.</td></tr>
+<tr><td><b>Joint pos − default</b></td><td>Centered numbers: 0 means "at the standing pose". Networks learn better from small, centered inputs.</td></tr>
+<tr><td><b>Last action</b></td><td>Motors lag their targets, so the policy needs to know what it already asked for. It's also needed for smooth commands.</td></tr>
+<tr><td><b>Noise</b></td><td>Real sensors are noisy. Training with noise means the policy doesn't trust any single reading too much.</td></tr>
+</tbody></table></div>
+<p>The trainer also <b>normalizes</b> observations (<code>normalize_observations=True</code>): a running mean and standard deviation per dimension, so joint velocities (tens of rad/s) and gravity (≤ 1) reach the network on similar scales.</p>
+
+<h2>3. Soccer adds 7 (→ 109)</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Slice</th><th>Dims</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td><code>[102:105]</code></td><td>3</td><td>Ball <b>as seen by the simulated camera</b>: x, y (robot frame) + a "detected?" flag. Noisy, about 120 ms delayed, only when it's in the field of view</td></tr>
+<tr><td><code>[105:107]</code></td><td>2</td><td>Goal position (robot frame, noisy)</td></tr>
+<tr><td><code>[107:109]</code></td><td>2</td><td>cos/sin of the robot's heading (noisy)</td></tr>
+</tbody></table></div>
+
+<h2>4. The deployable-only rule</h2>
+<div class="callout trap"><b class="t">The rule</b><p>The final policy runs on the real robot's computer (a Jetson). It can only use what the robot can measure: <b>IMU + joint encoders + camera detections</b>. The simulator knows the <i>true</i> ball position, but the real robot never will. A policy trained on the truth may completely fail on the real camera.</p></div>
+<p><b>Allowed during development:</b> it's fine to <i>start</i> with perfect ball information to learn the motor skill, then switch to realistic perception as a later stage. The repo even has a debug switch for this (<code>perception.perfect</code>). Just don't deploy that version.</p>
+
+<h3>What a keeper probably needs</h3>
+<ul>
+<li>Everything from the 102 (balance).</li>
+<li>Ball position <b>and velocity</b> relative to the robot. Velocity is what tells you <i>where the shot will cross the line</i>. The 109-dim soccer obs has no ball velocity, because the striker can live without it; a keeper can't.</li>
+<li>Own-goal position relative to the robot (where am I in my goal?).</li>
+</ul>
+
+<div class="callout try"><b class="t">Try it</b><p>Write down your keeper's observation as a table: slice, dims, contents, where it comes from on the real robot (IMU? encoder? camera?). Mark anything that's "sim-only". Keep this table; it goes in your design doc in Lesson 13.</p></div>
+
+<div class="quiz" data-quiz="m7"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m8" data-title="Reward design" data-time="2 h" data-group="Part 3: The task" hidden>
+<div class="kicker">Lesson 8</div>
+<h1>Reward design: saying what you want, precisely</h1>
+<p class="lede">The policy will do exactly what you reward, including things you didn't mean.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Read the weighted-sum reward and its terms.</li>
+<li>Understand the "falling is cheaper than living" trap and its fix.</li>
+<li>Use potential-based shaping, and know why it can't be farmed.</li>
+<li>Sketch keeper rewards.</li>
+</ul></div>
+
+<h2>1. The total reward is a weighted sum</h2>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · reward()">
+def reward(self, rewards):
+    total = jp.zeros(())
+    for k, v in rewards.items():
+        total = total + scales[k] * v      # scale from config × raw term value
+    return total
+</script>
+<p>Each <b>term</b> is a raw measurement, and its <b>scale</b> (in the config) sets its sign and importance. Most standing terms are penalties (negative scales):</p>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_stand.py · _get_reward() (selection, scales added as comments)">
+"termination_penalty": done,                                            # × -200
+"flat_orientation": jp.sum(jp.square(proj_g[:2])),                      # × -1   tilt
+"base_height": jp.square(qpos[2] - base_height_target),                 # × -1   crouching
+"base_lin_vel_xy": jp.sum(jp.square(qvel[0:2])),                        # × -1   drifting
+"joint_deviation": jp.sum(jp.abs(joint_pos - default)),                 # × -0.2 weird poses
+"action_rate": jp.sum(jp.square(action - info["last_act"])),           # × -0.01 jitter
+"undesired_contacts": jp.sum(data.sensordata[self._illegal_sensor_adr] > 0.0),  # × -1
+</script>
+
+<h2>2. The trap: when falling is the smart move</h2>
+<p>This really happened in this project (the experiment log's stage 0.5). Suppose all the small penalties add up to about −0.5 per step on average:</p>
+<div class="formula">stay alive 1000 steps:   1000 × (−0.5) = −500
+fall at step 10:           10 × (−0.5) + (−200) = −205       ← PPO prefers this!</div>
+<p>The optimizer isn't broken. It found the best answer to the question you <i>actually</i> asked. This is <b>reward hacking</b>. The repo's fix is a positive <b>survival</b> reward, +0.06 per step alive: over a 2000-step episode that's worth +120, so living beats dying.</p>
+<div class="callout why"><b class="t">Rule of thumb</b><p>Before training, do this arithmetic: what's the total reward of (a) standing still for the whole episode, (b) falling immediately, (c) the behaviour you want? (c) must clearly beat both.</p></div>
+
+<h2>3. Shaping: rewarding progress</h2>
+<p>A "+1 per save" reward is <b>sparse</b>. A random policy almost never saves, so there's nothing to learn from (you saw this in Lesson 1). Shaping adds dense hints. The safest kind is <b>potential-based</b>: pay the <i>change</i> in a distance.</p>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="t2_rl/t2_soccer.py · _get_reward()">
+# Potential-based approach shaping (robot -> ball).
+d_robot_ball = jp.linalg.norm(ball_xy - base_xy)
+d_last = jp.linalg.norm(info["last_ball_pos"] - info["last_base_pos"])
+out["ball_approach"] = (d_last - d_robot_ball) * keep     # got closer → positive
+</script>
+<div class="formula">Σ over the episode of (d_prev − d_now) = d_start − d_end
+→ only the start and end matter. Walking back and forth earns exactly nothing, so it can't be farmed.</div>
+
+<h2>4. Debugging rewards</h2>
+<p>Every term is logged separately as <code>reward/&lt;name&gt;</code> in the metrics. When behaviour is wrong:</p>
+<ol>
+<li>Look at which terms dominate the total. Is it the one you expected?</li>
+<li>Check units: a squared velocity in m²/s² and an angle in rad² can differ by 100×.</li>
+<li>Change <b>one</b> scale at a time and compare runs.</li>
+</ol>
+
+<h2>5. Keeper reward sketch (yours to refine)</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Term</th><th>Type</th><th>Idea</th></tr></thead>
+<tbody>
+<tr><td>save</td><td>sparse +</td><td>Ball touched the keeper and didn't cross the line</td></tr>
+<tr><td>conceded</td><td>sparse −</td><td>Ball crossed the line between the posts, under the bar</td></tr>
+<tr><td>positioning</td><td>shaping</td><td>Potential: getting closer to the ideal spot on the ball–goal line</td></tr>
+<tr><td>intercept</td><td>shaping</td><td>During a shot: move sideways toward where the ball will cross the keeper's line</td></tr>
+<tr><td>survival / termination</td><td>±</td><td>Stay upright (do the arithmetic from §2!)</td></tr>
+<tr><td>posture, smoothness</td><td>small −</td><td>Reuse standing ideas: tilt, action rate, symmetry</td></tr>
+</tbody></table></div>
+
+<div class="callout try"><b class="t">Try it: shaping on the toy keeper</b><ol>
+<li>Make the toy reward sparse (Lesson 1, exercise 2) and run <code>reinforce_keeper.py</code>. Does it learn within 3000 episodes?</li>
+<li>Now use a potential-based reward: store <code>d_prev = abs(target − x)</code> before moving, and reward <code>d_prev − abs(target − x)</code>. Does it learn again? Compare speed with the original <code>−|target − x|</code>.</li>
+</ol></div>
+
+<div class="quiz" data-quiz="m8"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m9" data-title="Sim-to-real" data-time="1 h" data-group="Part 3: The task" hidden>
+<div class="kicker">Lesson 9</div>
+<h1>Sim-to-real: making it survive reality</h1>
+<p class="lede">The simulator is always wrong in small ways. The job is a policy that doesn't care.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Name the sources of the sim-to-real gap.</li>
+<li>Know the defences: noise, domain randomization, disturbances, perception modelling.</li>
+<li>Learn from the repo's "100 % in sim, falls in 1 s" bug.</li>
+</ul></div>
+
+<h2>1. Where sim and reality differ</h2>
+<ul>
+<li>Masses, centres of mass, friction, motor strength and delay are never exactly right.</li>
+<li>Sensors are noisy and late; the camera misses the ball sometimes.</li>
+<li>People bump the robot; the floor isn't perfect.</li>
+</ul>
+
+<h2>2. The defences used in this repo</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Defence</th><th>What it does</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td>Observation noise</td><td>Uniform noise on every sensor reading</td><td><code>noise_config</code> in <code>t2_stand.py</code></td></tr>
+<tr><td>Domain randomization</td><td>Each env gets its own floor friction U(0.7, 1.0), trunk mass ±2 kg, centre of mass ±3 cm</td><td><code>t2_rl/randomize.py</code></td></tr>
+<tr><td>Pushes</td><td>Random velocity kicks every 3–6 s (v3/v4)</td><td><code>push_config</code></td></tr>
+<tr><td>Clash impulses</td><td>Short 40–120 N bursts on shoulders/elbows/trunk</td><td><code>clash_config</code> (v4)</td></tr>
+<tr><td>Virtual perception</td><td>Camera field of view (87°×58°), 90 % detection up to 7 m, ~120 ms delay, noise growing with distance</td><td><code>t2_soccer.py</code> perception block</td></tr>
+</tbody></table></div>
+<div class="formula">ball noise σ = 0.149 + 0.124 · d      at 2 m: σ ≈ 0.40 m   at 5 m: σ ≈ 0.77 m</div>
+<p>That's a lot of noise. A keeper that only works with perfect ball information won't survive a real camera, which is why realistic perception gets its own stage.</p>
+
+<h2>3. A true story from the repo</h2>
+<div class="callout trap"><b class="t">"100 % success" that fell in one second</b><p>v1 and v2 scored 100 % survival in training. But the ported environment had a bug: it <b>reset the robot's root velocity to zero every step</b> instead of only during pushes. The policies learned to balance in a fake, heavily damped world. In real momentum physics, both fell within about 1 s, even without a push. v3 fixed the physics and retrained.</p><p><b>Lessons:</b> (1) great training numbers only mean "great in <i>this</i> simulator"; (2) test in a <i>different</i> setting than you trained in (the repo's <code>push_test --engine cpu</code> runs plain MuJoCo for exactly this reason).</p></div>
+
+<h2>4. How the policy reaches the robot (future stage)</h2>
+<div class="diagram">trained weights (.pkl)  →  export to ONNX  →  C++ behaviour-tree node on the T2's Jetson, 50 Hz
+                                               gated by the team brain (Robotedge-5v5-RCAP2026):
+                                               e.g. decision == 'rl_goalie_save' → run the keeper policy</div>
+<p>Not built in the repo yet (it's the roadmap's last stage). It's the reason for the deployable-only rule.</p>
+
+<div class="quiz" data-quiz="m9"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m10" data-title="The training script" data-time="1.5 h" data-group="Part 4: Running it" hidden>
+<div class="kicker">Lesson 10</div>
+<h1>The training script, top to bottom</h1>
+<p class="lede"><code>scripts/train_stand.py</code> wires your environment into brax's PPO and writes everything to <code>logs/</code>.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Follow the flow: CLI flags → env → network → PPO → checkpoints.</li>
+<li>Read a training log line and know what "good" looks like.</li>
+<li>Know which hyperparameters to touch (few) and which to leave alone (most).</li>
+</ul></div>
+
+<h2>1. The flow</h2>
+<div class="diagram">pixi run train --env v4 --impl warp ...
+   │
+   ├─ ENVS["v4"]               → (T2StandV4, default_config_v4)
+   ├─ env = T2StandV4(config)  → loads XML, puts it on the GPU
+   ├─ network_factory          → MLP 256/128/128, ELU, tanh-normal actions
+   ├─ ppo_train.train(...)     → brax's PPO loop:
+   │      wrap_for_brax_training(env)  + domain_randomize → 4096 envs, each different
+   │      rollout → GAE → 20 gradient steps → repeat
+   │      every eval: progress_fn (prints + metrics.jsonl), policy_params_fn (checkpoint)
+   └─ save params_final.pkl</div>
+
+<h2>2. The env registry: how <code>--env</code> picks a class</h2>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="scripts/train_stand.py">
+ENVS = {
+    "v1": (T2Stand, default_config),
+    "v2": (T2StandV2, default_config_v2),
+    "v3": (T2StandV3, default_config_v3),
+    "v4": (T2StandV4, default_config_v4),
+    "soccer": (T2Soccer, default_config_soccer),
+}
+</script>
+<p>Your own keeper env would be one more line here, e.g. <code>"keeper": (MyKeeper, default_config_keeper)</code>, plus adding <code>"keeper"</code> to the <code>--env</code> choices.</p>
+
+<h2>3. The network and the PPO call</h2>
+<script type="text/x-code" data-lang="py" data-tag="repo" data-src="scripts/train_stand.py (simplified: defaults inlined)">
+network_factory = functools.partial(
+    ppo_networks.make_ppo_networks,
+    policy_hidden_layer_sizes=(256, 128, 128),
+    value_hidden_layer_sizes=(256, 128, 128),
+    activation=nn.elu,
+    distribution_type="tanh_normal",
+)
+train_fn = functools.partial(
+    ppo_train.train,
+    num_timesteps=args.num_timesteps, num_envs=args.num_envs,
+    episode_length=args.episode_length, unroll_length=24,
+    num_minibatches=4, num_updates_per_batch=5,
+    discounting=0.99, gae_lambda=0.95, clipping_epsilon=0.2,
+    learning_rate=1e-3, entropy_cost=0.008,
+    normalize_observations=True,
+    wrap_env_fn=wrap_for_brax_training,
+    randomization_fn=domain_randomize,
+    progress_fn=progress_fn, policy_params_fn=policy_params_fn,
+    ...
+)
+make_inference_fn, params, _ = train_fn(environment=env, eval_env=eval_env)
+</script>
+<p>Every number from Lesson 2 shows up here.</p>
+
+<h2>4. Reading the log</h2>
+<p>Every evaluation (20 per run by default), <code>progress_fn</code> prints a line like this:</p>
+<script type="text/x-code" data-lang="text" data-src="train.log (format)">
+[step    5242880 |      95s] eval/episode_reward=-310.442 eval/avg_episode_length=41.3 eval/loss_policy=...
+...
+[step   99614720 |     610s] eval/episode_reward=-28.917 eval/avg_episode_length=1000.0 eval/loss_policy=...
+</script>
+<div class="tablewrap"><table>
+<thead><tr><th>Signal</th><th>Healthy for standing</th><th>Worrying</th></tr></thead>
+<tbody>
+<tr><td><code>eval/avg_episode_length</code></td><td>Climbs toward 1000 (= survives the full 20 s)</td><td>Flat around 20–50 for a long time: it falls immediately. Check termination and the reward arithmetic.</td></tr>
+<tr><td><code>eval/episode_reward</code></td><td>Rises (becomes less negative)</td><td>Rises while length stays short: possible reward hacking</td></tr>
+<tr><td><code>reward/&lt;term&gt;</code> metrics</td><td>Each term goes in the direction you intended</td><td>One term dominates everything</td></tr>
+</tbody></table></div>
+<p><i>The numbers above illustrate the format. Your values will differ.</i></p>
+
+<h2>5. What lands on disk</h2>
+<div class="diagram">logs/2026-10-20_14-03-11_my_first_v4/
+   train.log           everything printed
+   metrics.jsonl       one JSON line per eval (for plotting)
+   env_config.json     the exact env config used   ← reproducibility
+   ppo_params.json     the exact PPO settings used
+   checkpoints/<step>/  checkpoints/latest/
+   params_final.pkl    the trained policy</div>
+
+<h2>6. The flags you'll actually use</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Flag</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>--env v4</code></td><td>Which environment (default is v1!)</td></tr>
+<tr><td><code>--impl warp</code></td><td>GPU physics backend (default is jax; use warp)</td></tr>
+<tr><td><code>--num_envs 4096</code></td><td>Parallel worlds. Also changes the batch size, so don't change it casually.</td></tr>
+<tr><td><code>--num_timesteps 100000000</code></td><td>Training budget. <b>To train longer, raise this</b>, not num_envs.</td></tr>
+<tr><td><code>--run_name my_first_v4</code></td><td>Name of the log folder</td></tr>
+<tr><td><code>--resume logs/&lt;run&gt;/checkpoints/latest</code></td><td>Continue from a checkpoint</td></tr>
+<tr><td><code>--no_wandb</code></td><td>Turn off the online dashboard (on by default)</td></tr>
+<tr><td><code>--smoke</code></td><td>Tiny run to check the pipeline works</td></tr>
+</tbody></table></div>
+
+<div class="quiz" data-quiz="m10"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m11" data-title="Tools & the A100 cluster" data-time="1 h" data-group="Part 4: Running it" hidden>
+<div class="kicker">Lesson 11</div>
+<h1>Tools &amp; the A100 cluster</h1>
+<p class="lede">pixi for the software, SLURM for the hardware. Neither is hard once you see what problem it solves.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Know what pixi, pixi.lock, CUDA, WSL2 and wandb are for.</li>
+<li>Know how a cluster job flows: VPN → SSH → login node → sbatch → queue → A100.</li>
+<li>Know the five SLURM commands and the cluster's house rules.</li>
+</ul></div>
+
+<h2>1. pixi: the exact same software everywhere</h2>
+<p>The training stack is a tower of tightly coupled versions (Python 3.12, jax 0.11.1 with CUDA 12, mujoco 3.12.0, warp 1.16.0 (1.17 breaks!), brax 0.14.2…). <b>pixi</b> pins all of them:</p>
+<ul>
+<li><code>pixi.toml</code>: what you want (like <code>requirements.txt</code>, but with Python itself and named tasks).</li>
+<li><code>pixi.lock</code>: the exact resolved versions. <code>pixi install</code> on any machine gives you <i>identical</i> software.</li>
+<li><code>pixi run train ...</code> = run the <code>train</code> task (<code>scripts/train_stand.py</code>) inside that environment.</li>
+</ul>
+<div class="callout trap"><b class="t">Linux only</b><p><code>pixi.toml</code> says <code>platforms = ["linux-64"]</code>. On Windows you'd need WSL2 (Linux inside Windows), and even then your laptop's GPU is too small. The cluster is Linux, so it just works there.</p></div>
+
+<h2>2. The A100 and the cluster</h2>
+<div class="tablewrap"><table>
+<thead><tr><th></th><th>Your laptop (MX230)</th><th>Typical lab PC (RTX 4070 Ti)</th><th>UMHPC A100</th></tr></thead>
+<tbody>
+<tr><td>GPU memory</td><td>2 GB</td><td>12 GB</td><td>40 or 80 GB</td></tr>
+<tr><td>Runs this training?</td><td>No</td><td>Yes, ~4096 envs</td><td>Yes, 4096+ envs</td></tr>
+<tr><td>Use it for</td><td>learning, exercises, viewing the robot</td><td>quick experiments</td><td>real training runs</td></tr>
+</tbody></table></div>
+
+<div class="diagram">laptop ──VPN──► login01.dicc.um.edu.my (LOGIN NODE)  ──sbatch──►  SLURM queue  ──►  COMPUTE NODE + A100
+                  "front desk": edit, git, submit                      "kitchen": your job runs here, alone
+                  NEVER train here                                     no screen, no internet</div>
+
+<h3>A job script = an order form + a normal shell script</h3>
+<script type="text/x-code" data-lang="sh" data-tag="repo" data-src="hpc/train.sbatch (header + run line, simplified)">
+#SBATCH --partition=gpu-a100      # the A100 machines
+#SBATCH --gpus=1                  # one GPU
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
+#SBATCH --qos=normal              # queue class: short = 1 h max, normal = 8 h, long = 3 days
+#SBATCH --time=7:50:00            # hard limit: killed when it runs out
+#SBATCH --output=logs/slurm/%x_%j.out   # everything printed goes here
+...
+pixi run "$TASK" --impl warp --wandb_mode offline "$@"   # the SAME command you'd run locally
+</script>
+
+<h3>The five commands</h3>
+<div class="tablewrap"><table>
+<thead><tr><th>Command</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>sbatch hpc/train.sbatch train --env v4 ...</code></td><td>Submit a job; prints a job id</td></tr>
+<tr><td><code>squeue --me</code></td><td>My jobs. <code>PD</code> = waiting, <code>R</code> = running</td></tr>
+<tr><td><code>tail -f logs/slurm/&lt;name&gt;_&lt;id&gt;.out</code></td><td>Watch the output live (Ctrl+C stops watching, not the job)</td></tr>
+<tr><td><code>scancel &lt;id&gt;</code></td><td>Cancel a job</td></tr>
+<tr><td><code>sacct -j &lt;id&gt;</code> / <code>seff &lt;id&gt;</code></td><td>What happened, how long, how much memory</td></tr>
+</tbody></table></div>
+
+<h3>House rules</h3>
+<ul>
+<li><b>VPN first</b>, always. SSH is blocked without it.</li>
+<li><b>Never train on the login node.</b> It's shared; sysadmins will notice.</li>
+<li><b>Compute nodes have no internet</b>, so wandb runs offline and you sync later from the login node.</li>
+<li><b>Storage:</b> <code>/scr/user/&lt;you&gt;</code> is fast but not backed up (files idle for 90 days get deleted); <code>/home</code> is backed up but only 100 GB.</li>
+<li><b>Account:</b> you need a <i>full</i> account. A limited one can't use <code>gpu-a100</code>. Check with <code>account-info</code>.</li>
+</ul>
+
+<h2>3. wandb (Weights &amp; Biases)</h2>
+<p>A website that plots your training curves live. On by default in the trainer. For your first runs, pass <code>--no_wandb</code> (or let the cluster script use offline mode) so you have one less thing to set up.</p>
+
+<div class="callout try"><b class="t">Do it now</b><ol>
+<li>Request a full DICC HPC account and the UM VPN <code>.ovpn</code> profile (DICC service desk).</li>
+<li>Install OpenVPN Connect and PuTTY (or use Windows' built-in <code>ssh</code>).</li>
+<li>Skim <code>docs/UMHPC.md</code> §1–§6 in the reference repo.</li>
+</ol></div>
+
+<div class="quiz" data-quiz="m11"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m12" data-title="LAB 1: your first training run" data-time="½ day ×3" data-group="Part 5: Labs" hidden>
+<div class="kicker">Lab 1</div>
+<h1>Your first training run (on the A100)</h1>
+<p class="lede">Goal: retrain the v4 standing policy from scratch, evaluate it, watch the video. It's nothing new; the point is to see the whole machine work once with your own hands.</p>
+<div class="goals"><h4>Before you start</h4><ul>
+<li>Full DICC account + VPN working (Lesson 11).</li>
+<li>Quizzes 0–11 done, or at least Lessons 6 and 10 understood.</li>
+<li>Each step below is a checkbox. Ticks are saved in this browser.</li>
+</ul></div>
+
+<h2>Part A: get onto the cluster and build the environment</h2>
+<ul class="checklist" data-check="labA">
+<li><input type="checkbox" data-k="a1"><span><b>Connect the VPN</b>, then SSH in: <code>ssh &lt;username&gt;@login01.dicc.um.edu.my</code></span></li>
+<li><input type="checkbox" data-k="a2"><span><b>Check your account:</b> <code>account-info</code>. It must be a full account with access to <code>gpu-a100</code>.</span></li>
+<li><input type="checkbox" data-k="a3"><span><b>Clone into scratch:</b><br><code>cd /scr/user/$USER</code><br><code>git clone https://github.com/f4ww4z/t2-mujoco-rl-playground.git</code><br><code>cd t2-mujoco-rl-playground</code></span></li>
+<li><input type="checkbox" data-k="a4"><span><b>Build the environment</b> (installs pixi if needed, creates <code>logs/slurm/</code>, about 4–8 GB download). DICC asks for this inside a small CPU allocation:<br><code>salloc --partition=cpu-epyc --nodes=1 --ntasks=1 --cpus-per-task=4 --mem=16G --qos=short --time=01:00:00</code><br><code>./hpc/setup.sh</code> then <code>exit</code>.<br><span class="muted">If the compute node can't download (DNS/timeout), run <code>./hpc/setup.sh</code> on the login node instead; it's only a download.</span></span></li>
+<li><input type="checkbox" data-k="a5"><span><b>Smoke job on an A100</b> (proves driver + CUDA + physics):<br><code>sbatch --job-name=t2_smoke --qos=short --time=00:30:00 hpc/job.sbatch smoke-all</code><br><code>squeue --me</code> → wait for it to finish → <code>tail logs/slurm/t2_smoke_*.out</code><br>Success: the log ends with <code>[job] task=smoke-all exited with status 0</code>, and <code>gpu-check</code> reports <code>jax … gpu</code>.</span></li>
+</ul>
+
+<h2>Part B: train, evaluate, watch</h2>
+<ul class="checklist" data-check="labB">
+<li><input type="checkbox" data-k="b1"><span><b>Submit your first training run</b> (100 M steps; around 10–20 min of training on an A100 plus queue time):
+<br><code>sbatch --qos=short --time=00:55:00 --job-name=my_first_v4 hpc/train.sbatch train --env v4 --num_envs 4096 --num_timesteps 100000000 --run_name my_first_v4</code>
+<br><span class="muted">The script adds <code>--impl warp --wandb_mode offline</code> for you.</span></span></li>
+<li><input type="checkbox" data-k="b2"><span><b>Watch it learn:</b> <code>tail -f logs/*my_first_v4*/train.log</code>. Write down <code>avg_episode_length</code> at each eval. Does it climb toward 1000?</span></li>
+<li><input type="checkbox" data-k="b3"><span><b>Evaluate survival</b> (200 episodes, with pushes):<br><code>sbatch --qos=short --time=00:55:00 hpc/job.sbatch play --env v4 --checkpoint logs/&lt;your_run&gt;/params_final.pkl --episodes 200</code><br><span class="muted">Note <code>--env v4</code>: <code>play</code> defaults to v1, and a mismatched env gives nonsense.</span></span></li>
+<li><input type="checkbox" data-k="b4"><span><b>Render a video</b> (headless rendering works on the cluster):<br><code>sbatch --qos=short --time=00:55:00 hpc/job.sbatch play --env v4 --checkpoint logs/&lt;your_run&gt;/params_final.pkl --video</code><br>It writes <code>rollout.mp4</code> next to the checkpoint.</span></li>
+<li><input type="checkbox" data-k="b5"><span><b>Download and watch</b> (on your laptop, VPN on):<br><code>scp &lt;username&gt;@login01.dicc.um.edu.my:/scr/user/&lt;username&gt;/t2-mujoco-rl-playground/logs/&lt;your_run&gt;/rollout.mp4 .</code></span></li>
+<li><input type="checkbox" data-k="b6"><span><b>Back up</b> runs you care about: <code>./hpc/backup_logs.sh</code> (copies <code>logs/</code> from scratch to home).</span></li>
+</ul>
+<div class="callout why"><b class="t">🎉 Milestone</b><p>When the video shows your robot standing and absorbing shoves, you have trained your first policy: from random weights to balance, in minutes. Compare with the reference result in <code>results/best_policy_v4/rollout.mp4</code>.</p></div>
+
+<h2>Part C: your first experiment</h2>
+<p>Science means changing one thing and measuring. Pick one:</p>
+<ul class="checklist" data-check="labC">
+<li><input type="checkbox" data-k="c1"><span><b>Budget:</b> train with <code>--num_timesteps 20000000</code> and evaluate. How does survival compare with 100 M? What does the robot do differently in the video?</span></li>
+<li><input type="checkbox" data-k="c2"><span><b>A reward weight</b> (on your own git branch): set <code>termination_penalty</code> to <code>-10.0</code> in the config, retrain, and compare. Predict the result <i>before</i> you run it (Lesson 8 §2).</span></li>
+<li><input type="checkbox" data-k="c3"><span><b>Write it down:</b> a lab-notebook entry with the command, what you changed, the eval numbers, and what you learned. This habit is your thesis method chapter later.</span></li>
+</ul>
+
+<h2>Troubleshooting</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Symptom</th><th>Likely cause → fix</th></tr></thead>
+<tbody>
+<tr><td><code>Unable to open output file</code> right away</td><td><code>logs/slurm/</code> doesn't exist → run <code>./hpc/setup.sh</code> (or <code>mkdir -p logs/slurm</code>) and submit from the repo root</td></tr>
+<tr><td>Job stays <code>PD</code> for a long time</td><td>Queue is busy → <code>squeue --start --me</code>, <code>scontrol show job &lt;id&gt;</code> for the reason. Short QoS has higher priority.</td></tr>
+<tr><td>Job state <code>TO</code></td><td>Hit the time limit → ask for more <code>--time</code> (normal QoS, up to 8 h) or fewer steps</td></tr>
+<tr><td><code>Warp CUDA error 900</code> / "Failed to load CUDA module"</td><td>Old cluster driver → the job preamble sets <code>T2_MJX_GRAPH_MODE=none</code> automatically. If you run outside the scripts, set it yourself.</td></tr>
+<tr><td><code>gpu-check</code> says <code>jax -> cpu</code></td><td>The job didn't get a GPU or CUDA failed. See <code>docs/UMHPC.md</code> §15.</td></tr>
+<tr><td><code>avg_episode_length</code> stuck near 20–50</td><td>Normal for the first few evals. If it stays there for the whole run, something in the env or reward is off (Lesson 8 §2).</td></tr>
+</tbody></table></div>
+
+<div class="complete-row"><span>No quiz for the lab: the video is your grade.</span></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="m13" data-title="LAB 2: design your goalkeeper" data-time="2 days" data-group="Part 5: Labs" hidden>
+<div class="kicker">Lab 2</div>
+<h1>Design your goalkeeper</h1>
+<p class="lede">Your idea: block ground shots with the legs, take up a good position based on where the ball is, and never fall over. Here is how to turn it into an environment you write yourself.</p>
+<div class="goals"><h4>Goals</h4><ul>
+<li>Use physics arithmetic to set priorities.</li>
+<li>Write a one-page design doc: obs, action, reward, reset, termination, curriculum, success metric.</li>
+<li>Start <i>your own</i> environment from a skeleton, in your own repo.</li>
+</ul></div>
+
+<h2>1. Physics first: what matters most?</h2>
+<div class="formula">goal mouth: 2.6 m wide · standing T2 covers roughly 0.4 m of it  (≈15 %)
+ground shot 5 m/s from 6 m  → reaches the line in ≈ 1.2 s
+minus camera delay ≈ 0.12 s → ≈ 1 s to react; a humanoid side-step covers maybe 0.3–0.5 m
+ball diameter 0.22 m · v4 stance ankle gap ≈ 0.16 m</div>
+<p><b>Conclusions</b> (estimates, so verify them in sim):</p>
+<ol>
+<li><b>Positioning beats reaction.</b> Standing on the ball–goal line means most straight shots hit you with no fast motion at all.</li>
+<li><b>"Closing the legs" already happens in a normal stance</b>: the ball is wider than the gap. Reaching wider with a leg is what <i>opens</i> the gap. That's a trade-off the policy will have to learn.</li>
+<li><b>Ball velocity is essential</b>: without it the keeper can't know where the shot will cross the line.</li>
+</ol>
+
+<h2>2. The positioning target</h2>
+<p>A classic keeper rule: stand on the line from the ball to the centre of your goal, a short distance <code>r</code> in front of the goal line.</p>
+<div class="formula">target = goal_centre + r · (ball − goal_centre) / |ball − goal_centre|        (r ≈ 0.5–1.0 m)</div>
+<script type="text/x-code" data-lang="py" data-tag="ex" data-src="positioning target in JAX">
+import jax.numpy as jp
+
+def keeper_target(ball_xy, goal_xy, r=0.8):
+    """Point on the ball→goal-centre line, r metres out from the goal."""
+    d = ball_xy - goal_xy
+    return goal_xy + r * d / (jp.linalg.norm(d) + 1e-6)
+
+goal = jp.array([-11.0015, 0.0])                        # the back goal in the soccer XML
+print(keeper_target(jp.array([-5.0, 3.0]), goal))       # ball out to the left → keeper shifts left
+</script>
+<p>Reward idea (potential-based, Lesson 8): <code>d_prev − d_now</code> where <code>d</code> = distance from the keeper's trunk to <code>target</code>. As the ball moves, the target moves, and the keeper learns to shadow it.</p>
+
+<h2>3. The curriculum (one skill at a time)</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Stage</th><th>Reset</th><th>Rewards</th><th>Done when</th></tr></thead>
+<tbody>
+<tr><td><b>K0</b> stand in goal</td><td>Keeper at the goal mouth facing the field, no ball</td><td>standing terms + survival</td><td>survives 20 s with pushes</td></tr>
+<tr><td><b>K1</b> positioning</td><td>Ball placed and slowly moved around the defending half</td><td>+ positioning shaping, face the ball</td><td>tracks the target within ~0.2 m</td></tr>
+<tr><td><b>K2</b> slow ground shots</td><td>After a random delay, ball shot along the ground (no upward velocity) at 1–2 m/s toward a random point in the mouth</td><td>+ save, − conceded, + intercept shaping</td><td>save rate clearly above "standing still"</td></tr>
+<tr><td><b>K3</b> faster shots</td><td>Raise speed step by step to 5–6 m/s</td><td>same</td><td>save rate on a fixed shot grid</td></tr>
+<tr><td><b>K4</b> real perception</td><td>Camera field of view, delay, noise</td><td>+ head tracking</td><td>save rate holds</td></tr>
+<tr><td><b>K5</b> (later) dive</td><td>New termination rules + get-up</td><td>-</td><td>research</td></tr>
+</tbody></table></div>
+<p>Start K0–K3 with <b>perfect ball information</b> (true position + velocity), so you're learning the motor skill. K4 handles realistic sensing as its own problem.</p>
+
+<h2>4. Your design doc (fill this in)</h2>
+<details open><summary>Template</summary>
+<ol>
+<li><b>Skill:</b> one sentence. (e.g. "Stay on the ball–goal line 0.8 m out and block ground shots up to 3 m/s without falling.")</li>
+<li><b>Observation table:</b> slice · dims · content · real-robot source · sim-only?</li>
+<li><b>Action:</b> 31 joint offsets? What <code>action_scale</code>? (Standing uses 0.5; bigger leg reaches may need more.)</li>
+<li><b>Reward table:</b> term · formula · scale · why. Then the arithmetic: total for (a) stand still, (b) fall immediately, (c) the behaviour you want.</li>
+<li><b>Reset:</b> where the keeper and ball start; how shots are generated; what is random.</li>
+<li><b>Termination:</b> what ends an attempt? Does a shot ending (save/goal) end the episode, or does a new shot start?</li>
+<li><b>Success metric:</b> e.g. save rate on a 9-point grid of shot targets × 3 speeds, 32 trials each.</li>
+<li><b>Deployment note:</b> behaviour-tree node name (e.g. <code>RLGoalieSave</code>), gating key (e.g. <code>decision == 'rl_goalie_save'</code>), deployable observation list.</li>
+</ol>
+</details>
+
+<h2>5. Your own environment skeleton</h2>
+<p>This goes in <b>your own repo</b>. It's a skeleton with TODOs, not a solution: it shows the shape (same as Lesson 6), and the design decisions are yours. For the robot model, either convert Booster's official T2 asset yourself (a great learning exercise) or reuse the reference repo's converted XML <i>with credit</i>.</p>
+<script type="text/x-code" data-lang="py" data-tag="ex" data-src="my_keeper/keeper_env.py (skeleton, fill the TODOs)">
+"""Goalkeeper positioning env (stage K1) for the Booster T2. Written by <you>."""
+import jax
+import jax.numpy as jp
+import mujoco
+from ml_collections import config_dict
+from mujoco import mjx
+from mujoco_playground._src import mjx_env
+
+
+def default_config():
+    return config_dict.create(
+        ctrl_dt=0.02, sim_dt=0.005, episode_length=1000, action_scale=0.5,
+        impl="warp", naconmax=8 * 8192, njmax=128,
+        keeper=config_dict.create(
+            target_radius=0.8,               # m in front of the goal centre
+            ball_region_x=[-9.0, -3.0],      # where the ball may be (defending half)
+            ball_region_y=[-5.0, 5.0],
+        ),
+        scales=config_dict.create(
+            positioning=1.0,                 # TODO: potential-based, see section 2
+            survival=0.05,                   # TODO: do the arithmetic (Lesson 8)
+            termination=-100.0,
+            tilt=-1.0,
+            action_rate=-0.01,
+        ),
+    )
+
+
+class KeeperPositioning(mjx_env.MjxEnv):
+    def __init__(self, config=default_config(), config_overrides=None):
+        super().__init__(config, config_overrides)
+        self._mj_model = mujoco.MjModel.from_xml_path("assets/my_t2_field.xml")  # TODO: your model
+        self._mj_model.opt.timestep = self.sim_dt
+        self._mjx_model = mjx.put_model(self._mj_model, impl=self._config.impl)
+        # TODO: look up ids once: trunk body, imu site, ball joint qpos/qvel address,
+        #       goal centre (read a <site> instead of hard-coding numbers!)
+
+    def reset(self, rng):
+        # TODO 1: start the robot standing near the goal mouth, facing the field
+        # TODO 2: place the ball at a random point in the defending half
+        # TODO 3: info = {"rng": ..., "last_act": ..., "last_target_dist": ...}
+        # TODO 4: return mjx_env.State(data, obs, reward, done, metrics, info)
+        raise NotImplementedError
+
+    def step(self, state, action):
+        # TODO 1: (K1) slowly move the ball (or teleport it now and then)
+        motor_targets = self._default_pose + self._config.action_scale * action
+        data = mjx_env.step(self.mjx_model, state.data, motor_targets, self.n_substeps)
+        # TODO 2: obs = self._get_obs(...); done = self._get_termination(...)
+        # TODO 3: rewards = self._get_reward(...); reward = sum(scale * term)
+        # TODO 4: update info (last action, last target distance), metrics for logging
+        raise NotImplementedError
+
+    def _target(self, ball_xy):
+        d = ball_xy - self._goal_xy
+        return self._goal_xy + self._config.keeper.target_radius * d / (jp.linalg.norm(d) + 1e-6)
+
+    # TODO: _get_obs, _get_reward, _get_termination
+    # Required by MjxEnv (copy the pattern from Lesson 6):
+    @property
+    def xml_path(self): return "assets/my_t2_field.xml"
+    @property
+    def action_size(self): return self._mjx_model.nu
+    @property
+    def mj_model(self): return self._mj_model
+    @property
+    def mjx_model(self): return self._mjx_model
+</script>
+<div class="callout trap"><b class="t">Talk to your supervisor and Fawwaz early</b><p>The reference repo's roadmap lists the goalkeeper as one of its own future stages. Agree on ownership now (e.g. he does striking, you do goalkeeping) so your thesis contribution is clearly yours.</p></div>
+
+<div class="quiz" data-quiz="m13"></div>
+</section>
+
+<!-- ===================================================================== -->
+<section data-mod="final" data-title="Final check" data-time="30 min" data-group="Part 5: Labs" hidden>
+<div class="kicker">Final check</div>
+<h1>Final check</h1>
+<p class="lede">Ten questions across the whole course. Aim for 8+. If you miss one, the explanation tells you which lesson to revisit.</p>
+<div class="quiz" data-quiz="final"></div>
+<h2>What next</h2>
+<ul>
+<li>Implement stage <b>K0</b> of your keeper and train it on the A100 (Lab 1 commands with <code>--env keeper</code>).</li>
+<li>Keep a lab notebook: one entry per run (command, change, numbers, conclusion).</li>
+<li>Read the reference paper analysis (<code>docs/humanoid-kick-paper-analysis.md</code>) to see how a full soccer-skill project is organized.</li>
+</ul>
+</section>
+
+<footer class="credit">
+Keeper School: a personal study course. Code tagged <b>repo</b> is excerpted from
+<a href="https://github.com/f4ww4z/t2-mujoco-rl-playground">t2-mujoco-rl-playground</a> (Fawwaz) for study purposes. Code tagged <b>ex</b> was written for this course and tested with mujoco 3.15, jax 0.10 and numpy 2.4 on Windows (CPU).
+Progress is stored only in your browser.
+</footer>
+
+</div></main>
+</div>
+
+<script>
+/* ======================= quiz bank ======================= */
+const QUIZ = {
+m0: [
+ {q:"In this project, what does the policy (neural network) output every control step?", o:["Motor torques in N·m","31 joint target angles, as offsets from the standing pose","A walking velocity command","Footstep locations"], a:1, w:"motor_targets = default_pose + action_scale × action. The PD controller in each position actuator turns those targets into torque."},
+ {q:"Which of these do you NOT normally design when you create a new task?", o:["The observation","The reward","The reset (what situations are practised)","The PPO gradient update"], a:3, w:"PPO is reusable machinery from brax. Your creative work is the observation, reward, reset and termination."},
+ {q:"Why is the policy trained in simulation instead of on the real T2?", o:["Simulation is more accurate than reality","It needs millions of attempts, including falls, which are cheap and parallel in sim","The real robot cannot run neural networks","The real robot has no sensors"], a:1, w:"Millions of attempts and thousands of falls would take years and break the robot. In sim, 4096 robots practise in parallel."},
+ {q:"How often does the policy make a decision?", o:["1000 Hz","200 Hz","50 Hz (every 0.02 s)","1 Hz"], a:2, w:"ctrl_dt = 0.02 s. Physics runs at 200 Hz underneath (sim_dt = 0.005 s): 4 physics steps per decision."}
+],
+m1: [
+ {q:"How does the robot's observation differ from the full simulator state?", o:["The observation is a partial, noisy view: only what sensors can measure","They are always identical","The observation contains more information than the state","The state is only used on the real robot"], a:0, w:"The simulator knows everything exactly. The policy only gets noisy sensor-like readings."},
+ {q:"Rewards are [0, 0, 10] and γ = 0.5. What is the discounted return from step 0?", o:["10","5","2.5","0"], a:2, w:"0 + 0.5·0 + 0.25·10 = 2.5."},
+ {q:"With γ = 0.99 and 50 decisions per second, roughly how far ahead does the agent care?", o:["0.02 s","About 2 s (≈ 1/(1−γ) = 100 steps)","About 1 minute","Forever, equally"], a:1, w:"Horizon ≈ 1/(1−γ) = 100 steps × 0.02 s = 2 s."},
+ {q:"In toy_keeper.py, why is the random policy so much worse than the rule policy?", o:["Its reward function is different","It ignores the observation, so it wanders instead of going to the target","It runs fewer steps","Random numbers are slow"], a:1, w:"Same environment, same reward. Only the decisions differ. A good policy uses the observation."},
+ {q:"What does a value function (critic) estimate?", o:["The best action","The reward of the current step only","The expected future (discounted) return from a state","The probability of falling next step"], a:2, w:"V(o) = how much return do I expect from here. It's used to compute advantages during training."},
+ {q:"The toy keeper only gets +1 at the last step if within 0.1 m of the target, else 0. What's the likely problem?", o:["Nothing; sparse rewards learn fastest","A random policy almost never sees a reward, so there's no signal to learn from","The episode becomes longer","The discount factor stops working"], a:1, w:"The sparse reward problem. That's why we use dense shaping (Lesson 8)."}
+],
+m2: [
+ {q:"Advantage = return − predicted value. An advantage of −3 for an action means…", o:["The action was better than expected → make it more likely","The action was worse than expected → make it less likely","The critic is broken","The episode ended"], a:1, w:"Negative advantage = worse than the critic predicted, so the update makes that action less likely in that situation."},
+ {q:"What is PPO's clipping (ε = 0.2) for?", o:["Clip rewards to ±0.2","Limit how much the policy can change in one update, so it doesn't wreck itself","Clip joint angles","Drop 20 % of the data"], a:1, w:"The probability ratio new/old is clipped to [0.8, 1.2] in the loss: small, safe steps."},
+ {q:"4096 envs, unroll_length 24, 4 minibatches, 5 updates per batch: how many gradient steps per training step?", o:["4","5","20","98,304"], a:2, w:"5 passes × 4 minibatches = 20. 98,304 = 4096 × 24 is the number of env steps collected."},
+ {q:"Why does the policy act randomly (sample from a distribution) during training?", o:["To explore: you can only learn that an action is good if you sometimes try it","Because the GPU is noisy","To make videos look natural","It doesn't; it's always deterministic"], a:0, w:"Exploration. At deployment we use the mean (most likely) action."},
+ {q:"TD error δ = r + γV(s′) − V(s). With r = 1, V(s) = 5, V(s′) = 6, γ = 0.99, δ ≈ ?", o:["−1","0","1.94","7"], a:2, w:"1 + 0.99·6 − 5 = 1 + 5.94 − 5 = 1.94 > 0: better than expected."},
+ {q:"In reinforce_keeper.py the learned 'right' row has a large positive weight on obs. Why?", o:["Random chance","obs = target − x; when it's positive the target is to the right, so the right action's logit should grow with obs","Because the bias is zero","The stay action is broken"], a:1, w:"The learned rule 'if the target is right, go right' appears as a positive weight. Nobody wrote it; reward taught it."}
+],
+m3: [
+ {q:"How do you set element 0 of a JAX array x to 5?", o:["x[0] = 5","x = x.at[0].set(5)","x.set(0, 5)","jp.assign(x, 0, 5)"], a:1, w:"JAX arrays are immutable. .at[...].set(...) returns a new array."},
+ {q:"Why does every random draw in the repo first do rng, key = jax.random.split(rng)?", o:["Splitting is faster","JAX randomness is explicit: reusing a key gives the SAME numbers, so you derive a fresh key each time","To use two GPUs","MuJoCo requires it"], a:1, w:"Same key → same numbers. Split to get a new, independent key."},
+ {q:"Inside a jitted step, how do you choose between two values based on an array condition?", o:["Python if/else","jp.where(cond, a, b)","try/except","A for loop"], a:1, w:"A Python if on a traced value raises ConcretizationTypeError. jp.where computes both and selects."},
+ {q:"What does jax.vmap(f) do?", o:["Visualizes f","Runs f over a batch dimension, as if called once per element, but in parallel","Saves f to disk","Makes f differentiable"], a:1, w:"vmap is how one env function becomes 4096 envs."},
+ {q:"`do_push = (...) & cfg.push_config.enable`: why is it fine to use a cfg value like a normal Python value?", o:["cfg values are plain Python constants known at compile time, not traced arrays","cfg is a GPU array","It isn't fine; it crashes","JAX ignores cfg"], a:0, w:"Config values are fixed when the function is compiled. Only data that changes per step is traced."},
+ {q:"Why write state.replace(data=data) instead of state.data = data?", o:["State is an immutable dataclass; you build a new one","replace is shorter to type","It deletes the old data from disk","Licensing"], a:0, w:"Pure functions return new values instead of mutating, which is what lets JAX jit and vmap them."}
+],
+m4: [
+ {q:"What does a <position> actuator do?", o:["Applies a constant force","Acts like a PD controller: torque pushes the joint toward the commanded target angle","Teleports the joint to the target","Measures the joint position"], a:1, w:"torque = kp·(target − angle) − kv·velocity."},
+ {q:"The T2 standing model has nq = 38. Where does 38 come from?", o:["38 joints","7 for the floating base (xyz + quaternion) + 31 joint angles","31 joints + 7 sensors","Random"], a:1, w:"Free joint = 3 position + 4 quaternion. Plus 31 hinge joints."},
+ {q:"sim_dt = 0.005 s and ctrl_dt = 0.02 s. How many physics steps per policy decision?", o:["1","2","4","20"], a:2, w:"0.02 / 0.005 = 4 (n_substeps)."},
+ {q:"In pendulum.py the target is 0.8 rad but the pole settles near 0.70 rad. Why?", o:["A bug in MuJoCo","Gravity pulls on the pole; a PD controller needs an error to produce torque, so it settles short","The sensor is wrong","The timestep is too large"], a:1, w:"Steady-state error. The policy learns to send targets that compensate."},
+ {q:"What's the difference between <body> and <geom>?", o:["None","A body is a rigid frame with mass and joints; geoms are shapes attached to it for collision and visuals","A geom is a joint","Bodies are only for sensors"], a:1, w:"Body = the link. Geom = its shapes."},
+ {q:"What is the 'home' keyframe used for in the env?", o:["Video recording","The default standing pose: reset starts near it and actions are offsets from it","Saving checkpoints","Nothing"], a:1, w:"_init_q comes from keyframe('home'); _default_pose = its joint part."}
+],
+m5: [
+ {q:"What does mjx.put_model do?", o:["Saves the model to XML","Converts the MuJoCo model into arrays on the accelerator for MJX","Downloads the robot","Starts the viewer"], a:1, w:"After put_model, the physics can run inside JAX: jitted, vmapped, on the GPU."},
+ {q:"At ~180,000 env-steps/s, roughly how long do 100 M steps take?", o:["9 seconds","9 minutes","9 hours","9 days"], a:1, w:"1e8 / 1.8e5 ≈ 555 s ≈ 9 min."},
+ {q:"Why is a GPU good at simulating 4096 robots?", o:["It has a faster single core","The same math runs on thousands of independent worlds at once, which suits thousands of small cores","GPUs have physics hard-wired","It isn't; CPUs are better"], a:1, w:"Data parallelism: same instructions, different numbers."},
+ {q:"What is --impl warp?", o:["A training algorithm","An MJX backend that runs physics as NVIDIA Warp kernels: faster and leaner than pure JAX","A wandb mode","A robot model"], a:1, w:"Warp needs an NVIDIA GPU. The repo trains with it."},
+ {q:"100 M steps at 0.02 s each is how much simulated robot time?", o:["~23 minutes","~23 hours","~23 days","~23 years"], a:2, w:"2,000,000 s ≈ 23 days, compressed into minutes on a GPU."}
+],
+m6: [
+ {q:"Which method decides what situation each attempt starts in?", o:["step()","reset()","_get_reward()","reward()"], a:1, w:"reset() is your curriculum: start pose, randomization, ball placement."},
+ {q:"In step(), what turns the policy's action into motor commands?", o:["motor_targets = default_pose + action_scale * action","action * 1000","jax.random.uniform","mjx.put_model"], a:0, w:"Actions are offsets around the standing pose, scaled."},
+ {q:"Where does the env keep per-episode hidden bookkeeping like the push timer and last action?", o:["state.obs","state.info","state.reward","A global variable"], a:1, w:"info carries rng keys, timers, last action, anchors…"},
+ {q:"Which of these ends an episode in T2Stand?", o:["Trunk height below 0.75 m","A reward below zero","Joint velocity above 1 rad/s","The ball moving"], a:0, w:"Termination: tilt > 0.6 rad, trunk < 0.75 m, illegal contact, or NaN."},
+ {q:"T2StandV4.reset() starts with state = super().reset(rng). What does that mean?", o:["It ignores the parent","It first runs the parent's (v3) reset, then adds v4 things on top","It resets twice for no reason","It calls the trainer"], a:1, w:"Each version layers on top of the previous one."},
+ {q:"Why are reward terms also written into state.metrics?", o:["So you can log and plot each term separately to debug training","PPO needs them","To save GPU memory","They aren't"], a:0, w:"metrics are for you: reward/<term> curves show what the policy is optimizing."}
+],
+m7: [
+ {q:"Indices 6:9 of the 102-dim obs are projected gravity. What does it tell the robot?", o:["Its height","Which way is down relative to its own body, i.e. how tilted it is","Its speed","Its mass"], a:1, w:"World 'down' rotated into the body frame: the IMU tilt signal."},
+ {q:"The robot is tilted 30° from upright. How long is the horizontal (x, y) part of projected gravity?", o:["0","0.5","0.87","1"], a:1, w:"sin 30° = 0.5. Upright → (0, 0, −1), horizontal part 0."},
+ {q:"Why does the obs include the last action?", o:["Decoration","So the policy knows what it just commanded (motors lag) and can act smoothly","PPO requires 31 extra numbers","For the critic only"], a:1, w:"It also feeds the action-rate smoothness penalty."},
+ {q:"Why are joint positions given relative to the default pose?", o:["Small, centered numbers are easier for a network; 0 means 'at the standing pose'","MuJoCo requires it","To hide information","It saves memory"], a:0, w:"Centered inputs make learning easier, and observation normalization helps further."},
+ {q:"Which observation is NOT allowed in a keeper policy meant for the real robot?", o:["IMU angular velocity","Joint positions","The TRUE ball position from the simulator","Ball position estimated by the camera"], a:2, w:"Deployable-only: the real robot never knows the true ball position. Fine as an early training stage, never for deployment."}
+],
+m8: [
+ {q:"Total reward in this repo is computed as…", o:["the largest term","Σ scale_i × term_i","the product of all terms","only the termination term"], a:1, w:"A weighted sum. The config scales set sign and importance."},
+ {q:"Per-step penalties average −0.5 and the fall penalty is −200. Staying alive 1000 steps costs −500. What might PPO learn?", o:["To stand perfectly","To fall early on purpose, because −200 beats −500","Nothing","To walk"], a:1, w:"Reward hacking. The repo's fix is a positive survival reward per step alive."},
+ {q:"Potential-based shaping pays (d_prev − d_now) every step. Over an episode the sum equals…", o:["Always zero","d_start − d_end: only the start and end matter, so it can't be farmed by wiggling","Infinite","The number of steps"], a:1, w:"A telescoping sum: the intermediate terms cancel."},
+ {q:"reward/base_height dominates the total while the robot still falls. Best first move?", o:["Train 10× longer","Inspect per-term metrics, check scales and units, then change ONE thing","Delete all penalties","Switch algorithm"], a:1, w:"Debug rewards like an experiment: one change at a time."},
+ {q:"For a keeper, why add a dense 'move toward the intercept point' reward rather than only +save / −goal?", o:["Saves are rare early on; the dense term gives a learning signal every step","PPO requires dense rewards","It's cheaper to compute","To make videos nicer"], a:0, w:"Shaping turns a sparse problem into a learnable one."},
+ {q:"What is reward hacking?", o:["Editing the logs","The policy maximizing reward in a way you didn't intend","A GPU error","Using someone else's reward"], a:1, w:"The optimizer answers the question you asked, not the one you meant."}
+],
+m9: [
+ {q:"What is the sim-to-real gap?", o:["Network latency","Differences between simulation and the real robot that make a sim-trained policy fail on hardware","The distance between two robots","The time to train"], a:1, w:"Wrong masses, friction, delays, sensor noise, perception errors…"},
+ {q:"What does domain randomization in randomize.py change?", o:["The reward","Floor friction, trunk mass and trunk centre of mass, differently per env","The network size","The robot's joint count"], a:1, w:"Each of the 4096 envs gets a slightly different robot/floor, so the policy can't overfit to one."},
+ {q:"v1/v2 scored 100 % but fell within ~1 s in real physics. Why?", o:["Bad luck","The env zeroed the root velocity every step, so they learned damped, fake dynamics","Too few envs","The GPU overheated"], a:1, w:"Great training numbers only mean 'great in this simulator'. Test elsewhere."},
+ {q:"Simulated ball noise σ = 0.149 + 0.124·d. At 2 m, σ ≈ ?", o:["0.15 m","0.27 m","0.40 m","1.0 m"], a:2, w:"0.149 + 0.248 = 0.397 m. Realistic perception is hard, so it gets its own stage."},
+ {q:"How will a trained policy eventually run on the T2?", o:["As Python on the cluster","Exported (ONNX) and run by a C++ behaviour-tree node on the Jetson at 50 Hz","Copied into the motor drivers","Through wandb"], a:1, w:"That deployment path is why observations must be deployable-only."}
+],
+m10: [
+ {q:"Where does train_stand.py look up which env class to build for --env v4?", o:["The ENVS dictionary","wandb","pixi.toml","The XML"], a:0, w:"ENVS maps names to (class, default_config). Your keeper becomes one more entry."},
+ {q:"eval/avg_episode_length rises from 30 to 1000 for v4. What does that mean?", o:["Training is broken","The policy now survives the whole 20 s episode (1000 steps)","The reward is 1000","It ran out of memory"], a:1, w:"1000 steps × 0.02 s = 20 s, the full episode."},
+ {q:"Which file holds the final trained weights?", o:["train.log","env_config.json","params_final.pkl","metrics.jsonl"], a:2, w:"params_final.pkl holds the normalizer + policy + value params. play/view load it."},
+ {q:"You want to train longer. Which flag do you raise?", o:["--num_envs","--num_timesteps","--num_evals","--seed"], a:1, w:"num_timesteps is the budget. num_envs is parallelism and also changes the batch size."},
+ {q:"What does --resume do?", o:["Restarts from scratch","Loads a saved checkpoint and continues training from it","Resumes wandb only","Replays a video"], a:1, w:"Point it at logs/<run>/checkpoints/latest (or a step folder)."}
+],
+m11: [
+ {q:"Why can't you pixi install this repo directly on Windows?", o:["pixi.toml declares platforms = ['linux-64'] only","pixi is paid on Windows","Python 3.12 doesn't exist on Windows","Git blocks it"], a:0, w:"The GPU stack is pinned for Linux. Use the cluster (or WSL2 with a big enough GPU)."},
+ {q:"What is pixi.lock?", o:["A password file","The exact resolved versions of every package, so everyone gets an identical environment","A GPU lock","A log file"], a:1, w:"Reproducibility: same lockfile → same software on every machine."},
+ {q:"On the UMHPC cluster, where do you run sbatch?", o:["On a compute node","On the login node","On your laptop","Inside the GPU"], a:1, w:"You submit from the login node; SLURM runs the job on a compute node with an A100."},
+ {q:"A job shows state PD. What does that mean?", o:["Failed","Pending: waiting in the queue","Paused by you","Printed debug"], a:1, w:"PD = pending, R = running, CD = completed, TO = hit the time limit."},
+ {q:"Why do cluster training runs use wandb offline mode?", o:["Offline is faster","Compute nodes have no internet; you sync later from the login node","wandb is banned","Offline means no logs"], a:1, w:"The runs are saved locally and uploaded later with pixi run wandb-sync."}
+],
+m13: [
+ {q:"A ground shot at 5 m/s from 6 m. Roughly how long until it reaches the goal line?", o:["0.12 s","1.2 s","5 s","12 s"], a:1, w:"6 / 5 = 1.2 s (a bit more with rolling resistance)."},
+ {q:"With about 1 s to react and a slow side-step, which skill gives the biggest win first?", o:["Diving","Good positioning before the shot","Kicking the ball back","Jumping"], a:1, w:"If you're already on the ball–goal line, most straight shots hit you."},
+ {q:"Ball diameter 0.22 m; v4 stance ankle gap ≈ 0.16 m. What does that mean for 'closing the legs'?", o:["The ball easily passes between the feet in a normal stance","A normal stance already blocks the gap; spreading the legs to reach wider is what opens it","Feet don't matter","The ball is smaller than the gap"], a:1, w:"The trade-off is reach vs gap. The policy has to learn when to reach."},
+ {q:"target = goal_centre + r · unit(ball − goal_centre). What is it?", o:["A point on the ball–goal-centre line, r metres out from the goal","The ball's landing point","The penalty spot","A random point"], a:0, w:"The classic angle-narrowing position."},
+ {q:"Which observation is MOST important to add for blocking that the 109-dim soccer obs lacks?", o:["Ball velocity","Head temperature","Battery level","Field colour"], a:0, w:"Velocity → where the shot will cross the line."},
+ {q:"Why start with perfect ball information and add realistic perception later?", o:["To separate problems: first learn the motor skill, then learn to cope with noisy sensing","Realistic perception is impossible","Perfect perception deploys fine","PPO requires it"], a:0, w:"One hard thing at a time, but never deploy the perfect-information version."}
+],
+final: [
+ {q:"Which three things define a new task?", o:["Observation, reward, reset (+ termination)","GPU, CPU, RAM","PPO, GAE, KL","XML, JSON, YAML"], a:0, w:"Lesson 0 / 6."},
+ {q:"A position actuator's kp is set very low. What happens?", o:["Joints become very stiff","Joints are soft and sag far from their targets","Nothing","The sim always crashes"], a:1, w:"Lesson 4: low gain → large steady-state error under load."},
+ {q:"Actions are tanh-squashed into [−1, 1] and action_scale = 0.5. What's the largest target offset from the standing pose?", o:["0.5 rad","1 rad","2 rad","Unbounded"], a:0, w:"Lessons 2 & 6: 0.5 × 1 = 0.5 rad."},
+ {q:"What gives each of the 4096 envs a slightly different robot to fight the sim-to-real gap?", o:["Domain randomization","Observation normalization","The clipping epsilon","num_evals"], a:0, w:"Lesson 9."},
+ {q:"Episode length stays flat around 30 for 50 M steps. First suspect?", o:["The robot falls almost immediately: check termination and whether falling is 'cheaper' than living","Need a bigger monitor","wandb","The random seed"], a:0, w:"Lesson 8 §2 and Lesson 10 §4."},
+ {q:"Which of these do you do on the cluster's login node?", o:["Edit, git, sbatch","Training","GPU benchmarks","Rendering videos"], a:0, w:"Lesson 11: never train on the login node."},
+ {q:"Why is observation normalization (running mean/std) useful?", o:["Inputs like joint velocity (large) and gravity (≤ 1) reach the network on similar scales","It hides noise","MuJoCo requires it","It compresses files"], a:0, w:"Lesson 7."},
+ {q:"Raising γ from 0.99 to 0.999 does what?", o:["The agent cares about a ~10× longer horizon (≈ 20 s at 50 Hz)","Nothing","Always makes training faster","Shortens the horizon"], a:0, w:"Lesson 1: horizon ≈ 1/(1−γ) = 1000 steps."},
+ {q:"Why does a keeper need ball velocity and not just position?", o:["To predict where the ball will cross the goal line","For logging","For the critic only","No reason"], a:0, w:"Lessons 7 & 13."},
+ {q:"The best order to build the keeper?", o:["Stand → position → slow shots → faster shots → realistic perception → (dive)","Dive first","Realistic perception first","Everything at once"], a:0, w:"Lesson 13: one skill at a time."}
+]
+};
+
+/* ======================= storage (safe) ======================= */
+const KEY = "keeperSchool.v1";
+function load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } }
+let S = load();
+S.done = S.done || {}; S.quiz = S.quiz || {}; S.check = S.check || {};
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+/* ======================= theme ======================= */
+const root = document.documentElement;
+if (S.theme) root.setAttribute("data-theme", S.theme);
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const cur = root.getAttribute("data-theme") ||
+    (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  const next = cur === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", next); S.theme = next; save();
+});
+
+/* ======================= code blocks + highlighting ======================= */
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const RULES = {
+  py: [
+    ["c", /#[^\n]*/y],
+    ["s", /("""[\s\S]*?"""|'''[\s\S]*?'''|f?"(?:\\.|[^"\\\n])*"|f?'(?:\\.|[^'\\\n])*')/y],
+    ["k", /\b(?:def|class|return|if|else|elif|for|while|in|import|from|as|with|not|and|or|is|None|True|False|lambda|self|pass|raise|try|except|yield|nonlocal|global|range|print)\b/y],
+    ["n", /\b\d+(?:\.\d+)?(?:e-?\d+)?\b/y],
+    ["f", /\b[A-Za-z_]\w*(?=\()/y],
+  ],
+  xml: [
+    ["c", /<!--[\s\S]*?-->/y],
+    ["t", /<\/?[\w:-]+|\/?>/y],
+    ["a", /[\w:-]+(?==)/y],
+    ["s", /"[^"]*"/y],
+  ],
+  sh: [
+    ["c", /#[^\n]*/y],
+    ["s", /"(?:\\.|[^"\\])*"|'[^']*'/y],
+    ["f", /(?<![\w./-])(?:pixi|sbatch|squeue|scancel|salloc|sacct|seff|ssh|scp|git|python|pip|cd|tail|mkdir|wsl|curl|keeper-env\\Scripts\\activate)\b/y],
+    ["a", /--[\w-]+/y],
+  ],
+};
+function highlight(code, lang) {
+  const rules = RULES[lang];
+  if (!rules) return esc(code);
+  let out = "", i = 0, plain = "";
+  while (i < code.length) {
+    let hit = null;
+    for (const [cls, re] of rules) {
+      re.lastIndex = i;
+      const m = re.exec(code);
+      if (m && m[0].length) { hit = [cls, m[0]]; break; }
+    }
+    if (hit) {
+      if (plain) { out += esc(plain); plain = ""; }
+      out += `<span class="tk-${hit[0]}">${esc(hit[1])}</span>`;
+      i += hit[1].length;
+    } else {
+      // advance one "word" or one char so keywords only match at word starts
+      const w = /[A-Za-z_]\w*|\d+|[\s\S]/y; w.lastIndex = i;
+      const m = w.exec(code); plain += m[0]; i += m[0].length;
+    }
+  }
+  return out + esc(plain);
+}
+document.querySelectorAll('script[type="text/x-code"]').forEach(s => {
+  const lang = s.dataset.lang || "text";
+  const code = s.textContent.replace(/^\n+|\s+$/g, "");
+  const fig = document.createElement("figure");
+  fig.className = "code";
+  const tag = s.dataset.tag ? `<span class="tag ${s.dataset.tag === "repo" ? "repo" : ""}">${s.dataset.tag}</span>` : "";
+  fig.innerHTML = `<figcaption><span class="src">${tag}${esc(s.dataset.src || lang)}</span><button class="copy" type="button">Copy</button></figcaption><pre><code>${highlight(code, lang)}</code></pre>`;
+  fig.querySelector(".copy").addEventListener("click", e => {
+    const b = e.currentTarget;
+    const done = ok => { b.textContent = ok ? "Copied" : "Select & copy"; setTimeout(() => b.textContent = "Copy", 1400); };
+    try { navigator.clipboard.writeText(code).then(() => done(true), () => done(false)); } catch (err) { done(false); }
+  });
+  s.replaceWith(fig);
+});
+
+/* ======================= quizzes ======================= */
+function order(n, seed) {               // deterministic shuffle per question
+  const idx = [...Array(n).keys()];
+  let x = seed * 9301 + 49297;
+  for (let i = n - 1; i > 0; i--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor(x / 233280 * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; }
+  return idx;
+}
+function renderQuiz(box) {
+  const id = box.dataset.quiz, qs = QUIZ[id];
+  if (!qs) return;
+  const best = S.quiz[id] ? S.quiz[id].best : null;
+  let h = `<div class="qhead"><h3>Quiz: ${qs.length} questions</h3><span class="best">${best != null ? `Best: ${best}/${qs.length}` : "Not attempted yet"}</span></div>`;
+  qs.forEach((q, qi) => {
+    h += `<div class="q" data-qi="${qi}"><div class="qt"><span class="n">${qi + 1}.</span>${esc(q.q)}</div>`;
+    order(q.o.length, qi + id.length * 7).forEach(oi => {
+      h += `<label class="opt" data-oi="${oi}"><input type="radio" name="${id}-${qi}" value="${oi}"><span>${esc(q.o[oi])}</span></label>`;
+    });
+    h += `<div class="why-box" hidden></div></div>`;
+  });
+  h += `<div class="qactions"><button class="btn" type="button" data-act="check">Check answers</button><button class="btn ghost" type="button" data-act="retry" hidden>Try again</button><span class="score" aria-live="polite"></span></div>`;
+  box.innerHTML = h;
+  box.querySelector('[data-act="check"]').addEventListener("click", () => grade(box));
+  box.querySelector('[data-act="retry"]').addEventListener("click", () => renderQuiz(box));
+}
+function grade(box) {
+  const id = box.dataset.quiz, qs = QUIZ[id];
+  let score = 0, answered = 0;
+  box.querySelectorAll(".q").forEach(qe => {
+    const qi = +qe.dataset.qi, q = qs[qi];
+    const sel = qe.querySelector("input:checked");
+    const why = qe.querySelector(".why-box");
+    qe.querySelectorAll(".opt").forEach(o => o.classList.remove("correct", "wrong"));
+    if (!sel) { why.hidden = false; why.className = "why-box no"; why.innerHTML = "<b>No answer selected.</b>"; return; }
+    answered++;
+    const pick = +sel.value, ok = pick === q.a;
+    if (ok) score++;
+    qe.querySelector(`.opt[data-oi="${q.a}"]`).classList.add("correct");
+    if (!ok) sel.closest(".opt").classList.add("wrong");
+    why.hidden = false;
+    why.className = "why-box " + (ok ? "ok" : "no");
+    why.innerHTML = `<b>${ok ? "Correct." : "Not quite."}</b> ${esc(q.w)}`;
+    qe.querySelectorAll("input").forEach(i => i.disabled = true);
+  });
+  const out = box.querySelector(".score");
+  out.textContent = `${score} / ${qs.length}` + (answered < qs.length ? `  (${qs.length - answered} unanswered)` : "") + (score === qs.length ? "  🎉" : "");
+  box.querySelector('[data-act="check"]').hidden = true;
+  box.querySelector('[data-act="retry"]').hidden = false;
+  const prev = S.quiz[id] ? S.quiz[id].best : -1;
+  S.quiz[id] = { best: Math.max(prev, score), last: score };
+  if (score >= Math.ceil(qs.length * 0.8)) S.done[id] = true;
+  save();
+  box.querySelector(".best").textContent = `Best: ${S.quiz[id].best}/${qs.length}`;
+  refreshNav();
+}
+document.querySelectorAll(".quiz[data-quiz]").forEach(renderQuiz);
+
+/* ======================= checklists ======================= */
+document.querySelectorAll(".checklist[data-check]").forEach(list => {
+  const g = list.dataset.check;
+  S.check[g] = S.check[g] || {};
+  list.querySelectorAll("input[data-k]").forEach(cb => {
+    const li = cb.closest("li");
+    cb.checked = !!S.check[g][cb.dataset.k];
+    li.classList.toggle("ticked", cb.checked);
+    cb.addEventListener("change", () => {
+      S.check[g][cb.dataset.k] = cb.checked; li.classList.toggle("ticked", cb.checked);
+      const all = [...list.querySelectorAll("input[data-k]")].every(x => x.checked);
+      if (list.closest("section").dataset.mod === "m12") {
+        const labs = [...document.querySelectorAll('section[data-mod="m12"] .checklist[data-check="labA"] input, section[data-mod="m12"] .checklist[data-check="labB"] input')];
+        S.done.m12 = labs.every(x => x.checked);
+      }
+      save(); refreshNav();
+    });
+  });
+});
+
+/* ======================= navigation ======================= */
+const sections = [...document.querySelectorAll("section[data-mod]")];
+const lessons = sections.filter(s => s.dataset.mod !== "home");
+const side = document.getElementById("side");
+function buildNav() {
+  let h = "", group = "";
+  sections.forEach(s => {
+    const g = s.dataset.group;
+    if (g !== group) { h += `<h4>${esc(g)}</h4>`; group = g; }
+    const i = lessons.indexOf(s);
+    const num = s.dataset.mod === "home" ? "★" : s.dataset.mod === "final" ? "✓" : (s.dataset.mod.startsWith("m1") && +s.dataset.mod.slice(1) >= 12 ? "L" + (+s.dataset.mod.slice(1) - 11) : s.dataset.mod.slice(1));
+    h += `<a href="#${s.dataset.mod}" data-mod="${s.dataset.mod}"><span class="num">${num}</span><span>${esc(s.dataset.title)}<span class="meta">${esc(s.dataset.time)}</span></span></a>`;
+  });
+  side.innerHTML = h;
+  const cards = document.getElementById("homeCards");
+  cards.innerHTML = lessons.map((s, i) =>
+    `<a class="card" href="#${s.dataset.mod}" data-mod="${s.dataset.mod}"><div class="cn">${esc(s.dataset.group.replace(/^Part \d+: /, ""))} · ${esc(s.dataset.time)}</div><div class="ct">${esc(s.dataset.title)}</div><div class="cs"></div></a>`).join("");
+}
+function refreshNav() {
+  const n = lessons.filter(s => S.done[s.dataset.mod]).length;
+  document.getElementById("progBar").style.width = (100 * n / lessons.length) + "%";
+  document.getElementById("progLabel").textContent = `${n} / ${lessons.length} complete`;
+  document.querySelectorAll("[data-mod]").forEach(a => {
+    if (a.tagName === "SECTION") return;
+    a.classList.toggle("done", !!S.done[a.dataset.mod]);
+  });
+  document.querySelectorAll(".card").forEach(c => {
+    const id = c.dataset.mod, q = S.quiz[id];
+    c.querySelector(".cs").textContent = S.done[id] ? "Complete ✓" : q ? `Quiz best ${q.best}/${QUIZ[id].length}` : (QUIZ[id] ? "Quiz: not attempted" : "Lab");
+  });
+}
+function addFooters() {
+  lessons.forEach((s, i) => {
+    const prev = i === 0 ? sections[0] : lessons[i - 1], next = lessons[i + 1];
+    const row = document.createElement("div");
+    row.className = "complete-row";
+    row.innerHTML = `<button class="btn ghost" type="button">${S.done[s.dataset.mod] ? "Marked complete ✓" : "Mark lesson complete"}</button><span class="muted small">Scoring 80 %+ on the quiz marks it automatically.</span>`;
+    row.querySelector("button").addEventListener("click", e => {
+      S.done[s.dataset.mod] = !S.done[s.dataset.mod]; save(); refreshNav();
+      e.currentTarget.textContent = S.done[s.dataset.mod] ? "Marked complete ✓" : "Mark lesson complete";
+    });
+    const nav = document.createElement("div");
+    nav.className = "lessonnav";
+    nav.innerHTML = `<a class="btn ghost" href="#${prev.dataset.mod}">← ${esc(prev.dataset.title)}</a>` +
+      (next ? `<a class="btn" href="#${next.dataset.mod}">${esc(next.dataset.title)} →</a>` : `<a class="btn" href="#home">Course home</a>`);
+    s.append(row, nav);
+  });
+}
+function route() {
+  const id = (location.hash || "#home").slice(1);
+  const target = sections.find(s => s.dataset.mod === id) || sections[0];
+  sections.forEach(s => s.hidden = s !== target);
+  side.querySelectorAll("a").forEach(a => a.classList.toggle("active", a.dataset.mod === target.dataset.mod));
+  side.classList.remove("open");
+  document.title = (target.dataset.mod === "home" ? "" : target.dataset.title + " · ") + "Keeper School";
+  window.scrollTo(0, 0);
+}
+document.getElementById("menuBtn").addEventListener("click", () => side.classList.toggle("open"));
+buildNav(); addFooters(); refreshNav();
+window.addEventListener("hashchange", route); route();
+</script>
+</body>
+</html>
