@@ -629,8 +629,7 @@ html.moon-dragging .cursor-ring{ transform: scale(.7); }
 .a-paper{ fill: var(--paper); } .a-wood{ fill: var(--wood); } .a-wood2{ fill: var(--wood-dark); }
 .a-rose{ fill: #e7b3ad; } .a-sage{ fill: #b7c3a2; } .a-sky{ fill: #c8dbe3; } .a-gold{ fill: #efc76a; } .a-ink{ fill: var(--ink); }
 .s-paper{ stroke: var(--paper); }
-.a-sunburst{ fill: url(#dh-sunburst); } .a-maple{ fill: #e9c98a; } .a-steel{ fill: #cfd3d6; }
-.room-art .string{ stroke: #cfd3d6; stroke-width: .8; }
+.room-credit{ display: inline-block; margin-top: 14px; font-size: 10px; border-bottom: 1px solid var(--ink-10); }
 .room.on .glow{ fill: #ffd77a; filter: drop-shadow(0 0 4px rgba(255, 200, 90, .9)); }
 
 /* little life in the rooms */

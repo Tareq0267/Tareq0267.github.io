@@ -988,20 +988,7 @@
       <path class="a-rose" transform="rotate(-14 66 106)" d="M56 96 h8 v21 h-8 z"/><path class="a-sky" transform="rotate(-24 76 108)" d="M68 99 h7 v19 h-7 z"/>
       <path class="a-paper" d="M200 117 l12 -5 l12 5 z M212 112 V117"/>
       <circle class="a-paper" cx="236" cy="114" r="3.5"/><circle class="a-paper" cx="78" cy="114" r="3"/>
-      <defs><radialGradient id="dh-sunburst" cx="50%" cy="58%" r="60%">
-        <stop offset="0" stop-color="#f4bd45"/><stop offset=".5" stop-color="#cf6a22"/><stop offset=".8" stop-color="#6e2a12"/><stop offset="1" stop-color="#2a120c"/>
-      </radialGradient></defs>
-      <path d="M268 117 L276 100 L286 117 M277 44 v6 M273 44 h8"/>
-      <path class="a-maple" d="M273 6 c0 -4 6 -5 9 -2 l1 7 c-1 2 -3 2 -4 4 l-1 13 h-4 z"/>
-      <circle class="a-paper" cx="275" cy="9" r="1"/><circle class="a-paper" cx="275" cy="14" r="1"/><circle class="a-paper" cx="275" cy="19" r="1"/>
-      <rect class="a-maple" x="275" y="28" width="5" height="54"/>
-      <path d="M275 34 h5 M275 40 h5 M275 46 h5 M275 52 h5 M275 58 h5 M275 64 h5 M275 70 h5 M275 76 h5"/>
-      <path class="a-sunburst" d="M269 112 C259 112 257 101 262 93 C265 88 263 83 264 78 C265 72 269 72 271 77 C272 80 274 82 277.5 82 C281 82 283 80 284 77 C286 70 292 73 292 79 C293 85 291 88 293 93 C298 101 295 112 286 112 Z"/>
-      <path class="a-paper" d="M265 96 C264 90 268 86 274 86 L284 88 C287 93 285 100 280 104 C274 106 267 103 265 96 Z"/>
-      <rect class="a-paper" x="274" y="87" width="7" height="2.5" rx="1"/><rect class="a-paper" x="274" y="92.5" width="7" height="2.5" rx="1"/><rect class="a-paper" x="273.5" y="98" width="7" height="2.5" rx="1" transform="rotate(-8 277 99)"/>
-      <rect class="a-steel" x="273" y="103.5" width="9" height="3" rx="1"/>
-      <circle class="a-paper" cx="286" cy="99" r="1.4"/><circle class="a-paper" cx="287.5" cy="103" r="1.4"/><circle class="a-paper" cx="285" cy="106.5" r="1.4"/>
-      <path class="string" d="M277.5 10 V105"/>` },
+      <image href="art/strat-sunburst.webp" x="252" y="35" width="46" height="82" preserveAspectRatio="xMidYMax meet"/>` },
 
     safaStudy: { w: 400, d: `
       ${windowAt(160, 8, 56, 40)}
@@ -1132,6 +1119,12 @@
       if (room.her) words.append(el('p', 'p6 muted', 'In her words'), el('p', 'hand room-her', `“${room.her}”`));
       if (room.adam) words.append(el('p', 'p6 muted room-from', 'And from Adam'), el('p', 'hand room-her', `“${room.adam}”`));
       if (!room.her && !room.adam && room.note) words.append(el('p', 'hand room-her', room.note));
+      // photo credits the license asks for (e.g. the Strat in Adam's study)
+      if (room.credit) {
+        const c = el('a', 'p6 muted room-credit', room.credit.text);
+        c.href = room.credit.url; c.target = '_blank'; c.rel = 'noreferrer';
+        words.append(c);
+      }
       const parts = [head, words];
       if (room.wishes && room.wishes.length) {
         const wrap = el('div', 'room-card-wishes');
