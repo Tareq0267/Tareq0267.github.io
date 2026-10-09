@@ -561,3 +561,117 @@ html.moon-dragging .cursor-ring{ transform: scale(.7); }
   /* a shorter sheet of paper leaves a strip above and below for the scattered photos */
   .paper{ max-height: calc(100svh - 190px); }
 }
+
+/* =========================================================
+   15) OUR FUTURE HOME: a dollhouse with the front taken off
+========================================================= */
+.home{
+  --wall-0: #f4e4de; --wall-1: #f0e7d7; --wall-2: #eadfe6; --wall-3: #e7eadf;
+  --wood: #c99a69; --wood-dark: #a5774d;
+}
+.home-hint{ font-size: 24px; color: var(--ink-70); margin: calc(clamp(48px, 6vw, 104px) * -.6) 0 clamp(28px, 3vw, 44px); }
+.dollhouse{ max-width: 980px; margin: 0 auto; color: var(--ink); }
+
+/* roof: a shingled triangle drawn over the chimney, with a round heart window */
+.dh-roof{ position: relative; isolation: isolate; width: 108%; margin-left: -4%; aspect-ratio: 1000 / 240; }
+.dh-roof::after{
+  content: ""; position: absolute; inset: 0; z-index: 0;
+  background: repeating-linear-gradient(to bottom, var(--ink) 0 13px, #54303a 13px 15px);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.dh-chimney{ position: absolute; z-index: -1; right: 23%; top: 14%; width: 5.5%; height: 50%; background: var(--ink); border-top: 6px solid #54303a; }
+.dh-window{
+  position: absolute; z-index: 1; left: 50%; top: 52%; translate: -50% -50%;
+  width: 9%; aspect-ratio: 1; border-radius: 50%;
+  background: var(--paper); box-shadow: 0 0 0 4px var(--wood), 0 0 0 6px var(--ink);
+  display: grid; place-items: center;
+}
+.dh-window::before{ content: "♥"; color: #e7b3ad; font-size: clamp(14px, 2.6vw, 30px); line-height: 1; }
+.dh-plate{ background: var(--ink); text-align: center; padding: 8px 8px 10px; margin-inline: -1%; }
+.dh-plate span{ display: inline-block; background: var(--paper); color: var(--ink); padding: 4px 16px; border-radius: 2px; box-shadow: 0 0 0 2px var(--wood); }
+
+/* the house: ink between rooms reads as walls and floor slabs */
+.dh-body{ background: var(--ink); padding: 0 6px 6px; display: grid; gap: 7px; }
+.dh-floor{ display: grid; gap: 6px; }
+.room{
+  --lamp-x: 80%;   /* off to the right, clear of the room's name */
+  position: relative; display: block; overflow: hidden; text-align: left;
+  height: clamp(118px, 19vw, 214px); padding: 0;
+  background: radial-gradient(rgba(59,30,38,.07) 1px, transparent 1.6px) 0 0 / 14px 14px, var(--wall);
+  transition: filter .4s;
+}
+.room::after{   /* floorboards */
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 7px;
+  background: repeating-linear-gradient(90deg, var(--wood) 0 26px, var(--wood-dark) 26px 27px);
+}
+.room::before{  /* lamplight, off until the room is tapped */
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(ellipse 75% 90% at var(--lamp-x) 0, rgba(255, 210, 120, .5), transparent 70%);
+  opacity: 0; transition: opacity .5s;
+}
+.room.on::before{ opacity: 1; }
+.room:hover{ filter: brightness(1.04); }
+.room:focus-visible{ outline: 2px solid var(--gold, #efc76a); outline-offset: -4px; }
+.room-name{ position: absolute; z-index: 3; top: 9px; left: 10px; right: calc(100% - var(--lamp-x) + 10px); color: var(--ink); line-height: 1.35; }
+.room-lamp{ position: absolute; z-index: 3; top: 0; left: var(--lamp-x); width: 1px; height: 14px; background: var(--ink); }
+.room-lamp::after{
+  content: ""; position: absolute; left: -5px; top: 13px; width: 11px; height: 8px;
+  border-radius: 6px 6px 3px 3px; background: var(--paper); box-shadow: 0 0 0 1px var(--ink);
+  transition: background-color .4s, box-shadow .4s;
+}
+.room.on .room-lamp::after{ background: #ffd77a; box-shadow: 0 0 0 1px var(--ink), 0 0 14px 6px rgba(255, 210, 120, .7); }
+.room-art{ position: absolute; z-index: 1; left: 5%; right: 5%; top: 30px; bottom: 7px; }
+.room-art svg{
+  display: block; width: 100%; height: 100%; overflow: visible;
+  fill: none; stroke: var(--ink); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round;
+}
+.room-art svg *{ vector-effect: non-scaling-stroke; }
+.a-paper{ fill: var(--paper); } .a-wood{ fill: var(--wood); } .a-wood2{ fill: var(--wood-dark); }
+.a-rose{ fill: #e7b3ad; } .a-sage{ fill: #b7c3a2; } .a-sky{ fill: #c8dbe3; } .a-gold{ fill: #efc76a; } .a-ink{ fill: var(--ink); }
+.s-paper{ stroke: var(--paper); }
+.room.on .glow{ fill: #ffd77a; filter: drop-shadow(0 0 4px rgba(255, 200, 90, .9)); }
+
+/* little life in the rooms */
+.swing{ transform-origin: 100px 0; animation: dh-swing 4s ease-in-out infinite; }
+.steam{ animation: dh-steam 2.6s ease-in-out infinite; }
+.bubble{ transform-box: fill-box; transform-origin: center; animation: dh-bob 3.2s ease-in-out infinite; }
+.drip{ animation: dh-drip 1.6s linear infinite; }
+.late{ animation-delay: -1.3s; }
+@keyframes dh-swing{ 0%, 100%{ rotate: -7deg; } 50%{ rotate: 7deg; } }
+@keyframes dh-steam{ 0%{ opacity: 0; translate: 0 6px; } 40%{ opacity: .9; } 100%{ opacity: 0; translate: 0 -8px; } }
+@keyframes dh-bob{ 0%, 100%{ translate: 0 0; } 50%{ translate: 0 -3px; } }
+@keyframes dh-drip{ 0%{ opacity: 0; translate: 0 0; } 30%{ opacity: 1; } 100%{ opacity: 0; translate: 0 22px; } }
+
+.dh-base{ height: 14px; background: var(--ink); margin: 0 -2.5%; border-radius: 2px; }
+
+/* the card under the house: her words and the wishes to tick off */
+.room-card{
+  max-width: 980px; margin: clamp(28px, 3vw, 44px) auto 0;
+  display: grid; grid-template-columns: 1.1fr 1.3fr 1fr; gap: 20px 32px; align-items: start;
+  padding-top: 24px; border-top: 1px solid var(--ink-10);
+}
+.room-card-head .h3{ margin-top: 6px; }
+.room-her{ font-size: clamp(24px, 2.2vw, 30px); line-height: 1.2; margin-top: 6px; }
+.room-card-wishes > .p6{ margin-bottom: 8px; }
+@media (max-width: 860px){ .room-card{ grid-template-columns: 1fr 1fr; } .room-card-head{ grid-column: 1 / -1; } }
+@media (max-width: 640px){
+  .dh-body{ padding: 0 4px 4px; gap: 5px; }
+  .dh-floor{ gap: 4px; }
+  .room{ height: 108px; }
+  .room{ --lamp-x: 84%; }
+  .room-name{ font-size: 8.5px; top: 6px; left: 6px; right: calc(100% - var(--lamp-x) + 7px); letter-spacing: .05em; }
+  .room-art{ top: 26px; left: 3%; right: 3%; }
+  .room-card{ grid-template-columns: 1fr; }
+}
+
+.room-from{ margin-top: 14px; }
+.s-ink{ stroke: var(--ink); }
+
+/* the omnidirectional shower: glass stall, rain from the top, jets from both walls; runs while the room is lit */
+.glass{ fill-opacity: .35; }
+.water{ opacity: 0; transition: opacity .4s; }
+.water path{ stroke: #6fa8c2; stroke-width: 1.6; stroke-dasharray: 4 7; animation: dh-flow .45s linear infinite; }
+.water .mist{ fill: #fff; stroke: none; opacity: .35; transform-box: fill-box; transform-origin: center; animation: dh-mist 3s ease-in-out infinite; }
+.room.on .water{ opacity: 1; }
+@keyframes dh-flow{ to{ stroke-dashoffset: -11; } }
+@keyframes dh-mist{ 0%, 100%{ scale: .8; opacity: .2; } 50%{ scale: 1.2; opacity: .45; } }
