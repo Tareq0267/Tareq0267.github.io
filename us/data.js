@@ -222,6 +222,43 @@ window.US = {
     { text: 'triplets. she wanted twins, now she wants triplets, so triplets it is 😂 👶👶👶' },
   ],
 
+  // Our future home, as specified by Alvy: a dollhouse seen from the front, top floor
+  // first. art: the little drawing in the room (crib, adamStudy, safaStudy, bath, gym,
+  // kitchen, door). wide: how much wider than a normal room. her: her words.
+  // wishes: tick them off when the real house has them.
+  home: {
+    name: 'Rumah Adam & Alvy',
+    floors: [
+      [
+        { id: 'triplet-1', name: 'Triplet 1', art: 'crib', her: 'tiga bilik anak, for the triplets', wishes: [{ text: 'a room of their own' }] },
+        { id: 'triplet-2', name: 'Triplet 2', art: 'crib', her: 'tiga bilik anak, for the triplets', wishes: [{ text: 'a room of their own' }] },
+        { id: 'triplet-3', name: 'Triplet 3', art: 'crib', her: 'tiga bilik anak, for the triplets', wishes: [{ text: 'a room of their own' }] },
+      ],
+      [
+        { id: 'bedroom', name: 'Bilik tidur', art: 'bedroom', wide: 1.2,
+          adam: 'our room, connected straight to the bilik mandi',
+          wishes: [{ text: 'connected to the bilik mandi' }] },
+        { id: 'bath', name: 'Bilik mandi', art: 'bath', wide: 1.4, her: 'ada bathtub, and asing from the children',
+          adam: 'and an omnidirectional shower: water from every side (tap the room to run it)',
+          wishes: [{ text: 'a bathtub' }, { text: 'separate from the children' }, { text: 'an omnidirectional shower' }] },
+      ],
+      [
+        { id: 'study-adam', name: 'Bilik study Adam', art: 'adamStudy', wide: 1.2, her: 'ada bilik study me',
+          adam: 'multiple screens, a bit messy, filled with books and wires, and a window',
+          wishes: [{ text: 'a study for Adam' }, { text: 'multiple screens' }, { text: 'a window' }, { text: 'books (and wires) everywhere' }] },
+        { id: 'study-safa', name: 'Bilik study Safa', art: 'safaStudy', wide: 1.8,
+          her: 'mini library, coffee machine, and a couch. susunan buku kena menegak and mendatar',
+          adam: 'and a study table for her',
+          wishes: [{ text: 'a mini library' }, { text: 'books standing up and lying down' }, { text: 'a coffee machine' }, { text: 'a couch' }, { text: 'a study table' }] },
+      ],
+      [
+        { id: 'kitchen', name: 'Dapur', art: 'kitchen', wide: 1.5, her: 'ada oven and microwave', wishes: [{ text: 'an oven' }, { text: 'a microwave' }] },
+        { id: 'gym', name: 'Bilik gym', art: 'gym', her: 'bilik gym', wishes: [{ text: 'a home gym' }] },
+        { id: 'door', name: 'Pintu depan', art: 'door', wide: .8, note: 'welcome home ♡' },
+      ],
+    ],
+  },
+
   // Countdowns on top of the automatic ones (next monthiversary, next anniversary,
   // and any upcoming date memo).
   // date: 'YYYY-MM-DD' or a full ISO date. Past dates hide themselves.

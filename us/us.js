@@ -911,6 +911,230 @@
   });
 
   /* =========================================================
+     OUR FUTURE HOME: her spec as a dollhouse with the front taken off.
+     Rooms come from D.home; each has a little ink drawing (ROOM_ART), a lamp that
+     switches on when tapped, and a card with her words and wishes to tick off.
+  ========================================================= */
+  const heartAt = (x, y, s, cls) =>
+    `<path class="${cls}" transform="translate(${x - 50 * s} ${y - 45 * s}) scale(${s})" d="M50 86 C20 64 4 46 4 28 C4 13 16 3 29 3 C39 3 46 9 50 16 C54 9 61 3 71 3 C84 3 96 13 96 28 C96 46 80 64 50 86Z"/>`;
+
+  const windowAt = (x, y, w, h) => {
+    const cx = x + w * .22, cy = y + h * .58;
+    return `<rect class="a-sky" x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>
+      <path class="a-paper" d="M${cx} ${cy} a5 5 0 0 1 9 -3 a4 4 0 0 1 8 3 z"/>
+      <path d="M${x + w / 2} ${y} V${y + h} M${x} ${y + h / 2} H${x + w}"/>
+      <path class="a-rose" d="M${x} ${y} h${w * .16} c-3 ${h * .35} -3 ${h * .65} 0 ${h} h-${w * .16} z"/>
+      <rect class="a-wood" x="${x - 4}" y="${y + h}" width="${w + 8}" height="4" rx="1"/>`;
+  };
+
+  // books for her library: some standing up, some lying down (menegak dan mendatar)
+  function shelfOfBooks() {
+    const r = rng(41), tones = ['a-rose', 'a-sage', 'a-wood', 'a-sky', 'a-gold', 'a-paper'];
+    let out = '';
+    [[15, 39], [41, 65], [67, 91]].forEach(([top, bottom], row) => {
+      let x = 20;
+      const stackAt = row === 1 ? 20 : 84;          // where this shelf's lying-down pile goes
+      while (x < 114) {
+        if (x >= stackAt && x < stackAt + 4) {        // a pile of books lying flat
+          for (let k = 0; k < 4; k++) out += `<rect class="${tones[(k + row) % 6]}" x="${x + (k % 2) * 2}" y="${bottom - 5 * (k + 1)}" width="26" height="5" rx="1"/>`;
+          x += 31;
+          continue;
+        }
+        const w = 6 + Math.floor(r() * 4), h = 16 + Math.floor(r() * 7);
+        if (x + w > 114) break;
+        out += `<rect class="${tones[Math.floor(r() * 6)]}" x="${x}" y="${bottom - h}" width="${w}" height="${h}" rx="1"/>`;
+        x += w + 1;
+      }
+    });
+    // bottom shelf: a long lying stack and a little plant
+    for (let k = 0; k < 3; k++) out += `<rect class="${tones[k + 1]}" x="${22 + k * 2}" y="${111 - 5 * (k + 1)}" width="40" height="5" rx="1"/>`;
+    out += `<path class="a-wood2" d="M88 111 l2 -10 h14 l2 10 z"/><path class="a-sage" d="M97 101 c-7 -8 -5 -16 0 -19 c5 3 7 11 0 19 z"/>`;
+    return out;
+  }
+
+  const ROOM_ART = {
+    crib: { w: 200, d: `
+      ${windowAt(10, 10, 34, 36)}
+      <g class="swing"><path d="M100 0 V20"/><path d="M80 20 H120"/><path d="M86 20 V30 M100 20 V36 M114 20 V28"/>
+        <circle class="a-gold" cx="86" cy="33" r="3.2"/>${heartAt(100, 40, .09, 'a-rose')}<circle class="a-sky" cx="114" cy="31" r="3.2"/></g>
+      <circle class="a-wood" cx="52" cy="50" r="3"/><circle class="a-wood" cx="148" cy="50" r="3"/>
+      <rect class="a-rose" x="52" y="88" width="96" height="12"/>
+      <path class="a-paper" d="M58 88 c4 -8 18 -8 22 0 z"/>
+      <path d="M52 53 V117 M148 53 V117 M52 62 H148 M52 100 H148"/>
+      <path d="M62 62 V88 M72 62 V88 M82 62 V88 M92 62 V88 M102 62 V88 M112 62 V88 M122 62 V88 M132 62 V88 M142 62 V88"/>` },
+
+    adamStudy: { w: 260, d: `
+      <rect class="a-sky" x="12" y="8" width="56" height="40" rx="2"/>
+      <path class="a-paper" d="M24 30 a6 6 0 0 1 11 -3 a5 5 0 0 1 9 3 z"/>
+      <path d="M40 8 V48 M12 28 H68"/><rect class="a-wood" x="8" y="48" width="64" height="4" rx="1"/>
+      <path class="a-rose" d="M12 8 h8 c-3 14 -3 26 0 40 h-8 z"/>
+      <rect class="a-ink" x="132" y="14" width="34" height="21" rx="2"/><path class="s-paper" d="M137 21 H154 M137 27 H160"/><path d="M149 35 V39"/>
+      <path class="a-ink" d="M94 46 L122 42 L122 70 L94 72 Z"/><path class="s-paper" d="M99 52 L114 50 M99 58 L117 56 M101 64 L111 63"/>
+      <rect class="a-ink" x="126" y="40" width="46" height="30" rx="2"/><path class="s-paper" d="M131 47 H150 M131 53 H163 M135 59 H155 M131 65 H146"/>
+      <path class="a-ink" d="M176 42 L204 46 L204 72 L176 70 Z"/><path class="s-paper" d="M181 50 L197 52 M181 56 L199 58 M181 62 L192 63"/>
+      <path d="M108 71 V76 M149 70 V76 M190 71 V76"/>
+      <rect class="a-paper" x="122" y="72" width="44" height="4" rx="1"/>
+      <path class="a-paper" d="M208 64 h9 v12 h-9 z"/><path d="M217 67 h3 v6 h-3"/>
+      <rect class="a-rose" x="220" y="70" width="26" height="6" rx="1"/><rect class="a-sage" x="222" y="64" width="22" height="6" rx="1"/><rect class="a-gold" x="219" y="58" width="24" height="6" rx="1"/>
+      <rect class="a-paper" x="228" y="40" width="14" height="15" rx="2"/><rect class="a-paper" x="226" y="28" width="18" height="12" rx="3"/>
+      <circle class="a-ink" cx="232" cy="34" r="1.4"/><circle class="a-ink" cx="238" cy="34" r="1.4"/><path d="M235 28 V23"/><circle class="a-rose" cx="235" cy="21" r="2"/>
+      <rect class="a-wood" x="86" y="76" width="166" height="6" rx="1"/><path d="M92 82 V117 M246 82 V117"/>
+      <path d="M108 76 C104 92 118 96 112 104 C106 112 92 104 96 98 C100 92 116 102 124 112"/>
+      <path d="M149 76 C152 90 140 94 146 102 C152 110 166 104 162 98 C158 92 150 104 156 112"/>
+      <path d="M190 76 C186 92 200 98 192 106 C186 112 176 108 172 112"/>
+      <rect class="a-ink" x="150" y="111" width="30" height="6" rx="1"/><path class="s-paper" d="M156 114 h3 M163 114 h3 M170 114 h3"/>
+      <rect class="a-sage" x="14" y="111" width="40" height="6" rx="1"/><rect class="a-rose" x="17" y="105" width="34" height="6" rx="1"/><rect class="a-sky" x="13" y="99" width="38" height="6" rx="1"/>
+      <rect class="a-gold" x="19" y="93" width="30" height="6" rx="1"/><rect class="a-paper" x="16" y="87" width="34" height="6" rx="1"/>
+      <path class="a-rose" transform="rotate(-14 66 106)" d="M56 96 h8 v21 h-8 z"/><path class="a-sky" transform="rotate(-24 76 108)" d="M68 99 h7 v19 h-7 z"/>
+      <path class="a-paper" d="M200 117 l12 -5 l12 5 z M212 112 V117"/>
+      <circle class="a-paper" cx="236" cy="114" r="3.5"/><circle class="a-paper" cx="78" cy="114" r="3"/>` },
+
+    safaStudy: { w: 400, d: `
+      ${windowAt(160, 8, 56, 40)}
+      <rect class="a-wood" x="12" y="10" width="110" height="107" rx="2"/>
+      <rect class="a-paper" x="17" y="15" width="100" height="96"/>
+      <path d="M17 39 H117 M17 65 H117 M17 91 H117"/>
+      ${shelfOfBooks()}
+      <rect class="a-rose" x="142" y="64" width="92" height="27" rx="10"/>
+      <rect class="a-rose" x="136" y="87" width="104" height="17" rx="5"/>
+      <rect class="a-rose" x="128" y="75" width="17" height="31" rx="8"/><rect class="a-rose" x="232" y="75" width="17" height="31" rx="8"/>
+      <path d="M188 89 V104 M142 104 V112 M234 104 V112"/>
+      ${heartAt(188, 77, .13, 'a-paper')}
+      <rect class="a-rose" x="284" y="58" width="32" height="26" rx="6"/><path d="M290 100 V117 M310 100 V117"/>
+      <path d="M268 78 V58 L278 48"/><path class="a-gold" d="M274 43 L287 49 L280 56 Z"/>
+      <path class="a-paper" d="M296 56 h34 v20 h-34 z"/><path class="s-ink" d="M301 62 h20 M301 67 h14"/><path class="a-paper" d="M290 76 h46 l-3 2 h-40 z"/>
+      <rect class="a-sky" x="270" y="72" width="20" height="6" rx="1"/><rect class="a-gold" x="272" y="66" width="16" height="6" rx="1"/>
+      <path class="steam" d="M360 40 c-4 -5 4 -9 0 -15"/><path class="steam late" d="M370 42 c-4 -5 4 -9 0 -15"/>
+      <rect class="a-ink" x="348" y="44" width="34" height="34" rx="3"/>
+      <rect class="a-paper" x="359" y="51" width="12" height="6" rx="1"/><circle class="a-gold" cx="354" cy="50" r="2"/>
+      <path class="a-paper" d="M357 65 h16 v8 a5 5 0 0 1 -5 5 h-6 a5 5 0 0 1 -5 -5 z"/>
+      <rect class="a-wood" x="262" y="78" width="128" height="6" rx="1"/><path d="M268 84 V117 M384 84 V117"/>
+      <rect class="a-wood2" x="340" y="84" width="38" height="14"/><path d="M352 91 H366"/>` },
+
+    bath: { w: 260, d: `
+      <circle class="a-paper bubble" cx="34" cy="68" r="7"/><circle class="a-paper bubble late" cx="48" cy="64" r="9"/>
+      <circle class="a-paper bubble" cx="64" cy="68" r="6"/><circle class="a-paper bubble late" cx="78" cy="66" r="5"/>
+      <ellipse class="a-gold" cx="100" cy="70" rx="9" ry="5"/><circle class="a-gold" cx="107" cy="63" r="5"/><path class="a-rose" d="M112 62 l5 1.6 -5 1.6 z"/>
+      <path class="a-paper" d="M12 74 H128 V88 C128 104 116 110 102 110 H38 C24 110 12 104 12 88 Z"/>
+      <path d="M8 74 H132"/><path d="M34 109 l-5 8 M106 109 l5 8"/>
+      <rect class="a-sky glass" x="150" y="10" width="100" height="107" rx="2"/>
+      <path d="M200 0 V10"/><rect class="a-ink" x="178" y="10" width="44" height="6" rx="2"/>
+      <rect class="a-ink" x="152" y="36" width="7" height="64" rx="2"/><rect class="a-ink" x="241" y="36" width="7" height="64" rx="2"/>
+      <path class="s-paper" d="M155.5 44 v0 M155.5 58 v0 M155.5 72 v0 M155.5 86 v0 M244.5 44 v0 M244.5 58 v0 M244.5 72 v0 M244.5 86 v0" stroke-width="3"/>
+      <rect class="a-ink" x="190" y="112" width="20" height="3" rx="1"/>
+      <g class="water">
+        <path d="M184 18 V112 M192 18 V112 M200 18 V112 M208 18 V112 M216 18 V112"/>
+        <path d="M160 44 L196 52 M160 58 L198 62 M160 72 L196 74 M160 86 L194 84"/>
+        <path d="M240 44 L204 52 M240 58 L202 62 M240 72 L204 74 M240 86 L206 84"/>
+        <circle class="mist" cx="186" cy="30" r="10"/><circle class="mist late" cx="214" cy="40" r="12"/><circle class="mist" cx="200" cy="96" r="13"/>
+      </g>` },
+
+    bedroom: { w: 240, d: `
+      <rect class="a-paper" x="88" y="12" width="32" height="24" rx="1"/>${heartAt(104, 25, .11, 'a-rose')}
+      <rect class="a-wood" x="10" y="78" width="26" height="39" rx="1"/><path d="M14 92 h18"/>
+      <path d="M23 78 V64"/><path class="a-gold" d="M15 64 h16 l-3 -12 h-10 z"/>
+      <path class="a-wood" d="M44 117 V62 a12 12 0 0 1 12 -12 H152 a12 12 0 0 1 12 12 V117"/>
+      ${heartAt(104, 63, .12, 'a-rose')}
+      <rect class="a-paper" x="56" y="74" width="38" height="14" rx="6"/><rect class="a-paper" x="114" y="74" width="38" height="14" rx="6"/>
+      <rect class="a-paper" x="38" y="84" width="132" height="14" rx="4"/>
+      <rect class="a-rose" x="38" y="92" width="132" height="18" rx="4"/><path d="M38 100 H170"/>
+      <path d="M44 110 V117 M164 110 V117"/>
+      <rect class="a-sage" x="60" y="114" width="90" height="3" rx="1"/>
+      <path class="a-wood" d="M194 117 V52 h40 V117"/><path d="M200 117 V58 h28 V117"/>
+      <circle class="a-gold" cx="222" cy="88" r="2.4"/>
+      <rect class="a-paper" x="204" y="64" width="20" height="13" rx="2"/><path d="M207 71 h14 v1 a4 4 0 0 1 -4 4 h-6 a4 4 0 0 1 -4 -4 z M209 71 V67 a2 2 0 0 1 4 0"/>` },
+
+    gym: { w: 200, d: `
+      <path d="M44 28 V117 M156 28 V117 M34 117 H54 M146 117 H166 M44 50 h6 M156 50 h-6"/>
+      <path d="M26 52 H174"/>
+      <rect class="a-ink" x="30" y="36" width="9" height="32" rx="2"/><rect class="a-rose" x="39" y="42" width="5" height="20" rx="1"/>
+      <rect class="a-ink" x="161" y="36" width="9" height="32" rx="2"/><rect class="a-rose" x="156" y="42" width="5" height="20" rx="1"/>
+      <path d="M86 98 a8 8 0 0 1 16 0"/><circle class="a-ink" cx="94" cy="107" r="10"/>
+      <path d="M114 112 H134"/><rect class="a-ink" x="110" y="106" width="5" height="11" rx="1"/><rect class="a-ink" x="133" y="106" width="5" height="11" rx="1"/>
+      <rect class="a-sage" x="58" y="114" width="80" height="3" rx="1"/>` },
+
+    kitchen: { w: 260, d: `
+      ${windowAt(110, 4, 50, 34)}
+      <path d="M22 30 H96"/><rect class="a-sky" x="28" y="18" width="12" height="12" rx="2"/><rect class="a-rose" x="46" y="14" width="12" height="16" rx="2"/><rect class="a-gold" x="64" y="20" width="12" height="10" rx="2"/>
+      <path d="M200 0 V12 M218 0 V16 M236 0 V10"/><circle class="a-ink" cx="200" cy="18" r="6"/><path class="a-wood" d="M214 16 h8 v14 a4 4 0 0 1 -8 0 z"/><path d="M236 10 v14"/><circle cx="236" cy="27" r="3"/>
+      <rect class="a-paper" x="150" y="44" width="68" height="30" rx="3"/>
+      <rect class="a-sky" x="156" y="50" width="40" height="18" rx="2"/>
+      <circle class="a-ink" cx="206" cy="53" r="1.6"/><circle class="a-ink" cx="212" cy="53" r="1.6"/><circle class="a-ink" cx="206" cy="59" r="1.6"/><circle class="a-ink" cx="212" cy="59" r="1.6"/><rect class="a-rose" x="204" y="63" width="10" height="4" rx="1"/>
+      <rect class="a-paper" x="10" y="78" width="240" height="39"/>
+      <rect class="a-wood" x="6" y="74" width="248" height="5" rx="1"/>
+      <rect class="a-ink" x="24" y="82" width="72" height="33" rx="2"/>
+      <rect class="a-gold glow" x="32" y="93" width="56" height="16" rx="2"/>
+      <path class="s-paper" d="M36 87 H84"/>
+      <path d="M152 78 V117 M200 78 V117 M168 92 v8 M184 92 v8 M216 92 v8"/>` },
+
+    door: { w: 150, d: `
+      <path class="a-wood" d="M40 117 V44 a35 35 0 0 1 70 0 V117 Z"/>
+      <path d="M50 117 V50 a25 25 0 0 1 50 0 V117"/>
+      ${heartAt(75, 52, .16, 'a-gold glow')}
+      <circle class="a-gold" cx="94" cy="86" r="3"/>
+      <rect class="a-rose" x="34" y="114" width="82" height="4" rx="1"/>
+      <path class="a-wood2" d="M118 117 l3 -15 h14 l3 15 z"/><path class="a-sage" d="M128 102 c-8 -9 -6 -18 0 -22 c6 4 8 13 0 22 z"/>` },
+  };
+
+  const home = D.home;
+  const houseBox = $('[data-dollhouse]'), roomCard = $('[data-room-card]');
+  if (home && houseBox) {
+    const rooms = [];
+    const roof = el('div', 'dh-roof');
+    roof.setAttribute('aria-hidden', 'true');
+    roof.append(el('span', 'dh-chimney'), el('span', 'dh-window'));
+    const plate = el('div', 'dh-plate');
+    plate.append(el('span', 'p6', home.name));
+    const body = el('div', 'dh-body');
+    home.floors.forEach((floor, f) => {
+      const row = el('div', 'dh-floor');
+      row.style.gridTemplateColumns = floor.map(r => `${r.wide || 1}fr`).join(' ');
+      floor.forEach(room => {
+        const b = el('button', 'room room-' + room.art);
+        b.type = 'button';
+        b.style.setProperty('--wall', `var(--wall-${rooms.length % 4})`);
+        b.setAttribute('aria-pressed', 'false');
+        b.setAttribute('aria-label', room.name);
+        b.dataset.cursor = room.art === 'bath' ? 'Shower' : 'Lights';
+        const art = ROOM_ART[room.art];
+        const pic = el('span', 'room-art');
+        if (art) pic.innerHTML = `<svg viewBox="0 0 ${art.w} 120" preserveAspectRatio="xMidYMax meet" aria-hidden="true">${art.d}</svg>`;
+        b.append(el('span', 'room-lamp'), el('span', 'room-name p6', room.name), pic);
+        b.addEventListener('click', () => select(room, b));
+        row.append(b);
+        rooms.push({ room, b });
+      });
+      body.append(row);
+    });
+    const base = el('div', 'dh-base');
+    base.setAttribute('aria-hidden', 'true');
+    houseBox.append(roof, plate, body, base);
+
+    function select(room, b) {
+      rooms.forEach(r => { const on = r.b === b; r.b.classList.toggle('on', on); r.b.setAttribute('aria-pressed', String(on)); });
+      const head = el('div', 'room-card-head');
+      head.append(el('p', 'p6 muted', `Room ${pad(rooms.findIndex(r => r.room === room) + 1)} of ${pad(rooms.length)}`), el('h4', 'h3', room.name));
+      const words = el('div', 'room-card-words');
+      if (room.her) words.append(el('p', 'p6 muted', 'In her words'), el('p', 'hand room-her', `“${room.her}”`));
+      if (room.adam) words.append(el('p', 'p6 muted room-from', 'And from Adam'), el('p', 'hand room-her', `“${room.adam}”`));
+      if (!room.her && !room.adam && room.note) words.append(el('p', 'hand room-her', room.note));
+      const parts = [head, words];
+      if (room.wishes && room.wishes.length) {
+        const wrap = el('div', 'room-card-wishes');
+        wrap.append(el('p', 'p6 muted', 'Wishes'));
+        const ul = el('ul', 'checks small');
+        room.wishes.forEach((w, j) => ul.append(checkItem(`us-home-${room.id}-${j}`, w)));
+        wrap.append(ul);
+        parts.push(wrap);
+      }
+      roomCard.replaceChildren(...parts);
+    }
+    // start with her study lit up
+    const first = rooms.find(r => r.room.id === 'study-safa') || rooms[0];
+    if (first) select(first.room, first.b);
+  }
+
+  /* =========================================================
      COUNTDOWNS: next monthiversary and anniversary, plus any from data.js
   ========================================================= */
   function addMonths(d, n) {
