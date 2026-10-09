@@ -244,9 +244,9 @@ window.US = {
       ],
       [
         { id: 'study-adam', name: 'Bilik study Adam', art: 'adamStudy', wide: 1.35, her: 'ada bilik study me',
-          adam: 'multiple screens, a bit messy, filled with books and wires, a window, and my sunburst Strat',
-          wishes: [{ text: 'a study for Adam' }, { text: 'multiple screens' }, { text: 'a window' }, { text: 'books (and wires) everywhere' }, { text: 'a sunburst Strat on a stand' }],
-          credit: { text: 'Strat photo: Lightburst, CC BY-SA 4.0, Wikimedia Commons ↗', url: 'https://commons.wikimedia.org/wiki/File:1958_Fender_Stratocaster.jpg' } },
+          adam: 'multiple screens, a bit messy, filled with books and wires, a window, and my guitar',
+          wishes: [{ text: 'a study for Adam' }, { text: 'multiple screens' }, { text: 'a window' }, { text: 'books (and wires) everywhere' }, { text: 'my guitar on a stand' }],
+          credit: { text: 'Guitar photo: Lightburst, CC BY-SA 4.0, Wikimedia Commons ↗', url: 'https://commons.wikimedia.org/wiki/File:1958_Fender_Stratocaster.jpg' } },
         { id: 'study-safa', name: 'Bilik study Safa', art: 'safaStudy', wide: 1.8,
           her: 'mini library, coffee machine, and a couch. susunan buku kena menegak and mendatar',
           adam: 'and a study table for her',
