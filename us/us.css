@@ -676,3 +676,7 @@ html.moon-dragging .cursor-ring{ transform: scale(.7); }
 .room.on .water{ opacity: 1; }
 @keyframes dh-flow{ to{ stroke-dashoffset: -11; } }
 @keyframes dh-mist{ 0%, 100%{ scale: .8; opacity: .2; } 50%{ scale: 1.2; opacity: .45; } }
+
+/* the menu has grown past one screen on phones: let it scroll on its own */
+.menu{ overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.menu-foot{ padding-bottom: env(safe-area-inset-bottom); }
