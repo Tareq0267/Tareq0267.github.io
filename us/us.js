@@ -963,7 +963,7 @@
       <path d="M52 53 V117 M148 53 V117 M52 62 H148 M52 100 H148"/>
       <path d="M62 62 V88 M72 62 V88 M82 62 V88 M92 62 V88 M102 62 V88 M112 62 V88 M122 62 V88 M132 62 V88 M142 62 V88"/>` },
 
-    adamStudy: { w: 260, d: `
+    adamStudy: { w: 300, d: `
       <rect class="a-sky" x="12" y="8" width="56" height="40" rx="2"/>
       <path class="a-paper" d="M24 30 a6 6 0 0 1 11 -3 a5 5 0 0 1 9 3 z"/>
       <path d="M40 8 V48 M12 28 H68"/><rect class="a-wood" x="8" y="48" width="64" height="4" rx="1"/>
@@ -987,7 +987,21 @@
       <rect class="a-gold" x="19" y="93" width="30" height="6" rx="1"/><rect class="a-paper" x="16" y="87" width="34" height="6" rx="1"/>
       <path class="a-rose" transform="rotate(-14 66 106)" d="M56 96 h8 v21 h-8 z"/><path class="a-sky" transform="rotate(-24 76 108)" d="M68 99 h7 v19 h-7 z"/>
       <path class="a-paper" d="M200 117 l12 -5 l12 5 z M212 112 V117"/>
-      <circle class="a-paper" cx="236" cy="114" r="3.5"/><circle class="a-paper" cx="78" cy="114" r="3"/>` },
+      <circle class="a-paper" cx="236" cy="114" r="3.5"/><circle class="a-paper" cx="78" cy="114" r="3"/>
+      <defs><radialGradient id="dh-sunburst" cx="50%" cy="58%" r="60%">
+        <stop offset="0" stop-color="#f4bd45"/><stop offset=".5" stop-color="#cf6a22"/><stop offset=".8" stop-color="#6e2a12"/><stop offset="1" stop-color="#2a120c"/>
+      </radialGradient></defs>
+      <path d="M268 117 L276 100 L286 117 M277 44 v6 M273 44 h8"/>
+      <path class="a-maple" d="M273 6 c0 -4 6 -5 9 -2 l1 7 c-1 2 -3 2 -4 4 l-1 13 h-4 z"/>
+      <circle class="a-paper" cx="275" cy="9" r="1"/><circle class="a-paper" cx="275" cy="14" r="1"/><circle class="a-paper" cx="275" cy="19" r="1"/>
+      <rect class="a-maple" x="275" y="28" width="5" height="54"/>
+      <path d="M275 34 h5 M275 40 h5 M275 46 h5 M275 52 h5 M275 58 h5 M275 64 h5 M275 70 h5 M275 76 h5"/>
+      <path class="a-sunburst" d="M269 112 C259 112 257 101 262 93 C265 88 263 83 264 78 C265 72 269 72 271 77 C272 80 274 82 277.5 82 C281 82 283 80 284 77 C286 70 292 73 292 79 C293 85 291 88 293 93 C298 101 295 112 286 112 Z"/>
+      <path class="a-paper" d="M265 96 C264 90 268 86 274 86 L284 88 C287 93 285 100 280 104 C274 106 267 103 265 96 Z"/>
+      <rect class="a-paper" x="274" y="87" width="7" height="2.5" rx="1"/><rect class="a-paper" x="274" y="92.5" width="7" height="2.5" rx="1"/><rect class="a-paper" x="273.5" y="98" width="7" height="2.5" rx="1" transform="rotate(-8 277 99)"/>
+      <rect class="a-steel" x="273" y="103.5" width="9" height="3" rx="1"/>
+      <circle class="a-paper" cx="286" cy="99" r="1.4"/><circle class="a-paper" cx="287.5" cy="103" r="1.4"/><circle class="a-paper" cx="285" cy="106.5" r="1.4"/>
+      <path class="string" d="M277.5 10 V105"/>` },
 
     safaStudy: { w: 400, d: `
       ${windowAt(160, 8, 56, 40)}

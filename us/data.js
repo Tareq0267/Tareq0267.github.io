@@ -243,9 +243,9 @@ window.US = {
           wishes: [{ text: 'a bathtub' }, { text: 'separate from the children' }, { text: 'an omnidirectional shower' }] },
       ],
       [
-        { id: 'study-adam', name: 'Bilik study Adam', art: 'adamStudy', wide: 1.2, her: 'ada bilik study me',
-          adam: 'multiple screens, a bit messy, filled with books and wires, and a window',
-          wishes: [{ text: 'a study for Adam' }, { text: 'multiple screens' }, { text: 'a window' }, { text: 'books (and wires) everywhere' }] },
+        { id: 'study-adam', name: 'Bilik study Adam', art: 'adamStudy', wide: 1.35, her: 'ada bilik study me',
+          adam: 'multiple screens, a bit messy, filled with books and wires, a window, and my sunburst Strat',
+          wishes: [{ text: 'a study for Adam' }, { text: 'multiple screens' }, { text: 'a window' }, { text: 'books (and wires) everywhere' }, { text: 'a sunburst Strat on a stand' }] },
         { id: 'study-safa', name: 'Bilik study Safa', art: 'safaStudy', wide: 1.8,
           her: 'mini library, coffee machine, and a couch. susunan buku kena menegak and mendatar',
           adam: 'and a study table for her',
