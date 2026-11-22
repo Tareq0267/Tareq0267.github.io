@@ -114,7 +114,7 @@ kbd{font:inherit;font-size:.72em;font-weight:700;padding:.1em .45em;border-radiu
 .sum b{display:block;font-size:22px;font-weight:800}
 .sum span{font-size:12px;color:var(--mute);font-weight:600}
 .panel .btn{width:100%}
-.lfoot{padding-right:170px;display:flex;justify-content:space-between;align-items:center;max-width:1360px;width:100%;margin:0 auto;color:var(--mute);font-size:14px;font-weight:600}
+.lfoot{padding-right:170px;display:flex;justify-content:space-between;align-items:center;width:100%;margin:0 0 -12px -10px;color:var(--mute);font-size:14px;font-weight:600}
 
 /* ---------- HOWTO ---------- */
 .howto{gap:clamp(14px,2.4vh,28px);justify-content:center}
@@ -256,6 +256,108 @@ kbd{font:inherit;font-size:.72em;font-weight:700;padding:.1em .45em;border-radiu
 .stats div{padding:10px 18px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:600;color:var(--mute)}
 .stats b{color:var(--text)}
 .fin .acts{display:flex;gap:12px;margin-top:auto}
+.seri-word{margin-top:4vh;font-size:clamp(90px,15vh,180px);font-weight:800;letter-spacing:.04em;line-height:1;color:var(--text);animation:slam .5s cubic-bezier(.2,1.6,.4,1) both}
+.seri .sub{margin-top:0;font-size:clamp(17px,1.5vw,22px);animation:fadeIn .5s .3s both}
+.tie{display:flex;gap:clamp(12px,1.6vw,24px);flex-wrap:wrap;justify-content:center;margin-top:2vh}
+.tc{width:clamp(170px,16vw,250px);padding:24px 18px 20px;border-radius:20px;background:var(--panel);border:1px solid var(--line);border-top:6px solid var(--tc);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;animation:fadeIn .5s both}
+.tc .medal{width:58px;height:58px;border-radius:50%;background:var(--gold);color:#2a1d00;display:grid;place-items:center;font-size:28px;font-weight:800;box-shadow:0 8px 24px -8px var(--gold)}
+.tc .tn{font-size:clamp(20px,1.8vw,28px);font-weight:800;line-height:1.2}
+.tc .ts{color:var(--mute);font-weight:700;font-size:clamp(15px,1.2vw,19px)}
+
+/* ---------- shared small controls ---------- */
+.btn.sm{padding:9px 14px;font-size:14px;border-radius:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.panel{max-height:calc(100vh - 90px);overflow:auto}
+.qsrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.bankbtn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--mute);opacity:.6;transition:opacity .2s,background .2s,color .2s}
+.bankbtn:hover{opacity:1;color:var(--text);background:var(--panel2)}
+.bankbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
+.tog{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;cursor:pointer}
+.tog input{position:absolute;opacity:0;pointer-events:none}
+.tog span{width:40px;height:24px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);position:relative;transition:background .2s;flex:none}
+.tog span::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--mute);transition:transform .2s,background .2s}
+.tog input:checked+span{background:var(--accent);border-color:var(--accent)}
+.tog input:checked+span::after{transform:translateX(16px);background:#fff}
+.tog input:focus-visible+span{outline:2px solid var(--hl);outline-offset:2px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:80;padding:12px 20px;border-radius:12px;background:var(--text);color:var(--bg);font-weight:700;font-size:15px;box-shadow:0 10px 30px rgba(0,0,0,.3);animation:fadeIn .25s}
+
+/* ---------- QUESTION BANK ---------- */
+.bank{gap:14px}
+.bk-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.bk-title{flex:1;display:flex;align-items:baseline;gap:14px;min-width:0;flex-wrap:wrap}
+.bk-title h2{font-size:clamp(26px,2.6vw,40px);font-weight:800}
+.bk-title span{color:var(--mute);font-weight:600}
+.bk-acts{display:flex;gap:8px;flex-wrap:wrap}
+.bk-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bk-bar .sp{flex:1}
+.bk-search{flex:1;min-width:200px;max-width:420px;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:9px 14px;outline:0;font-weight:600;font-size:15px;margin-right:6px}
+.bk-search:focus{border-color:var(--accent)}
+.lnk{color:var(--mute);font-weight:600;font-size:14px;padding:8px 10px;border-radius:8px}
+.lnk:hover{color:var(--text);background:var(--panel2)}
+.lnk.sure{color:var(--bad);background:rgba(255,90,122,.12)}
+.bk-note{font-size:13px;color:var(--mute);font-weight:600;line-height:1.5;padding:10px 14px;border-radius:10px;background:var(--panel);border:1px solid var(--line)}
+.bk-note b{color:var(--text)}
+.bk-note.warn{color:var(--bad);border-color:var(--bad)}
+.bk-list{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:2px 4px 64px 2px}
+.qr{display:flex;align-items:flex-start;gap:14px;padding:14px 16px;border-radius:16px;background:var(--panel);border:1px solid var(--line);transition:opacity .2s,border-color .2s}
+.qr:hover{border-color:var(--mute)}
+.qr.off{opacity:.5}
+.chk{flex:none;width:26px;height:26px;margin-top:2px;cursor:pointer;position:relative}
+.chk input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.chk span{position:absolute;inset:0;border-radius:8px;border:2px solid var(--line);background:var(--field);display:grid;place-items:center;font-size:14px;font-weight:800;color:transparent;pointer-events:none}
+.chk input:checked+span{background:var(--accent);border-color:var(--accent);color:#fff}
+.chk input:focus-visible+span{outline:2px solid var(--hl);outline-offset:2px}
+.qr-n{flex:none;min-width:24px;font-weight:800;color:var(--mute);font-size:15px;margin-top:4px;text-align:right}
+.qr-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.qr-meta{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--panel2);color:var(--mute)}
+.tag.new{color:var(--hl);background:color-mix(in srgb,var(--hl) 16%,transparent)}
+.qr-q{font-size:17px;font-weight:700;line-height:1.35}
+.qr-opts{display:flex;flex-wrap:wrap;gap:6px}
+.po{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 10px 3px 3px;border-radius:8px;border:1px solid var(--line);color:var(--mute)}
+.po b{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;font-size:11px;color:#fff;background:var(--tile);opacity:.45}
+.po.ok{border-color:var(--tile);color:var(--text);background:color-mix(in srgb,var(--tile) 16%,transparent)}
+.po.ok b{opacity:1}
+.qr-exp{font-size:13px;color:var(--mute);line-height:1.45}
+.qr-img{flex:none;width:112px;height:78px;object-fit:cover;border-radius:10px;border:1px solid var(--line)}
+.qr-act{flex:none;display:flex;flex-direction:column;gap:4px}
+.qr-act .mv{display:flex;gap:4px}
+.qr-act .mv .ib{flex:1}
+.ib{padding:6px 10px;border-radius:8px;font-size:13px;font-weight:700;color:var(--mute);background:var(--panel2)}
+.ib:hover:not(:disabled){color:var(--text)}
+.ib.sure{color:#fff;background:var(--bad)}
+.ib:disabled{opacity:.3;cursor:default}
+.empty{padding:48px 20px;text-align:center;color:var(--mute);font-weight:600}
+.empty b{color:var(--text)}
+
+/* ---------- EDITOR MODAL ---------- */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(5,8,16,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:grid;place-items:center;padding:20px;animation:fadeIn .2s}
+.mbox{width:min(760px,100%);max-height:calc(100vh - 40px);display:flex;flex-direction:column;background:var(--bg);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.mh h2{font-size:22px;font-weight:800}
+.x{width:34px;height:34px;border-radius:8px;color:var(--mute)}
+.x:hover{background:var(--panel2);color:var(--text)}
+.mbody{padding:18px 22px;overflow:auto;display:flex;flex-direction:column;gap:16px}
+.f{display:flex;flex-direction:column;gap:8px}
+.f>label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:700}
+.f small{text-transform:none;letter-spacing:0;font-weight:600;opacity:.85}
+.f textarea,.f input[type=text]{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;font-weight:600;outline:0;resize:vertical;color:var(--text);font-family:inherit;line-height:1.4}
+.f textarea:focus,.f input[type=text]:focus{border-color:var(--accent)}
+.f .seg{max-width:360px}
+.eopts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.eo{display:flex;align-items:center;gap:8px;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:5px 6px;transition:border-color .15s,box-shadow .15s}
+.eo.ok{border-color:var(--tile);box-shadow:0 0 0 1px var(--tile)}
+.eo-k{flex:none;width:34px;height:34px;border-radius:8px;background:var(--panel2);font-weight:800;color:var(--mute)}
+.eo.ok .eo-k{background:var(--tile);color:#fff}
+.eo input[type=text]{flex:1;min-width:0;background:none;border:0;padding:6px 4px;font-size:15px}
+.eimg{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.eimg-prev{flex:none;width:160px;height:108px;border-radius:10px;border:1px dashed var(--line);display:grid;place-items:center;color:var(--mute);font-size:13px;font-weight:600;overflow:hidden}
+.eimg-prev img{width:100%;height:100%;object-fit:cover}
+.eimg-side{flex:1;min-width:220px;display:flex;flex-direction:column;gap:8px}
+.eimg-btns{display:flex;gap:8px;flex-wrap:wrap}
+.err{color:var(--bad);font-weight:700;font-size:14px;min-height:1.2em}
+.mf{display:flex;justify-content:flex-end;gap:10px;padding:14px 22px;border-top:1px solid var(--line)}
+@media (max-width:700px){ .eopts{grid-template-columns:1fr} .qr{flex-wrap:wrap} .qr-act{flex-direction:row} }
 .conf{position:fixed;top:-20px;width:10px;height:16px;border-radius:2px;z-index:40;animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
 </style>
@@ -291,7 +393,8 @@ const OPT = {
 // Sejarah Tingkatan 4 · Bab 1.3 Keunggulan Sistem Pentadbiran dan Undang-Undang
 // img: file in ./img/ (hidden automatically if the file is missing) · credit: shown under the image
 const TOPIC = 'Sejarah T4 · 1.3 Keunggulan Sistem Pentadbiran dan Undang-Undang';
-const QUESTIONS = [
+// Built-in starter questions. They are copied into the teacher's question bank (IndexedDB) on first run.
+const DEFAULT_QUESTIONS = [
   {type:'mcq', q:'Siapakah ketua pemerintahan, peperangan, hubungan diplomatik dan agama dalam Kesultanan Melayu Melaka?',
    opts:['Bendahara','Temenggung','Sultan','Laksamana'], ans:2, img:'istana.jpg',
    exp:'Sultan berada di puncak sistem pentadbiran KMM sebagai ketua pemerintahan, peperangan, hubungan diplomatik dan agama.'},
@@ -345,8 +448,8 @@ const QUESTIONS = [
 ];
 const EXP = 'Penjelasan ringkas jawapan akan dipaparkan di sini selepas jawapan didedahkan.';
 
-const S = { screen:'lobby', teams:[], timer:20, qi:0, phase:null, remaining:0, paused:false,
-            marks:new Set(), prev:[], gain:[], to:[], iv:null };
+const S = { screen:'lobby', teams:[], timer:20, shuffle:false, qi:0, phase:null, remaining:0, paused:false,
+            marks:new Set(), prev:[], gain:[], to:[], iv:null, modal:false, bankQ:'' };
 
 const $  = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
@@ -433,6 +536,279 @@ function toggleTheme(){
 }
 $('#bTheme').onclick=toggleTheme; drawTheme();
 
+/* ================= QUESTION BANK (stored in IndexedDB) ================= */
+let BANK = [];        // every question in the bank, sorted by .order
+let QUESTIONS = [];   // the questions used for the current game
+const uid = () => 'q' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const imgSrc = s => /^(data:|https?:)/.test(s) ? s : 'img/' + s;
+const selected = () => BANK.filter(q => q.on);
+const sortBank = () => BANK.sort((a,b) => a.order - b.order);
+const nextOrder = () => BANK.reduce((m,q) => Math.max(m,q.order), -1) + 1;
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const seedDefaults = () => DEFAULT_QUESTIONS.map((q,i) => ({...q, id:'d'+(i+1), order:i, on:true, custom:false}));
+
+// Survives refresh and browser restarts. Falls back to memory if IndexedDB is unavailable (e.g. some private modes).
+const Store = {
+  db:null, mem:{q:new Map(), m:new Map()},
+  async open(){
+    try{
+      this.db = await new Promise((res,rej)=>{
+        const r = indexedDB.open('alvyquiz', 1);
+        r.onupgradeneeded = () => { r.result.createObjectStore('questions',{keyPath:'id'}); r.result.createObjectStore('meta'); };
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+        r.onblocked = () => rej(new Error('blocked'));
+      });
+      try{ navigator.storage?.persist?.(); }catch(e){}
+    }catch(e){ this.db = null; }
+  },
+  run(store, mode, fn){
+    return new Promise((res,rej)=>{
+      const tx = this.db.transaction(store, mode), r = fn(tx.objectStore(store));
+      tx.oncomplete = () => res(r && 'result' in r ? r.result : undefined);
+      tx.onerror = tx.onabort = () => rej(tx.error);
+    });
+  },
+  all(){ return this.db ? this.run('questions','readonly',s=>s.getAll()) : Promise.resolve([...this.mem.q.values()]); },
+  put(...qs){ if(!this.db){ qs.forEach(q=>this.mem.q.set(q.id,q)); return Promise.resolve(); } return this.run('questions','readwrite',s=>{ qs.forEach(q=>s.put(q)); }); },
+  del(id){ if(!this.db){ this.mem.q.delete(id); return Promise.resolve(); } return this.run('questions','readwrite',s=>s.delete(id)); },
+  clear(){ if(!this.db){ this.mem.q.clear(); return Promise.resolve(); } return this.run('questions','readwrite',s=>s.clear()); },
+  get(k){ return this.db ? this.run('meta','readonly',s=>s.get(k)) : Promise.resolve(this.mem.m.get(k)); },
+  set(k,v){ if(!this.db){ this.mem.m.set(k,v); return Promise.resolve(); } return this.run('meta','readwrite',s=>s.put(v,k)); },
+};
+function saveSettings(){
+  Store.set('settings', {timer:S.timer, shuffle:S.shuffle, teams:S.teams.map(t=>t.name)}).catch(()=>{});
+}
+
+function toast(msg){
+  $$('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(()=>t.remove(), 2800);
+}
+// two-click confirmation instead of browser confirm() dialogs
+function confirmClick(btn, label, fn){
+  if(btn.classList.contains('sure')) return fn();
+  const old=btn.textContent; btn.classList.add('sure'); btn.textContent=label;
+  setTimeout(()=>{ if(btn.isConnected){ btn.classList.remove('sure'); btn.textContent=old; } }, 2800);
+}
+
+function renderBank(){
+  S.screen='bank'; clearTimers();
+  app.innerHTML = `
+  <div class="screen bank">
+    <div class="bk-head">
+      <button class="btn sm" id="bkBack">← Back</button>
+      <div class="bk-title"><h2>Bank Soalan</h2><span id="bkCount"></span></div>
+      <div class="bk-acts">
+        <button class="btn sm" id="bkImp">Import</button>
+        <button class="btn sm" id="bkExp">Export</button>
+        <button class="btn sm primary" id="bkAdd">+ Add Question</button>
+      </div>
+    </div>
+    <div class="bk-bar">
+      <input class="bk-search" id="bkSearch" type="search" placeholder="Search questions…" value="${esc(S.bankQ)}">
+      <button class="lnk" id="bkAll">Select all</button>
+      <button class="lnk" id="bkNone">Clear selection</button>
+      <span class="sp"></span>
+      <button class="lnk" id="bkReset">Reset to original questions</button>
+    </div>
+    <div class="bk-note ${Store.db?'':'warn'}">${Store.db
+      ? 'Questions are saved in this browser and stay after refreshing or closing the page. They are only lost if the browser data is cleared, and they are not shared with other devices. Use <b>Export</b> to keep a backup or move them to another computer.'
+      : 'Browser storage is not available (maybe incognito mode). Changes only last until the page is closed. Use <b>Export</b> to save your work.'}</div>
+    <div class="bk-list" id="bkList"></div>
+    <input type="file" id="bkFile" accept=".json,application/json" hidden>
+  </div>`;
+  drawBank();
+  $('#bkBack').onclick=renderLobby;
+  $('#bkAdd').onclick=()=>openEditor(null);
+  $('#bkExp').onclick=exportBank;
+  $('#bkImp').onclick=()=>$('#bkFile').click();
+  $('#bkFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) importBank(f); };
+  $('#bkSearch').oninput=e=>{ S.bankQ=e.target.value; drawBank(); };
+  $('#bkAll').onclick=()=>setAll(true);
+  $('#bkNone').onclick=()=>setAll(false);
+  $('#bkReset').onclick=e=>confirmClick(e.currentTarget, 'Sure? All changes will be lost', resetBank);
+}
+function drawBankCount(){ $('#bkCount').textContent = `${selected().length} of ${BANK.length} selected`; }
+function drawBank(){
+  drawBankCount();
+  const el=$('#bkList'), term=S.bankQ.trim().toLowerCase();
+  const list = term ? BANK.filter(q=>[q.q, ...(q.opts||[]), q.exp||''].join(' ').toLowerCase().includes(term)) : BANK;
+  if(!BANK.length){ el.innerHTML='<div class="empty">The Bank Soalan is empty. Click <b>+ Add Question</b> to start.</div>'; return; }
+  if(!list.length){ el.innerHTML='<div class="empty">No questions match your search.</div>'; return; }
+  el.innerHTML = list.map(q=>{
+    const i=BANK.indexOf(q), tf=q.type==='tf';
+    const keys = tf ? ['T','F'] : ['A','B','C','D'], texts = tf ? ['True','False'] : q.opts;
+    return `
+    <div class="qr ${q.on?'':'off'}" data-id="${esc(q.id)}">
+      <label class="chk" title="Include in quiz"><input type="checkbox" ${q.on?'checked':''}><span>✓</span></label>
+      <div class="qr-n">${i+1}</div>
+      <div class="qr-body">
+        <div class="qr-meta"><span class="tag">${tf?'True / False':'Multiple choice A–D'}</span>${q.custom?'<span class="tag new">Your question</span>':''}</div>
+        <div class="qr-q">${esc(q.q)}</div>
+        <div class="qr-opts">${keys.map((k,j)=>`<span class="po ${j===q.ans?'ok':''}" style="--tile:${OPT[k].c}"><b>${tf?(j?'F':'T'):k}</b>${esc(texts[j])}</span>`).join('')}</div>
+        ${q.exp?`<div class="qr-exp">${esc(q.exp)}</div>`:''}
+      </div>
+      ${q.img?`<img class="qr-img" src="${esc(imgSrc(q.img))}" alt="" onerror="this.remove()">`:''}
+      <div class="qr-act">
+        <div class="mv"><button class="ib" data-a="up" title="Move up" ${i===0?'disabled':''}>↑</button><button class="ib" data-a="down" title="Move down" ${i===BANK.length-1?'disabled':''}>↓</button></div>
+        <button class="ib" data-a="edit">Edit</button>
+        <button class="ib" data-a="del">Delete</button>
+      </div>
+    </div>`; }).join('');
+  el.querySelectorAll('.qr').forEach(row=>{
+    const q=BANK.find(x=>x.id===row.dataset.id);
+    row.querySelector('input').onchange=e=>{ q.on=e.target.checked; row.classList.toggle('off',!q.on); drawBankCount(); Store.put(q).catch(()=>toast('Could not save')); };
+    row.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>bankAction(b.dataset.a, q, b));
+  });
+}
+async function bankAction(a, q, btn){
+  const i=BANK.indexOf(q);
+  if(a==='edit') return openEditor(q);
+  if(a==='del') return confirmClick(btn, 'Sure?', async()=>{ BANK.splice(i,1); await Store.del(q.id); drawBank(); toast('Question deleted'); });
+  const j = a==='up' ? i-1 : i+1;
+  if(j<0 || j>=BANK.length) return;
+  const o=BANK[j]; [q.order,o.order]=[o.order,q.order]; sortBank();
+  await Store.put(q,o); drawBank();
+}
+async function setAll(v){ BANK.forEach(q=>q.on=v); await Store.put(...BANK); drawBank(); }
+async function resetBank(){
+  await Store.clear(); BANK=seedDefaults(); await Store.put(...BANK);
+  S.bankQ=''; renderBank(); toast('Bank Soalan reset to the original questions');
+}
+
+function exportBank(){
+  const data={app:'alvyquiz', version:1, exported:new Date().toISOString(), questions:BANK.map(({id,order,...q})=>q)};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,1)],{type:'application/json'}));
+  const a=document.createElement('a'); a.href=url; a.download=`alvyquiz-question-bank-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  toast(`${BANK.length} questions exported`);
+}
+// imported files are untrusted: keep only known fields, check shapes, cap lengths
+function cleanQ(raw){
+  if(!raw || typeof raw!=='object') return null;
+  const type = raw.type==='tf' ? 'tf' : 'mcq';
+  const q = String(raw.q||'').trim(); if(!q) return null;
+  const out = {type, q:q.slice(0,400), exp:String(raw.exp||'').trim().slice(0,400), on:raw.on!==false, custom:!!raw.custom};
+  if(type==='mcq'){
+    const opts=(Array.isArray(raw.opts)?raw.opts:[]).slice(0,4).map(s=>String(s??'').trim().slice(0,160));
+    if(opts.length<4 || opts.some(s=>!s)) return null;
+    out.opts=opts;
+  }
+  const ans=Number(raw.ans);
+  if(!Number.isInteger(ans) || ans<0 || ans>=(type==='tf'?2:4)) return null;
+  out.ans=ans;
+  if(typeof raw.img==='string' && (/^data:image\/(jpeg|png|webp|gif);base64,/.test(raw.img) || /^[\w.-]+\.(jpe?g|png|webp|gif)$/i.test(raw.img))) out.img=raw.img;
+  if(out.img && raw.credit) out.credit=String(raw.credit).slice(0,120);
+  return out;
+}
+async function importBank(file){
+  try{
+    const data=JSON.parse(await file.text());
+    const arr=Array.isArray(data) ? data : data && data.questions;
+    if(!Array.isArray(arr)) throw new Error('bad');
+    let ord=nextOrder();
+    const qs=arr.map(cleanQ).filter(Boolean).map(q=>({...q, id:uid(), order:ord++}));
+    if(!qs.length) return toast('No valid questions found in this file');
+    BANK.push(...qs); await Store.put(...qs); drawBank();
+    toast(`${qs.length} questions imported` + (qs.length<arr.length ? ` · ${arr.length-qs.length} skipped` : ''));
+  }catch(e){ toast('Invalid file. Choose a .json file exported from Alvyquiz.'); }
+}
+
+/* ---------- question editor (add / edit) ---------- */
+let ED=null;
+function shrinkImage(file){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onload=()=>{
+      const s=Math.min(1, 1400/Math.max(img.naturalWidth,img.naturalHeight));
+      const c=document.createElement('canvas'); c.width=Math.round(img.naturalWidth*s); c.height=Math.round(img.naturalHeight*s);
+      const g=c.getContext('2d'); g.fillStyle='#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg',.82));
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('img')); };
+    img.src=url;
+  });
+}
+function openEditor(q){
+  ED = q ? JSON.parse(JSON.stringify(q)) : {type:'mcq', q:'', opts:['','','',''], ans:0, exp:'', on:true, custom:true};
+  if(!Array.isArray(ED.opts)) ED.opts=['','','',''];
+  const isNew=!q;
+  const m=document.createElement('div'); m.className='modal'; m.id='modal';
+  m.innerHTML=`
+  <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="mh"><h2 id="mTitle">${isNew?'Add Question':'Edit Question'}</h2><button class="x" id="mX" title="Close">✕</button></div>
+    <div class="mbody">
+      <div class="f"><label>Question type</label><div class="seg" id="eType"><button data-t="mcq">Multiple choice A–D</button><button data-t="tf">True / False</button></div></div>
+      <div class="f"><label for="eQ">Question</label><textarea id="eQ" rows="3" maxlength="400" placeholder="Type the question here…"></textarea></div>
+      <div class="f" id="eMcq"><label>Answer options <small>· click a letter to mark the correct answer</small></label>
+        <div class="eopts">${['A','B','C','D'].map((k,i)=>`
+          <div class="eo" data-i="${i}" style="--tile:${OPT[k].c}"><button class="eo-k" data-i="${i}" title="Mark ${k} as the correct answer">${k}</button><input type="text" data-i="${i}" maxlength="160" placeholder="Option ${k}"></div>`).join('')}</div></div>
+      <div class="f" id="eTf"><label>Correct answer</label><div class="seg" id="eTfSeg"><button data-v="0">True</button><button data-v="1">False</button></div></div>
+      <div class="f"><label for="eExp">Explanation <small>· shown after the answer is revealed (optional)</small></label><textarea id="eExp" rows="2" maxlength="400"></textarea></div>
+      <div class="f"><label>Image <small>· optional</small></label>
+        <div class="eimg"><div class="eimg-prev" id="eImgPrev"></div>
+          <div class="eimg-side">
+            <div class="eimg-btns"><button class="btn sm" id="eImgPick">Choose image…</button><button class="btn sm" id="eImgRm">Remove image</button></div>
+            <input type="text" id="eCredit" maxlength="120" placeholder="Image credit (optional)">
+          </div></div>
+        <input type="file" id="eFile" accept="image/*" hidden></div>
+      <div class="err" id="eErr"></div>
+    </div>
+    <div class="mf"><button class="btn" id="mCancel">Cancel</button><button class="btn primary" id="mSave">${isNew?'Add':'Save'}</button></div>
+  </div>`;
+  document.body.appendChild(m); S.modal=true;
+  $('#eQ').value=ED.q; $('#eExp').value=ED.exp||''; $('#eCredit').value=ED.credit||'';
+  $$('.eo input').forEach(inp=>{ inp.value=ED.opts[+inp.dataset.i]||''; inp.oninput=()=>{ ED.opts[+inp.dataset.i]=inp.value; }; });
+  $('#eQ').oninput=e=>{ ED.q=e.target.value; };
+  $('#eExp').oninput=e=>{ ED.exp=e.target.value; };
+  $('#eCredit').oninput=e=>{ ED.credit=e.target.value; };
+  $('#eType').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; ED.type=b.dataset.t; if(ED.type==='tf' && ED.ans>1) ED.ans=0; drawEd(); };
+  $$('.eo-k').forEach(b=>b.onclick=()=>{ ED.ans=+b.dataset.i; drawEd(); });
+  $('#eTfSeg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return; ED.ans=+b.dataset.v; drawEd(); };
+  $('#eImgPick').onclick=()=>$('#eFile').click();
+  $('#eFile').onchange=async e=>{
+    const f=e.target.files[0]; e.target.value=''; if(!f) return;
+    try{ ED.img=await shrinkImage(f); $('#eErr').textContent=''; drawEd(); }
+    catch(err){ $('#eErr').textContent='Could not read that image. Try a JPG or PNG file.'; }
+  };
+  $('#eImgRm').onclick=()=>{ delete ED.img; ED.credit=''; $('#eCredit').value=''; drawEd(); };
+  $('#mX').onclick=closeEditor; $('#mCancel').onclick=closeEditor;
+  $('#mSave').onclick=()=>saveEditor(isNew);
+  drawEd(); setTimeout(()=>$('#eQ')?.focus(), 60);
+}
+function drawEd(){
+  $$('#eType button').forEach(b=>b.classList.toggle('on', b.dataset.t===ED.type));
+  $('#eMcq').style.display = ED.type==='mcq' ? '' : 'none';
+  $('#eTf').style.display  = ED.type==='tf'  ? '' : 'none';
+  $$('.eo').forEach(o=>o.classList.toggle('ok', +o.dataset.i===ED.ans));
+  $$('#eTfSeg button').forEach(b=>b.classList.toggle('on', +b.dataset.v===ED.ans));
+  $('#eImgPrev').innerHTML = ED.img ? `<img src="${esc(imgSrc(ED.img))}" alt="">` : 'No image';
+  $('#eImgRm').style.display = ED.img ? '' : 'none';
+  $('#eCredit').style.display = ED.img ? '' : 'none';
+}
+function closeEditor(){ $('#modal')?.remove(); S.modal=false; ED=null; }
+async function saveEditor(isNew){
+  const err=$('#eErr'), q=ED.q.trim();
+  if(!q){ err.textContent='Please type the question.'; return $('#eQ').focus(); }
+  if(ED.type==='mcq'){
+    ED.opts=ED.opts.map(s=>(s||'').trim());
+    const miss=ED.opts.findIndex(s=>!s);
+    if(miss>=0){ err.textContent=`Please fill in option ${'ABCD'[miss]}.`; return $$('.eo input')[miss].focus(); }
+  }
+  const out={...ED, q, exp:(ED.exp||'').trim(), credit:(ED.credit||'').trim()};
+  if(out.type==='tf') delete out.opts;
+  if(!out.img){ delete out.img; delete out.credit; }
+  if(!out.credit) delete out.credit;
+  if(isNew){ Object.assign(out, {id:uid(), order:nextOrder(), on:true, custom:true}); }
+  try{ await Store.put(out); }
+  catch(e){ err.textContent='Could not save. Browser storage may be full. Try a smaller image.'; return; }
+  if(isNew) BANK.push(out); else BANK[BANK.findIndex(x=>x.id===out.id)]=out;
+  closeEditor(); drawBank();
+  if(isNew){ const l=$('#bkList'); l.scrollTop=l.scrollHeight; }
+  toast(isNew ? 'Question added' : 'Question saved');
+}
+
 /* ================= LOBBY ================= */
 function renderLobby(){
   S.screen='lobby'; clearTimers();
@@ -457,23 +833,32 @@ function renderLobby(){
           <h3>Masa berfikir</h3>
           <div class="seg" id="seg">${[10,15,20,30].map(s=>`<button data-s="${s}" class="${s===S.timer?'on':''}">${s} saat</button>`).join('')}</div>
         </div>
+        <div class="sec">
+          <h3><span>Soalan</span><span>${selected().length} / ${BANK.length} dipilih</span></h3>
+          <div class="qsrow">
+            <label class="tog"><input type="checkbox" id="shuf" ${S.shuffle?'checked':''}><span></span>Susunan rawak</label>
+          </div>
+        </div>
         <div class="sum" id="sum"></div>
-        <button class="btn primary" id="next">Seterusnya: Cara Main</button>
+        <button class="btn primary" id="next" ${selected().length?'':'disabled'}>${selected().length?'Seterusnya: Cara Main':'Pilih sekurang-kurangnya 1 soalan'}</button>
       </div>
     </div>
-    <div class="lfoot"><span></span></div>
+    <div class="lfoot"><button class="bankbtn" id="openBank" title="Urus soalan (untuk guru)"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Bank Soalan</button></div>
   </div>`;
   drawTeams();
-  $('#addt').onclick=()=>{ if(S.teams.length<8){ S.teams.push(newTeam(S.teams.length)); drawTeams(); } };
+  $('#addt').onclick=()=>{ if(S.teams.length<8){ S.teams.push(newTeam(S.teams.length)); drawTeams(); saveSettings(); } };
   $('#seg').onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
-    S.timer=+b.dataset.s; $$('#seg button').forEach(x=>x.classList.toggle('on',x===b)); drawSummary(); };
-  $('#next').onclick=()=>{ Snd.init(); Snd.click(); renderHowto(); };
+    S.timer=+b.dataset.s; $$('#seg button').forEach(x=>x.classList.toggle('on',x===b)); drawSummary(); saveSettings(); };
+  $('#shuf').onchange=e=>{ S.shuffle=e.target.checked; saveSettings(); };
+  $('#openBank').onclick=()=>{ Snd.init(); Snd.click(); renderBank(); };
+  $('#next').onclick=()=>{ if(!selected().length) return; Snd.init(); Snd.click(); renderHowto(); };
 }
 function drawSummary(){
+  const n=selected().length;
   $('#sum').innerHTML = `
-    <div><b>${QUESTIONS.length}</b><span>soalan</span></div>
+    <div><b>${n}</b><span>soalan</span></div>
     <div><b>${S.teams.length}</b><span>kumpulan</span></div>
-    <div><b>~${Math.round(QUESTIONS.length*(S.timer+25)/60)}</b><span>minit</span></div>`;
+    <div><b>~${Math.max(1,Math.round(n*(S.timer+25)/60))}</b><span>minit</span></div>`;
 }
 function drawTeams(){
   const el=$('#tlist');
@@ -481,8 +866,8 @@ function drawTeams(){
     <div class="trow"><span class="sw" style="background:${t.color}"></span>
       <input value="${esc(t.name)}" data-i="${i}" maxlength="18" aria-label="Nama kumpulan ${i+1}">
       <button data-rm="${i}" title="Buang" ${S.teams.length<=2?'disabled style="opacity:.25"':''}>✕</button></div>`).join('');
-  el.querySelectorAll('input').forEach(inp=>inp.oninput=()=>{ S.teams[+inp.dataset.i].name=inp.value||`Kumpulan ${+inp.dataset.i+1}`; });
-  el.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ if(S.teams.length>2){ S.teams.splice(+b.dataset.rm,1); drawTeams(); } });
+  el.querySelectorAll('input').forEach(inp=>inp.oninput=()=>{ S.teams[+inp.dataset.i].name=inp.value||`Kumpulan ${+inp.dataset.i+1}`; saveSettings(); });
+  el.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ if(S.teams.length>2){ S.teams.splice(+b.dataset.rm,1); drawTeams(); saveSettings(); } });
   $('#addt').style.display = S.teams.length>=8 ? 'none' : '';
   $('#tcount').textContent = `${S.teams.length} / 8`;
   drawSummary();
@@ -512,6 +897,9 @@ function renderHowto(){
 }
 
 function startGame(){
+  const pool=selected();
+  if(!pool.length) return renderLobby();
+  QUESTIONS = S.shuffle ? shuffle([...pool]) : [...pool];
   Snd.init(); Snd.click();
   S.teams.forEach(t=>Object.assign(t,{score:0,streak:0,best:0,correct:0}));
   S.qi=0; renderQuestion();
@@ -541,7 +929,7 @@ function renderQuestion(){
           <h1 class="qtext">${esc(q.q)}</h1>
           <p class="qexp">${esc(q.exp||EXP)}</p>
         </div>
-        ${q.img?`<figure class="qimg"><img src="img/${esc(q.img)}" alt="" onerror="this.closest('.qcard').classList.remove('has-img');this.parentNode.remove()">${q.credit?`<figcaption>${esc(q.credit)}</figcaption>`:''}</figure>`:''}
+        ${q.img?`<figure class="qimg"><img src="${esc(imgSrc(q.img))}" alt="" onerror="this.closest('.qcard').classList.remove('has-img');this.parentNode.remove()">${q.credit?`<figcaption>${esc(q.credit)}</figcaption>`:''}</figure>`:''}
       </div>
       <div class="timer" id="timer">
         <svg viewBox="0 0 100 100"><circle class="trk" cx="50" cy="50" r="44"/><circle class="rng" id="rng" cx="50" cy="50" r="44" stroke-dasharray="${CIRC}" stroke-dashoffset="0"/></svg>
@@ -696,20 +1084,40 @@ function countUp(el, from, to, ms){
 function renderFinal(){
   S.screen='final'; clearTimers();
   const order=rankOrder(S.teams.map(t=>t.score));
-  const pod=[[1,'p2','var(--silver)','58%'],[0,'p1','var(--gold)','78%'],[2,'p3','var(--bronze)','42%']].filter(p=>order[p[0]]!==undefined);
+  // shared ranks: teams with equal scores get the same place (1, 1, 3 …)
+  const place=t=>1+S.teams.filter(o=>o.score>t.score).length;
+  const top=S.teams[order[0]].score;
+  const tied=order.filter(ti=>S.teams[ti].score===top);
   const best=S.teams.slice().sort((a,b)=>b.best-a.best)[0];
   const acc=Math.round(S.teams.reduce((s,t)=>s+t.correct,0)/(S.teams.length*QUESTIONS.length)*100);
-  app.innerHTML = `
-  <div class="screen fin">
-    <h2>Keputusan Akhir</h2>
-    <div class="sub">Tahniah kepada semua kumpulan!</div>
-    <div class="pod">${pod.map(([r,cls,col,h])=>{ const t=S.teams[order[r]]; return `
-      <div class="pc ${cls}"><div class="pn">${esc(t.name)}</div><div class="ps">${t.score} mata</div>
-        <div class="pb" style="--pcol:${col};height:${h}">${r+1}</div></div>`; }).join('')}</div>
-    ${order.length>3?`<div class="rest">${order.slice(3).map((ti,k)=>`<div>${k+4}. ${esc(S.teams[ti].name)} · ${S.teams[ti].score}</div>`).join('')}</div>`:''}
-    <div class="stats"><div>Ketepatan kelas: <b>${acc}%</b></div><div>Rentak terbaik: <b>${esc(best.name)} (${best.best})</b></div></div>
-    <div class="acts"><button class="btn primary" id="again">Main Semula</button><button class="btn" id="home">Laman Utama</button></div>
-  </div>`;
+  const stats=`<div class="stats"><div>Ketepatan kelas: <b>${acc}%</b></div><div>Rentak terbaik: <b>${esc(best.name)} (${best.best})</b></div></div>`;
+  const acts=`<div class="acts"><button class="btn primary" id="again">Main Semula</button><button class="btn" id="home">Laman Utama</button></div>`;
+
+  if(tied.length>1){
+    // SERI: two or more teams share first place
+    const others=order.filter(ti=>S.teams[ti].score!==top);
+    app.innerHTML = `
+    <div class="screen fin seri">
+      <div class="seri-word">SERI!</div>
+      <div class="sub">${tied.length===S.teams.length?'Semua kumpulan':`${tied.length} kumpulan`} berkongsi tempat pertama dengan ${top} mata</div>
+      <div class="tie">${tied.map((ti,i)=>{ const t=S.teams[ti]; return `
+        <div class="tc" style="--tc:${t.color};animation-delay:${.5+i*.15}s"><div class="medal">1</div><div class="tn">${esc(t.name)}</div><div class="ts">${t.score} mata</div></div>`; }).join('')}</div>
+      ${others.length?`<div class="rest">${others.map(ti=>{ const t=S.teams[ti]; return `<div>${place(t)}. ${esc(t.name)} · ${t.score}</div>`; }).join('')}</div>`:''}
+      ${stats}${acts}
+    </div>`;
+  } else {
+    const pod=[[1,'p2','var(--silver)','58%'],[0,'p1','var(--gold)','78%'],[2,'p3','var(--bronze)','42%']].filter(p=>order[p[0]]!==undefined);
+    app.innerHTML = `
+    <div class="screen fin">
+      <h2>Keputusan Akhir</h2>
+      <div class="sub">Tahniah kepada semua kumpulan!</div>
+      <div class="pod">${pod.map(([r,cls,col,h])=>{ const t=S.teams[order[r]]; return `
+        <div class="pc ${cls}"><div class="pn">${esc(t.name)}</div><div class="ps">${t.score} mata</div>
+          <div class="pb" style="--pcol:${col};height:${h}">${place(t)}</div></div>`; }).join('')}</div>
+      ${order.length>3?`<div class="rest">${order.slice(3).map(ti=>`<div>${place(S.teams[ti])}. ${esc(S.teams[ti].name)} · ${S.teams[ti].score}</div>`).join('')}</div>`:''}
+      ${stats}${acts}
+    </div>`;
+  }
   $('#again').onclick=startGame; $('#home').onclick=renderLobby;
   later(()=>{ Snd.fanfare(); confetti(); }, 1500);
 }
@@ -739,9 +1147,10 @@ function next(){
   }
 }
 document.addEventListener('keydown', e=>{
-  if(e.target.tagName==='INPUT') return;
+  if(S.modal){ if(e.key==='Escape') closeEditor(); return; }
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
   const k=e.key;
-  if([' ','Enter','ArrowRight','PageDown'].includes(k)){ e.preventDefault(); next(); return; }
+  if(S.screen!=='bank' && [' ','Enter','ArrowRight','PageDown'].includes(k)){ e.preventDefault(); next(); return; }
   if(k==='m'||k==='M') return toggleMute();
   if(k==='t'||k==='T') return toggleTheme();
   if(k==='f'||k==='F') return toggleFs();
@@ -751,7 +1160,22 @@ document.addEventListener('keydown', e=>{
 // keep Space from re-clicking a focused button
 document.addEventListener('click', e=>{ const b=e.target.closest('button'); if(b) b.blur(); });
 
-renderLobby();
+/* boot: open the question bank (seed it with the starter questions on first visit), restore settings */
+(async ()=>{
+  await Store.open();
+  try{
+    if(!(await Store.get('seeded'))){ await Store.put(...seedDefaults()); await Store.set('seeded', true); }
+    BANK = await Store.all();
+    const st = await Store.get('settings');
+    if(st){
+      if([10,15,20,30].includes(st.timer)) S.timer=st.timer;
+      S.shuffle=!!st.shuffle;
+      if(Array.isArray(st.teams) && st.teams.length>=2)
+        S.teams=st.teams.slice(0,8).map((n,i)=>({...newTeam(i), name:String(n||'').slice(0,18)||newTeam(i).name}));
+    }
+  }catch(e){ BANK=seedDefaults(); }
+  sortBank(); renderLobby();
+})();
 </script>
 </body>
 </html>
