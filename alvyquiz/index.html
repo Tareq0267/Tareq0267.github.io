@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alvyquiz — Kuiz Kelas</title>
+<title>WhoAmI — Kuiz Kelas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -102,6 +102,7 @@ kbd{font:inherit;font-size:.72em;font-weight:700;padding:.1em .45em;border-radiu
 .trow:focus-within{border-color:var(--accent)}
 .trow .sw{width:12px;height:12px;border-radius:4px;flex:none}
 .trow input{flex:1;min-width:0;background:none;border:0;outline:0;font-weight:600;font-size:16px;padding:7px 0}
+.trow input::placeholder{color:var(--mute);opacity:.75;font-weight:500}
 .trow button{width:26px;height:26px;border-radius:7px;color:var(--mute);font-size:13px}
 .trow button:hover{background:var(--panel2);color:var(--text)}
 .addt{padding:9px;border-radius:10px;border:1px dashed var(--line);color:var(--mute);font-weight:600;font-size:15px}
@@ -270,6 +271,7 @@ kbd{font:inherit;font-size:.72em;font-weight:700;padding:.1em .45em;border-radiu
 .panel{max-height:calc(100vh - 90px);overflow:auto}
 .qsrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .bankbtn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--mute);opacity:.6;transition:opacity .2s,background .2s,color .2s}
+.credit{font-size:14px;font-weight:600;color:var(--mute)}
 .bankbtn:hover{opacity:1;color:var(--text);background:var(--panel2)}
 .bankbtn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round}
 .tog{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;cursor:pointer}
@@ -373,12 +375,13 @@ kbd{font:inherit;font-size:.72em;font-weight:700;padding:.1em .45em;border-radiu
 
 <script>
 /* =========================================================
-   ALVYQUIZ — kuiz kelas tanpa peranti (mockup)
+   WHOAMI — kuiz kelas tanpa peranti (mockup)
    Teacher runs this on a projector; students answer with
    seated gestures; teacher marks which teams were right.
    ========================================================= */
 
-const NAMES  = ['Hang Tuah','Puteri Santubong','Merong Mahawangsa','Mahsuri','Tun Fatimah','Hang Jebat','Tun Teja','Hang Kasturi'];
+// names the old version filled in automatically; cleared when restoring saved settings
+const OLD_DEFAULT_NAMES = ['Hang Tuah','Puteri Santubong','Merong Mahawangsa','Mahsuri','Tun Fatimah','Hang Jebat','Tun Teja','Hang Kasturi'];
 const COLORS = ['#4f8cff','#ffb020','#22c58b','#ff5a7a','#a78bfa','#2dd4bf','#f472b6','#facc15'];
 
 const OPT = {
@@ -395,54 +398,51 @@ const OPT = {
 const TOPIC = 'Sejarah T4 · 1.3 Keunggulan Sistem Pentadbiran dan Undang-Undang';
 // Built-in starter questions. They are copied into the teacher's question bank (IndexedDB) on first run.
 const DEFAULT_QUESTIONS = [
-  {type:'mcq', q:'Siapakah ketua pemerintahan, peperangan, hubungan diplomatik dan agama dalam Kesultanan Melayu Melaka?',
+  {id:'d1', type:'mcq', q:'Siapakah ketua pemerintahan, peperangan, hubungan diplomatik dan agama dalam Kesultanan Melayu Melaka?',
    opts:['Bendahara','Temenggung','Sultan','Laksamana'], ans:2, img:'istana.jpg',
-   exp:'Sultan berada di puncak sistem pentadbiran KMM sebagai ketua pemerintahan, peperangan, hubungan diplomatik dan agama.'},
-  {type:'mcq', q:'Pembesar manakah yang bertanggungjawab menjaga keselamatan kota Melaka?',
+   exp:'Sultan berada di puncak sistem pentadbiran Kesultanan Melayu Melaka sebagai ketua pemerintahan, peperangan, hubungan diplomatik dan agama.'},
+  {id:'d2', type:'mcq', q:'Pembesar manakah yang bertanggungjawab menjaga keselamatan kota Melaka?',
    opts:['Temenggung','Laksamana','Penghulu Bendahari','Syahbandar'], ans:0, img:'kota-melaka.jpg',
    exp:'Temenggung menjaga keselamatan kota Melaka.'},
-  {type:'mcq', q:'Siapakah panglima angkatan laut Melaka?',
+  {id:'d3', type:'mcq', q:'Siapakah panglima angkatan laut Melaka?',
    opts:['Bendahara','Penghulu Bendahari','Temenggung','Laksamana'], ans:3, img:'kapal-melaka.jpg',
    exp:'Laksamana ialah panglima angkatan laut Melaka.'},
-  {type:'tf', q:'Bendahara ialah ketua pentadbir, ketua angkatan tentera, penasihat dan pemangku sultan.', ans:0,
+  {id:'d4', type:'tf', q:'Bendahara ialah ketua pentadbir, ketua angkatan tentera, penasihat dan pemangku sultan.', ans:0,
    exp:'Benar. Bendahara ialah pembesar tertinggi selepas sultan.'},
-  {type:'mcq', q:'Apakah tugas Penghulu Bendahari?',
+  {id:'d5', type:'mcq', q:'Apakah tugas Penghulu Bendahari?',
    opts:['Menjaga keselamatan kota','Mengurus perbendaharaan','Mengetuai angkatan laut','Memangku sultan'], ans:1,
    exp:'Penghulu Bendahari menguruskan perbendaharaan kerajaan.'},
-  {type:'mcq', q:'Pembesar Berlapan terdiri daripada…',
+  {id:'d6', type:'mcq', q:'Pembesar Berlapan terdiri daripada…',
    opts:['Pembesar bergelar Raja','Bendahara dan Laksamana','Syahbandar dan pembesar bergelar Seri','Pembesar peringkat rendah'], ans:2,
    img:'tanjak.jpg', credit:'Foto: MargaretRDonald, CC BY 4.0',
    exp:'Pembesar Berlapan terdiri daripada Syahbandar dan pembesar yang bergelar Seri.'},
-  {type:'mcq', q:'Pembesar Berenam Belas ialah pembesar yang bergelar…',
+  {id:'d7', type:'mcq', q:'Pembesar Berenam Belas ialah pembesar yang bergelar…',
    opts:['Seri','Orang Kaya','Tun','Raja'], ans:3,
    exp:'Pembesar Berenam Belas ialah pembesar yang bergelar Raja.'},
-  {type:'tf', q:'Pembesar Tiga Puluh Dua ialah pembesar peringkat tinggi.', ans:1,
+  {id:'d8', type:'tf', q:'Pembesar Tiga Puluh Dua ialah pembesar peringkat tinggi.', ans:1,
    exp:'Salah. Pembesar Tiga Puluh Dua ialah pembesar peringkat rendah.'},
-  {type:'mcq', q:'Sistem Pembesar Empat Lipatan mempunyai dua peringkat pentadbiran, iaitu…',
+  {id:'d9', type:'mcq', q:'Sistem Pembesar Empat Lipatan mempunyai dua peringkat pentadbiran, iaitu…',
    opts:['Pusat dan jajahan','Pusat dan negeri','Persekutuan dan negeri','Bandar dan kampung'], ans:0, img:'peta-melaka.jpg',
    exp:'Pentadbiran pusat (Sultan dan Pembesar Berempat) dan pentadbiran peringkat jajahan (pembesar lain).'},
-  {type:'mcq', q:'Wilayah, sungai atau pulau yang diperintah oleh Pembesar Berempat dikenali sebagai…',
+  {id:'d10', type:'mcq', q:'Wilayah, sungai atau pulau yang diperintah oleh Pembesar Berempat dikenali sebagai…',
    opts:['Kawasan naungan','Kawasan pegangan','Kawasan taklukan','Kawasan jajahan'], ans:1,
    exp:'Kawasan yang diperintah oleh Pembesar Berempat dikenali sebagai kawasan pegangan.'},
-  {type:'mcq', q:'Antara berikut, yang manakah BUKAN sumber pendapatan pentadbiran pusat KMM?',
+  {id:'d11', type:'mcq', q:'Antara berikut, yang manakah BUKAN sumber pendapatan pentadbiran pusat Kesultanan Melayu Melaka?',
    opts:['Perdagangan','Cukai','Pinjaman daripada kuasa Barat','Ufti daripada wilayah taklukan'], ans:2, img:'pelabuhan-melaka.jpg',
    exp:'Sumber pendapatan pentadbiran pusat ialah perdagangan, cukai serta ufti wilayah taklukan dan naungan.'},
-  {type:'mcq', q:'Berapakah bilangan fasal dalam Hukum Kanun Melaka?',
+  {id:'d12', type:'mcq', q:'Berapakah bilangan fasal dalam Hukum Kanun Melaka?',
    opts:['16','25','32','44'], ans:3,
    img:'hukum-kanun.jpg', credit:'Manuskrip Hukum Kanun Melaka · Foto: Kerina yin, CC BY-SA 3.0',
    exp:'Hukum Kanun Melaka mempunyai 44 fasal.'},
-  {type:'mcq', q:'Fasal 30 Hukum Kanun Melaka berkaitan dengan…',
+  {id:'d13', type:'mcq', q:'Fasal 30 Hukum Kanun Melaka berkaitan dengan…',
    opts:['Pengharaman riba dalam urus niaga','Syarat saksi pernikahan','Tugas sultan dan Pembesar Berempat','Hukuman membunuh tanpa pengetahuan raja'], ans:0,
    exp:'Fasal 30 (ekonomi) mengharamkan riba. Peniaga perlu akil baligh, siuman dan melafazkan niat jual beli.'},
-  {type:'mcq', q:'Berapakah bilangan fasal dalam Undang-Undang Laut Melaka?',
-   opts:['44','25','32','8'], ans:1,
-   exp:'Undang-Undang Laut Melaka mempunyai 25 fasal.'},
-  {type:'tf', q:'Menurut Undang-Undang Laut Melaka, nakhoda berkuasa penuh ibarat raja dalam pelayaran.', ans:0, img:'kapal-melaka.jpg',
+  {id:'d15', type:'tf', q:'Menurut Undang-Undang Laut Melaka, nakhoda berkuasa penuh ibarat raja dalam pelayaran.', ans:0, img:'kapal-melaka.jpg',
    exp:'Benar. Fasal 13.1 juga menyatakan nakhoda perlu diberi keutamaan untuk berniaga selama 4 hari.'},
-  {type:'mcq', q:'Undang-undang Kesultanan Melayu Melaka berasaskan…',
-   opts:['Undang-undang Barat dan adat','Syariah dan hukum adat','Hukum adat sahaja','Undang-undang Hindu-Buddha'], ans:1, img:'istana-kehakiman.jpg',
-   exp:'Undang-undang KMM berasaskan syariah dan hukum adat.'},
-  {type:'mcq', q:'Fasal 6.3 Undang-Undang Laut Melaka: jika penumpang turun awal sebelum sampai janjinya, nakhoda menentukan cukai sebanyak…',
+  {id:'d16', type:'mcq', q:'Undang-undang Kesultanan Melayu Melaka berasaskan…',
+   opts:['Undang-undang Barat dan adat','Syariah dan hukum adat','Hukum adat sahaja','Undang-undang Hindu-Buddha'], ans:1,
+   exp:'Undang-undang Kesultanan Melayu Melaka berasaskan syariah dan hukum adat.'},
+  {id:'d17', type:'mcq', q:'Fasal 6.3 Undang-Undang Laut Melaka: jika penumpang turun awal sebelum sampai janjinya, nakhoda menentukan cukai sebanyak…',
    opts:['1/2 daripada hasil','1/5 daripada hasil','1/10 daripada hasil','1/20 daripada hasil'], ans:2,
    exp:'Cukai ialah 1/10 daripada hasil jika penumpang turun awal sebelum sampai janjinya.'},
 ];
@@ -456,7 +456,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const app = $('#app');
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-function newTeam(i){ return {name:NAMES[i%NAMES.length], color:COLORS[i%COLORS.length], score:0, streak:0, best:0, correct:0}; }
+function newTeam(i){ return {input:'', name:`Peserta ${i+1}`, color:COLORS[i%COLORS.length], score:0, streak:0, best:0, correct:0}; }
 S.teams = Array.from({length:4},(_,i)=>newTeam(i));
 
 function later(fn, ms){ const id=setTimeout(fn, ms); S.to.push(id); return id; }
@@ -545,7 +545,19 @@ const selected = () => BANK.filter(q => q.on);
 const sortBank = () => BANK.sort((a,b) => a.order - b.order);
 const nextOrder = () => BANK.reduce((m,q) => Math.max(m,q.order), -1) + 1;
 const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
-const seedDefaults = () => DEFAULT_QUESTIONS.map((q,i) => ({...q, id:'d'+(i+1), order:i, on:true, custom:false}));
+const SEED_VERSION = 2;   // bump when DEFAULT_QUESTIONS change so existing browsers pick up the update
+const seedDefaults = () => DEFAULT_QUESTIONS.map((q,i) => ({...q, order:i, on:true, custom:false}));
+// Bring built-in questions up to date without touching the teacher's own or edited questions.
+async function migrateDefaults(){
+  const v = (await Store.get('seedVersion')) || 1;
+  if(v >= SEED_VERSION) return;
+  const defs = seedDefaults(), ids = new Set(defs.map(d=>d.id));
+  const cur = await Store.all(), byId = new Map(cur.map(q=>[q.id,q]));
+  for(const q of cur) if(!q.custom && !q.edited && /^d\d+$/.test(q.id) && !ids.has(q.id)) await Store.del(q.id);
+  const upd = defs.filter(d=>{ const o=byId.get(d.id); return o && !o.edited; }).map(d=>{ const o=byId.get(d.id); return {...d, on:o.on, order:o.order}; });
+  if(upd.length) await Store.put(...upd);
+  await Store.set('seedVersion', SEED_VERSION);
+}
 
 // Survives refresh and browser restarts. Falls back to memory if IndexedDB is unavailable (e.g. some private modes).
 const Store = {
@@ -577,7 +589,7 @@ const Store = {
   set(k,v){ if(!this.db){ this.mem.m.set(k,v); return Promise.resolve(); } return this.run('meta','readwrite',s=>s.put(v,k)); },
 };
 function saveSettings(){
-  Store.set('settings', {timer:S.timer, shuffle:S.shuffle, teams:S.teams.map(t=>t.name)}).catch(()=>{});
+  Store.set('settings', {timer:S.timer, shuffle:S.shuffle, teams:S.teams.map(t=>t.input)}).catch(()=>{});
 }
 
 function toast(msg){
@@ -673,14 +685,14 @@ async function bankAction(a, q, btn){
 }
 async function setAll(v){ BANK.forEach(q=>q.on=v); await Store.put(...BANK); drawBank(); }
 async function resetBank(){
-  await Store.clear(); BANK=seedDefaults(); await Store.put(...BANK);
+  await Store.clear(); BANK=seedDefaults(); await Store.put(...BANK); await Store.set('seedVersion', SEED_VERSION);
   S.bankQ=''; renderBank(); toast('Bank Soalan reset to the original questions');
 }
 
 function exportBank(){
   const data={app:'alvyquiz', version:1, exported:new Date().toISOString(), questions:BANK.map(({id,order,...q})=>q)};
   const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,1)],{type:'application/json'}));
-  const a=document.createElement('a'); a.href=url; a.download=`alvyquiz-question-bank-${new Date().toISOString().slice(0,10)}.json`;
+  const a=document.createElement('a'); a.href=url; a.download=`whoami-question-bank-${new Date().toISOString().slice(0,10)}.json`;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1500);
   toast(`${BANK.length} questions exported`);
 }
@@ -712,7 +724,7 @@ async function importBank(file){
     if(!qs.length) return toast('No valid questions found in this file');
     BANK.push(...qs); await Store.put(...qs); drawBank();
     toast(`${qs.length} questions imported` + (qs.length<arr.length ? ` · ${arr.length-qs.length} skipped` : ''));
-  }catch(e){ toast('Invalid file. Choose a .json file exported from Alvyquiz.'); }
+  }catch(e){ toast('Invalid file. Choose a .json file exported from WhoAmI.'); }
 }
 
 /* ---------- question editor (add / edit) ---------- */
@@ -801,6 +813,7 @@ async function saveEditor(isNew){
   if(!out.img){ delete out.img; delete out.credit; }
   if(!out.credit) delete out.credit;
   if(isNew){ Object.assign(out, {id:uid(), order:nextOrder(), on:true, custom:true}); }
+  else if(!out.custom) out.edited=true;
   try{ await Store.put(out); }
   catch(e){ err.textContent='Could not save. Browser storage may be full. Try a smaller image.'; return; }
   if(isNew) BANK.push(out); else BANK[BANK.findIndex(x=>x.id===out.id)]=out;
@@ -817,7 +830,7 @@ function renderLobby(){
     <div class="lob">
       <div class="hero">
         <div class="top">${MARK()}</div>
-        <div class="logo">Alvyquiz</div>
+        <div class="logo">WhoAmI</div>
         <div class="topic">${esc(TOPIC)}</div>
         <div class="legend">${['A','B','C','D'].map(k=>`
           <div class="lg"><div class="ic" style="background:${OPT[k].c}">${figure(k)}</div><div><b>${k}</b><span>${OPT[k].g}</span></div></div>`).join('')}</div>
@@ -825,9 +838,9 @@ function renderLobby(){
       <div class="panel card">
         <div class="ph"><h2>Tetapan permainan</h2><span>Langkah 1 / 2</span></div>
         <div class="sec">
-          <h3><span>Kumpulan</span><span id="tcount"></span></h3>
+          <h3><span>Peserta</span><span id="tcount"></span></h3>
           <div class="tlist" id="tlist"></div>
-          <button class="addt" id="addt">+ Tambah kumpulan</button>
+          <button class="addt" id="addt">+ Tambah peserta</button>
         </div>
         <div class="sec">
           <h3>Masa berfikir</h3>
@@ -843,7 +856,7 @@ function renderLobby(){
         <button class="btn primary" id="next" ${selected().length?'':'disabled'}>${selected().length?'Seterusnya: Cara Main':'Pilih sekurang-kurangnya 1 soalan'}</button>
       </div>
     </div>
-    <div class="lfoot"><button class="bankbtn" id="openBank" title="Urus soalan (untuk guru)"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Bank Soalan</button></div>
+    <div class="lfoot"><button class="bankbtn" id="openBank" title="Urus soalan (untuk guru)"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>Bank Soalan</button><span class="credit">Developed by TA</span></div>
   </div>`;
   drawTeams();
   $('#addt').onclick=()=>{ if(S.teams.length<8){ S.teams.push(newTeam(S.teams.length)); drawTeams(); saveSettings(); } };
@@ -857,16 +870,16 @@ function drawSummary(){
   const n=selected().length;
   $('#sum').innerHTML = `
     <div><b>${n}</b><span>soalan</span></div>
-    <div><b>${S.teams.length}</b><span>kumpulan</span></div>
+    <div><b>${S.teams.length}</b><span>peserta</span></div>
     <div><b>~${Math.max(1,Math.round(n*(S.timer+25)/60))}</b><span>minit</span></div>`;
 }
 function drawTeams(){
   const el=$('#tlist');
   el.innerHTML = S.teams.map((t,i)=>`
     <div class="trow"><span class="sw" style="background:${t.color}"></span>
-      <input value="${esc(t.name)}" data-i="${i}" maxlength="18" aria-label="Nama kumpulan ${i+1}">
+      <input value="${esc(t.input)}" data-i="${i}" maxlength="18" placeholder="Peserta ${i+1}" aria-label="Nama peserta ${i+1}">
       <button data-rm="${i}" title="Buang" ${S.teams.length<=2?'disabled style="opacity:.25"':''}>✕</button></div>`).join('');
-  el.querySelectorAll('input').forEach(inp=>inp.oninput=()=>{ S.teams[+inp.dataset.i].name=inp.value||`Kumpulan ${+inp.dataset.i+1}`; saveSettings(); });
+  el.querySelectorAll('input').forEach(inp=>inp.oninput=()=>{ S.teams[+inp.dataset.i].input=inp.value; saveSettings(); });
   el.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ if(S.teams.length>2){ S.teams.splice(+b.dataset.rm,1); drawTeams(); saveSettings(); } });
   $('#addt').style.display = S.teams.length>=8 ? 'none' : '';
   $('#tcount').textContent = `${S.teams.length} / 8`;
@@ -901,7 +914,7 @@ function startGame(){
   if(!pool.length) return renderLobby();
   QUESTIONS = S.shuffle ? shuffle([...pool]) : [...pool];
   Snd.init(); Snd.click();
-  S.teams.forEach(t=>Object.assign(t,{score:0,streak:0,best:0,correct:0}));
+  S.teams.forEach((t,i)=>Object.assign(t,{name:t.input.trim()||`Peserta ${i+1}`, score:0,streak:0,best:0,correct:0}));
   S.qi=0; renderQuestion();
 }
 
@@ -915,7 +928,7 @@ function renderQuestion(){
   app.innerHTML = `
   <div class="screen q">
     <div class="qbar">
-      <span class="brand-sm">${MARK('sm')}Alvyquiz</span>
+      <span class="brand-sm">${MARK('sm')}WhoAmI</span>
       <span class="qcount">Soalan <b>${S.qi+1}</b> / ${n}</span>
       <div class="prog"><i style="width:${(S.qi)/n*100}%"></i></div>
       <span class="pill" id="pill">FIKIR</span>
@@ -1003,7 +1016,7 @@ function reveal(){
   const q=QUESTIONS[S.qi];
   $$('.opt').forEach(o=>o.classList.add(+o.dataset.i===q.ans?'right':'wrong'));
   $('#foot').innerHTML = `
-    <div class="mark-row"><span class="ml">Tandakan kumpulan yang betul:</span>
+    <div class="mark-row"><span class="ml">Tandakan peserta yang betul:</span>
       <div class="chips">${S.teams.map((t,i)=>`<button class="chip" data-i="${i}" style="--tc:${t.color}"><span class="dot"></span>${esc(t.name)}<span class="ck">✓</span></button>`).join('')}</div>
     </div>
     <span class="hint"><kbd>1</kbd>–<kbd>${S.teams.length}</kbd> tanda · <kbd>Space</kbd> papan</span>`;
@@ -1039,9 +1052,9 @@ function renderBoard(){
   const right=S.marks.size, total=S.teams.length;
   const hot=S.teams.filter(t=>t.streak>=3).sort((a,b)=>b.streak-a.streak)[0];
   const callout = hot ? `🔥 ${esc(hot.name)} menjawab betul ${hot.streak} kali berturut-turut!`
-    : right===0 ? 'Soalan mencabar! Tiada kumpulan yang menjawab betul.'
-    : right===total ? 'Hebat! Semua kumpulan menjawab betul.'
-    : `${right} daripada ${total} kumpulan menjawab betul.`;
+    : right===0 ? 'Soalan mencabar! Tiada peserta yang menjawab betul.'
+    : right===total ? 'Hebat! Semua peserta menjawab betul.'
+    : `${right} daripada ${total} peserta menjawab betul.`;
 
   app.innerHTML = `
   <div class="screen lb">
@@ -1099,7 +1112,7 @@ function renderFinal(){
     app.innerHTML = `
     <div class="screen fin seri">
       <div class="seri-word">SERI!</div>
-      <div class="sub">${tied.length===S.teams.length?'Semua kumpulan':`${tied.length} kumpulan`} berkongsi tempat pertama dengan ${top} mata</div>
+      <div class="sub">${tied.length===S.teams.length?'Semua peserta':`${tied.length} peserta`} berkongsi tempat pertama dengan ${top} mata</div>
       <div class="tie">${tied.map((ti,i)=>{ const t=S.teams[ti]; return `
         <div class="tc" style="--tc:${t.color};animation-delay:${.5+i*.15}s"><div class="medal">1</div><div class="tn">${esc(t.name)}</div><div class="ts">${t.score} mata</div></div>`; }).join('')}</div>
       ${others.length?`<div class="rest">${others.map(ti=>{ const t=S.teams[ti]; return `<div>${place(t)}. ${esc(t.name)} · ${t.score}</div>`; }).join('')}</div>`:''}
@@ -1110,7 +1123,7 @@ function renderFinal(){
     app.innerHTML = `
     <div class="screen fin">
       <h2>Keputusan Akhir</h2>
-      <div class="sub">Tahniah kepada semua kumpulan!</div>
+      <div class="sub">Tahniah kepada semua peserta!</div>
       <div class="pod">${pod.map(([r,cls,col,h])=>{ const t=S.teams[order[r]]; return `
         <div class="pc ${cls}"><div class="pn">${esc(t.name)}</div><div class="ps">${t.score} mata</div>
           <div class="pb" style="--pcol:${col};height:${h}">${place(t)}</div></div>`; }).join('')}</div>
@@ -1164,14 +1177,15 @@ document.addEventListener('click', e=>{ const b=e.target.closest('button'); if(b
 (async ()=>{
   await Store.open();
   try{
-    if(!(await Store.get('seeded'))){ await Store.put(...seedDefaults()); await Store.set('seeded', true); }
+    if(!(await Store.get('seeded'))){ await Store.put(...seedDefaults()); await Store.set('seeded', true); await Store.set('seedVersion', SEED_VERSION); }
+    else await migrateDefaults();
     BANK = await Store.all();
     const st = await Store.get('settings');
     if(st){
       if([10,15,20,30].includes(st.timer)) S.timer=st.timer;
       S.shuffle=!!st.shuffle;
       if(Array.isArray(st.teams) && st.teams.length>=2)
-        S.teams=st.teams.slice(0,8).map((n,i)=>({...newTeam(i), name:String(n||'').slice(0,18)||newTeam(i).name}));
+        S.teams=st.teams.slice(0,8).map((n,i)=>{ n=String(n||'').slice(0,18); return {...newTeam(i), input:OLD_DEFAULT_NAMES.includes(n)?'':n}; });
     }
   }catch(e){ BANK=seedDefaults(); }
   sortBank(); renderLobby();
